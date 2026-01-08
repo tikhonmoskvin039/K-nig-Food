@@ -16,15 +16,12 @@ export default function DocumentationPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="max-w-6xl mx-auto px-6">
         {/* Page Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Documentation
           </h1>
-          <p className="text-lg text-gray-600">
-            Everything you need to know about setting up and customizing TishCommerce
-          </p>
         </div>
 
         {/* Documentation Pages List */}

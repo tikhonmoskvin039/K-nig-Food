@@ -98,7 +98,7 @@ export default async function ProductPage({
 
   return (
     <section className="py-12 bg-stone-100">
-      <div className="container mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-6">
         <h1 className="text-3xl font-bold text-center text-gray-800">{product.Title}</h1>
 
         <div className="grid mt-2 grid-cols-1 md:grid-cols-2 gap-6 mt-6">

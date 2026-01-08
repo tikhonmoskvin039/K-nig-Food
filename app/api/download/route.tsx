@@ -3,7 +3,10 @@ import Stripe from "stripe";
 import getProducts from "../../utils/getProducts";
 import { getPayPalApiBase } from "../../utils/paypalConfig";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+// Helper function to get Stripe instance (lazy initialization to prevent build-time inlining)
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+}
 
 /**
  * GET /api/download?payment_intent_id=xxx (for Stripe)
@@ -12,6 +15,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
  * Verifies payment with Stripe/PayPal and returns download URLs for purchased products
  */
 export async function GET(request: NextRequest) {
+  const stripe = getStripe();
   try {
     const { searchParams } = new URL(request.url);
     const paymentIntentId = searchParams.get("payment_intent_id");

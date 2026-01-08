@@ -49,8 +49,12 @@ export default function Footer() {
               {content.labels.contactUs}
             </Link>
           </p>
-          <p>{content.labels.phone}: <a href={`tel:${content.phone}`} className="text-gray-300 hover:text-gray-400 transition">{content.phone}</a></p>
-          <p>{content.labels.address}: {content.address}</p>
+          {content.phone && (
+            <p>{content.labels.phone}: <a href={`tel:${content.phone}`} className="text-gray-300 hover:text-gray-400 transition">{content.phone}</a></p>
+          )}
+          {content.address && (
+            <p>{content.labels.address}: {content.address}</p>
+          )}
         </div>
 
         {/* Social Media */}

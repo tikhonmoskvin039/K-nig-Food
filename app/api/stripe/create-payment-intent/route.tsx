@@ -5,7 +5,10 @@ import type { CartItem } from "../../../../types/CartItem";
 import type { Product } from "../../../../types/Product";
 import productsData from "../../../../configs/products.json";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+// Helper function to get Stripe instance (lazy initialization to prevent build-time inlining)
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+}
 
 // Helper to get products (now using direct import for compatibility with Vercel, Cloudflare, and Netlify)
 function getProductsSync(): Product[] {
@@ -77,6 +80,7 @@ export async function POST(req: Request) {
       cartItems: JSON.stringify(minimalCartItems),
     };
 
+    const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency,

@@ -761,6 +761,39 @@ npm run build
 
 ### Release Notes
 
+##### Release 1.2.3: Security & UI Improvements (08-Jan-2026)
+
+**Security Fixes:**
+- **Fixed Secret Exposure in Build Output** – Resolved critical issue where server-side secrets could be embedded in build artifacts
+  - Moved environment variable access from module-level to function-level in all API routes
+  - Changed Stripe client initialization from module constant to lazy-loaded helper function
+  - Prevents build-time inlining of sensitive credentials (Stripe keys, Gmail passwords, Mailchimp keys)
+  - Fixes Netlify deployment failures due to secret scanning detection
+- **Added Netlify Configuration** – Created `netlify.toml` to properly configure secrets scanning
+  - Explicitly allows `NEXT_PUBLIC_*` variables in build output (they're intentionally public)
+  - Prevents false-positive security warnings for client-side API keys
+  - Ensures smooth Netlify deployments without manual configuration
+
+**Affected Files:**
+- `app/api/newsletter/route.tsx` - Moved Mailchimp keys access inside POST function
+- `app/api/stripe/create-payment-intent/route.tsx` - Created `getStripe()` helper function
+- `app/api/stripe/webhook/route.tsx` - Created `getStripe()` helper function
+- `app/api/stripe/verify-payment/route.tsx` - Created `getStripe()` helper function
+- `app/api/download/route.tsx` - Created `getStripe()` helper function
+- `.gitignore` - Improved patterns to properly exclude all `.env*` files
+- `netlify.toml` - Added configuration for Netlify deployment and secrets scanning
+
+**UI Improvements:**
+- **Conditional Footer Display** – Phone and address now only display if values are provided in `locale.en.json`
+  - Empty phone values no longer show "Phone: " label
+  - Empty address values no longer show "Address: " label
+  - Cleaner footer appearance when contact info is not needed
+
+**Migration Notes:**
+- No breaking changes - all changes are backward compatible
+- If deploying to Netlify, the new `netlify.toml` file is now required
+- Existing `.env.local` files remain compatible
+
 ##### Release 1.2.2: Gmail SMTP Integration (01-Jan-2026)
 
 **Email Service Migration:**

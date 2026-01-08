@@ -1,9 +1,13 @@
 import Stripe from "stripe";
 import { sendAdminEmail, sendCustomerEmail, OrderBody } from "../../../utils/emailUtilities";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+// Helper function to get Stripe instance (lazy initialization to prevent build-time inlining)
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {});
+}
 
 export async function POST(req: Request) {
+  const stripe = getStripe();
   const sig = req.headers.get("stripe-signature");
 
   if (!sig) {

@@ -55,7 +55,7 @@ export default async function CategoryPage(props: {
 
   return (
     <section className="py-12 bg-stone-100">
-      <div className="container mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-6">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 text-center mb-2">

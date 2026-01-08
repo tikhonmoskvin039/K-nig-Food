@@ -4,8 +4,27 @@ import nodemailer from 'nodemailer';
 export async function POST(req: Request) {
   const { name, email, message, token } = await req.json();
 
+  // Validate required fields
+  if (!name || !email || !message) {
+    console.error('❌ Missing required fields:', { name: !!name, email: !!email, message: !!message });
+    return NextResponse.json(
+      { success: false, message: 'Missing required fields.' },
+      { status: 400 }
+    );
+  }
+
+  if (!token) {
+    console.error('❌ Missing reCAPTCHA token');
+    return NextResponse.json(
+      { success: false, message: 'Missing reCAPTCHA token. Please refresh the page and try again.' },
+      { status: 400 }
+    );
+  }
+
   // Step 1: reCAPTCHA Validation
   console.log('🔍 Validating reCAPTCHA token...');
+  console.log('🔍 Secret key configured:', !!process.env.RECAPTCHA_SECRET_KEY);
+
   const verifyRes = await fetch(
     `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
     {
@@ -23,7 +42,11 @@ export async function POST(req: Request) {
       'error-codes': captchaValidation['error-codes'],
     });
     return NextResponse.json(
-      { success: false, message: 'CAPTCHA verification failed.' },
+      {
+        success: false,
+        message: 'CAPTCHA verification failed. Please refresh the page and try again.',
+        details: captchaValidation['error-codes'] || []
+      },
       { status: 400 }
     );
   }
