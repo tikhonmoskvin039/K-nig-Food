@@ -12,8 +12,7 @@ export interface Product {
     RegularPrice: string;
     SalePrice: string;
     Currency: string;
-    SubscriptionEnabled: boolean;
-    SubscriptionType: string;
-    SaleSubscriptionType?: string;
+    DownloadURL?: string;
+    DemoURL?: string;
   }
   

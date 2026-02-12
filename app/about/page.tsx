@@ -18,15 +18,15 @@ export default function AboutPage() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 items-start">
           {/* Feature Image */}
           <div className="relative w-full h-64 md:h-96">
             <Image
               src={about.imagePath}
               alt={about.title}
               fill
-              className="rounded-lg object-cover"
+              className="rounded-lg object-contain object-top"
               priority
             />
           </div>

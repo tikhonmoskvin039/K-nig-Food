@@ -32,7 +32,7 @@ export default function NewsletterSignup() {
 
   return (
     <section className="py-16 bg-gray-100">
-      <div className="container mx-auto text-center px-6">
+      <div className="max-w-6xl mx-auto text-center px-6">
         <h2 className="text-3xl font-bold text-gray-800">{newsletter.title}</h2>
         <p className="text-gray-600 mt-2">{newsletter.description}</p>
 

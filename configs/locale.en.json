@@ -1,11 +1,9 @@
 {
-  "email": "contact@example.com",
   "phone": "+1 234 567 890",
   "address": "123 Main Street, Tish City",
   "siteName": "TishCommerce",
   "siteTagline": "Your Database-Free Store",
   "labels": {
-    "email": "Email",
     "phone": "Phone",
     "address": "Address",
     "quickLinks": "Quick Links",
@@ -53,7 +51,8 @@
     "orderPlacedSuccess": "Your order has been placed successfully!",
     "orderFailed": "Failed to place order. Please try again.",
     "sameAsShipping": "Same as Shipping",
-    "orderConfirmationMessage": "Your order was placed successfully. We’ll notify you once it’s processed.",
+    "orderConfirmationTitle": "Your Order Confirmation",
+    "orderConfirmationMessage": "Your order was placed successfully. Thank you for your purchase!",
     "orderDetails": "Order Details",
     "orderId": "Order ID",
     "orderDate": "Order Date",
@@ -63,12 +62,14 @@
   "menu": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
+    { "label": "Docs", "href": "/documentation" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }
   ],
   "footerLinks": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
+    { "label": "Docs", "href": "/documentation" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }
   ],
@@ -76,7 +77,8 @@
     { "id": "facebook", "icon": "SiFacebook", "url": "https://facebook.com/yourpage" },
     { "id": "x", "icon": "SiX", "url": "https://x.com/yourprofile" },
     { "id": "instagram", "icon": "SiInstagram", "url": "https://instagram.com/yourpage" },
-    { "id": "linkedin", "icon": "SiLinkedin", "url": "https://linkedin.com/in/yourprofile" }
+    { "id": "linkedin", "icon": "SiLinkedin", "url": "https://linkedin.com/in/yourprofile" },
+    { "id": "youtube", "icon": "SiYoutube", "url": "https://youtube.com/@yourchannel" }
   ],
   "homepage": {
     "banner": {
@@ -149,5 +151,5 @@
     "errorMessage": "Failed to send message. Please try again later.",
     "captchaError": "reCAPTCHA is not yet available."
   },
-  "copyright": "© 2025 Tihomir Ivanov @tishonator. All rights reserved."
+  "copyright": "© 2025 - 2026 Tihomir Ivanov @tishonator. All rights reserved."
 }

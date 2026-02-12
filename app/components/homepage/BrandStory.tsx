@@ -13,7 +13,7 @@ export default async function BrandStory() {
 
   return (
     <section className="relative w-full py-24 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white">
-      <div className="container mx-auto px-6 text-center">
+      <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Title */}
         <h2 className="text-4xl font-extrabold mb-6 tracking-wide">
           {title}

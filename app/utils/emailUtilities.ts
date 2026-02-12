@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { getLocalization } from "./getLocalization";
 import { Product } from "../../types/Product";
 
@@ -7,23 +7,20 @@ import { Product } from "../../types/Product";
 export interface Address {
   firstName: string;
   lastName: string;
-  country: string;
-  state: string;
-  city: string;
-  address1: string;
-  address2: string;
-  postalCode: string;
-  phone: string;
   email: string;
 }
 
-export interface ShippingMethod {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
+// Minimal cart item interface with only required fields for emails
+export interface MinimalCartItem {
+  ID: string;
+  Title: string;
+  RegularPrice: string;
+  SalePrice: string;
+  quantity: number;
+  DownloadURL?: string;
 }
 
+// Full cart item for PayPal orders that send complete product data
 export interface OrderCartItem extends Product {
   quantity: number;
 }
@@ -31,11 +28,23 @@ export interface OrderCartItem extends Product {
 export interface OrderBody {
   orderId: string,
   orderDate: string;
-  cartItems: OrderCartItem[];
-  shippingForm: Address;
+  cartItems: MinimalCartItem[] | OrderCartItem[];
   billingForm: Address;
-  shippingMethod: ShippingMethod;
   paymentMethodId: string;
+}
+
+// ----- Gmail SMTP Transporter -----
+
+function createGmailTransporter() {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use TLS
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
 }
 
 // ----- Send Email -----
@@ -50,22 +59,33 @@ export async function sendEmail({
   text: string;
 }) {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    console.log('📧 Attempting to send email...');
+    console.log('📧 From:', process.env.GMAIL_USER);
+    console.log('📧 To:', to);
+    console.log('📧 Subject:', subject);
 
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!,
+    const transporter = createGmailTransporter();
+
+    const result = await transporter.sendMail({
+      from: `"${getLocalization().siteName || 'TishCommerce'}" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
     });
+
+    console.log('✅ Email sent successfully:', {
+      messageId: result.messageId,
+      response: result.response,
+    });
   } catch (error) {
     console.error("❌ Failed to send email to:", to, "\nError:", error);
+    throw error; // Re-throw to let caller know it failed
   }
 }
 
 // ----- Format Order Summary -----
 
-export function formatOrderSummary(cartItems: OrderCartItem[]): {
+export function formatOrderSummary(cartItems: MinimalCartItem[] | OrderCartItem[]): {
   lines: string;
   subtotal: number;
 } {
@@ -92,32 +112,31 @@ export function formatOrderSummary(cartItems: OrderCartItem[]): {
 export function generateAdminEmail(
   body: OrderBody,
   summary: string,
-  subtotal: number,
-  shipping: number,
   total: number
 ): string {
+  // Generate download links section
+  const downloadableItems = body.cartItems.filter(item => item.DownloadURL);
+  console.log(`📧 Admin email: Including ${downloadableItems.length} download links`);
+
+  const downloadSection = downloadableItems.length > 0
+    ? `\n\nDownload Links:\n${downloadableItems.map(item =>
+        `- ${item.Title}: ${item.DownloadURL}`
+      ).join('\n')}\n`
+    : '';
+
   return `New Order Received
 
 Order ID: ${body.orderId}
 Order Date: ${body.orderDate}
-Customer: ${body.shippingForm.firstName} ${body.shippingForm.lastName}
-Email: ${body.shippingForm.email}
-Phone: ${body.shippingForm.phone}
+Customer: ${body.billingForm.firstName} ${body.billingForm.lastName}
+Email: ${body.billingForm.email}
 
-Shipping Address:
-${body.shippingForm.address1}
-${body.shippingForm.address2}
-${body.shippingForm.city}, ${body.shippingForm.state}, ${body.shippingForm.country} ${body.shippingForm.postalCode}
-
-Shipping Method: ${body.shippingMethod.name}
 Payment Method: ${body.paymentMethodId.toUpperCase()}
 
 Order Summary:
 ${summary}
 
-Subtotal: $${subtotal.toFixed(2)}
-Shipping: $${shipping.toFixed(2)}
-Total: $${total.toFixed(2)}
+Total: $${total.toFixed(2)}${downloadSection}
 
 Date: ${new Date().toLocaleString()}
 `;
@@ -131,24 +150,32 @@ export function generateCustomerEmail(
   total: number
 ): string {
   const { labels, siteName } = getLocalization();
-  return `Hi ${body.shippingForm.firstName},
 
-${labels.orderConfirmationMessage || "Your order was placed successfully. We’ll notify you once it’s processed."}
+  // Generate download links section for products with download URLs
+  const downloadableItems = body.cartItems.filter(item => item.DownloadURL);
+  console.log(`📧 Customer email: Including ${downloadableItems.length} download links`);
+  if (downloadableItems.length > 0) {
+    console.log(`📧 Download links:`, downloadableItems.map(item => `${item.Title}: ${item.DownloadURL}`));
+  }
+
+  const downloadSection = downloadableItems.length > 0
+    ? `\n\nDownload Your Products:\n${downloadableItems.map(item =>
+        `- ${item.Title}: ${item.DownloadURL}`
+      ).join('\n')}\n\nPlease download your products as soon as possible. These links do not expire, but we recommend saving your products to your device.`
+    : '';
+
+  return `Hi ${body.billingForm.firstName},
+
+${labels.orderConfirmationMessage || "Your order was placed successfully. Thank you for your purchase!"}
 
 Order ID: ${body.orderId}
 Order Date: ${body.orderDate}
-Shipping Method: ${body.shippingMethod.name}
 Payment Method: ${body.paymentMethodId.toUpperCase()}
-
-Shipping Address:
-${body.shippingForm.address1}
-${body.shippingForm.address2}
-${body.shippingForm.city}, ${body.shippingForm.state}, ${body.shippingForm.country} ${body.shippingForm.postalCode}
 
 Order Summary:
 ${summary}
 
-Total: $${total.toFixed(2)}
+Total: $${total.toFixed(2)}${downloadSection}
 
 Thank you for shopping with us!
 ${siteName || "TishCommerce"}
@@ -159,14 +186,13 @@ ${siteName || "TishCommerce"}
 
 export async function sendAdminEmail(body: OrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
-  const shipping = body.shippingMethod?.price || 0;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
-  const text = generateAdminEmail(body, lines, subtotal, shipping, total);
-  const subject = `🛒 New Order from ${body.shippingForm.firstName} ${body.shippingForm.lastName}`;
+  const text = generateAdminEmail(body, lines, total);
+  const subject = `🛒 New Order from ${body.billingForm.firstName} ${body.billingForm.lastName}`;
 
   await sendEmail({
-    to: process.env.ADMIN_EMAIL!,
+    to: process.env.GMAIL_USER!,
     subject,
     text,
   });
@@ -176,15 +202,14 @@ export async function sendAdminEmail(body: OrderBody) {
 
 export async function sendCustomerEmail(body: OrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
-  const shipping = body.shippingMethod?.price || 0;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const text = generateCustomerEmail(body, lines, total);
   const subject =
     getLocalization().labels.orderConfirmationTitle || "Your Order Confirmation";
 
   await sendEmail({
-    to: body.shippingForm.email,
+    to: body.billingForm.email,
     subject,
     text,
   });

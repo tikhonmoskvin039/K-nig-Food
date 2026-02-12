@@ -32,12 +32,15 @@ yarn-error.log*
 
 # Ignore all .env files
 *.env
-
-# Allow .env.local
-!.env.local
+.env*
+*.local
+!.env.example
 
 # vercel
 .vercel
+
+# cloudflare (OpenNext)
+.open-next
 
 # typescript
 *.tsbuildinfo

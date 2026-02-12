@@ -8,11 +8,10 @@ interface PayPalCreateBody {
   currency: string;
   orderId: string;
   cartItems: CartItem[];
-  shippingMethodName: string;
 }
 
 export async function POST(req: Request) {
-  const { amount, currency, orderId, cartItems, shippingMethodName }: PayPalCreateBody = await req.json();
+  const { amount, currency, orderId, cartItems }: PayPalCreateBody = await req.json();
 
   const localization = getLocalization(); // Get localized site name
   const siteName = localization.siteName || "TishCommerce";
@@ -26,28 +25,13 @@ export async function POST(req: Request) {
 
   const items = cartItems.map((item) => ({
     name: item.Title,
+    sku: item.ID, // Store product ID for download verification
     unit_amount: {
       currency_code: currency,
       value: parseFloat(item.SalePrice || item.RegularPrice).toFixed(2),
     },
     quantity: item.quantity.toString(),
   }));
-
-  const itemTotal = items.reduce(
-    (acc, item) => acc + parseFloat(item.unit_amount.value) * parseInt(item.quantity),
-    0
-  );
-
-  const shippingValue = (parseFloat(amount) - itemTotal).toFixed(2);
-
-  items.push({
-    name: `Shipping: ${shippingMethodName}`,
-    unit_amount: {
-      currency_code: currency,
-      value: shippingValue,
-    },
-    quantity: "1",
-  });
 
   const res = await fetch(`${base}/v2/checkout/orders`, {
     method: "POST",

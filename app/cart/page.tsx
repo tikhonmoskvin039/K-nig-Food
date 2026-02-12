@@ -34,7 +34,7 @@ function CartContent() {
 
   return (
     <section className="py-12 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">{labels.yourCart || "Your Cart"}</h1>
 
         {items.length === 0 ? (
@@ -57,7 +57,7 @@ function CartContent() {
                     />
                     <div className="flex-1">
                       <Link
-                        href={`/products/${item.Slug}`}
+                        href={`/product/${item.Slug}`}
                         className="text-lg font-semibold text-gray-800 hover:text-gray-600"
                       >
                         {item.Title}

@@ -8,7 +8,6 @@ interface PayPalBasketBody {
   currency: string;
   orderId: string;
   cartItems: CartItem[];
-  shippingMethodName: string;
 }
 
 export async function POST(req: Request) {
@@ -18,10 +17,9 @@ export async function POST(req: Request) {
       currency,
       orderId,
       cartItems,
-      shippingMethodName,
     }: PayPalBasketBody = await req.json();
 
-    if (!amount || !currency || !orderId || !cartItems?.length || !shippingMethodName) {
+    if (!amount || !currency || !orderId || !cartItems?.length) {
       return NextResponse.json({ error: "Invalid PayPal request data" }, { status: 400 });
     }
 
@@ -38,28 +36,13 @@ export async function POST(req: Request) {
     // Build product line items
     const items = cartItems.map((item) => ({
       name: item.Title,
+      sku: item.ID, // Store product ID for download verification
       unit_amount: {
         currency_code: currency,
         value: parseFloat(item.SalePrice || item.RegularPrice).toFixed(2),
       },
       quantity: item.quantity.toString(),
     }));
-
-    const itemTotal = items.reduce(
-      (sum, item) => sum + parseFloat(item.unit_amount.value) * parseInt(item.quantity),
-      0
-    );
-
-    const shippingValue = (parseFloat(amount) - itemTotal).toFixed(2);
-
-    items.push({
-      name: `Shipping: ${shippingMethodName}`,
-      unit_amount: {
-        currency_code: currency,
-        value: shippingValue,
-      },
-      quantity: "1",
-    });
 
     const invoiceId = `${orderId}-${Date.now()}`;
 

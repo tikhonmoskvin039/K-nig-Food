@@ -28,7 +28,7 @@ export default function Testimonials() {
 
   return (
     <section className="py-20 bg-white">
-      <div className="container mx-auto px-6 text-center">
+      <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Section Title */}
         <h2 className="text-4xl font-extrabold text-gray-800 mb-12">
           {homepage.testimonialsTitle || "What Our Customers Say"}

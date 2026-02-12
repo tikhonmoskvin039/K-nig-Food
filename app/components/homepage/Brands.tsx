@@ -10,7 +10,7 @@ export default function Brands() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="container mx-auto px-6 text-center">
+      <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Section Title */}
         <h2 className="text-3xl font-bold text-gray-800 mb-8">{homepage.brandsTitle}</h2>
 

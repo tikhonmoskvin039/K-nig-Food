@@ -3,12 +3,16 @@ import { getLocalization } from "../../utils/getLocalization";
 import getProducts from "../../utils/getProducts";
 import { Product } from "../../../types/Product";
 
-export default async function RecentProducts() {
+interface RecentProductsProps {
+  count?: number;
+}
+
+export default async function RecentProducts({ count = 3 }: RecentProductsProps) {
   const localeData = getLocalization();
   const labels = localeData.labels;
 
   const allProducts = await getProducts();
-  const recentProducts = allProducts.slice(0, 3);
+  const recentProducts = allProducts.slice(0, count);
 
   if (recentProducts.length === 0) {
     return <p className="text-center text-gray-500">{labels.noProductsFound}</p>;
@@ -16,7 +20,7 @@ export default async function RecentProducts() {
 
   return (
     <section className="py-12 bg-gray-100">
-      <div className="container mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
           {labels.recentProducts}
         </h2>
