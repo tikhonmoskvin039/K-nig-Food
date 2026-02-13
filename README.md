@@ -5,7 +5,7 @@
 
 ## Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce&project-name=tishcommerce&env=ADMIN_EMAIL,RESEND_API_KEY,RESEND_FROM_EMAIL,NEXT_PUBLIC_RECAPTCHA_SITE_KEY,RECAPTCHA_SECRET_KEY&envDescription=Configuration%20needed%20for%20TishCommerce.%20See%20README%20for%20details.&envLink=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce%23configuration&demo-title=TishCommerce&demo-description=Database-Free%20eCommerce%20Solution%20built%20with%20Next.js%2C%20TypeScript%2C%20and%20Tailwind%20CSS&demo-url=https%3A%2F%2Ftishcommerce.vercel.app%2F&demo-image=https%3A%2F%2Ftishonator.github.io%2Ftishcommerce.png)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce&project-name=tishcommerce&env=GMAIL_USER,GMAIL_APP_PASSWORD,NEXT_PUBLIC_RECAPTCHA_SITE_KEY,RECAPTCHA_SECRET_KEY&envDescription=Configuration%20needed%20for%20TishCommerce.%20See%20README%20for%20details.&envLink=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce%23configuration&demo-title=TishCommerce&demo-description=Database-Free%20eCommerce%20Solution%20built%20with%20Next.js%2C%20TypeScript%2C%20and%20Tailwind%20CSS&demo-url=https%3A%2F%2Ftishcommerce.vercel.app%2F&demo-image=https%3A%2F%2Ftishonator.github.io%2Ftishcommerce.png)
 
 ## Live Demo
 https://tishcommerce.vercel.app/
@@ -25,7 +25,7 @@ https://tishcommerce.vercel.app/
 - **Product Demos** – Add demo URLs to let customers preview themes, plugins, or products before purchasing.
 - **Newsletter Integration (MailChimp)** – Capture leads via a newsletter signup connected to your MailChimp list.
 - **Contact Form with Google reCAPTCHA v3** – Protects your inbox from spam while collecting user inquiries.
-- **Order Processing via Email (Resend)** – Uses Resend to send order notifications to admins and customers.
+- **Order Processing via Email (Gmail SMTP)** – Uses Gmail SMTP to send order notifications to admins and customers.
 - **SEO Optimized** – Fast, indexable product pages with automatic static generation.
 - **Deploy Anywhere** – Works on Vercel, Cloudflare Pages, Netlify, or any static hosting.  
 

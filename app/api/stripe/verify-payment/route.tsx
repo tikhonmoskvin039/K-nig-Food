@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Wait 2 seconds to respect Resend rate limit (2 requests per second)
+    // 2. Wait 2 seconds to respect Gmail SMTP rate limit (2 requests per second)
     console.log("⏳ Waiting 2 seconds before sending admin email (rate limit)...");
     await new Promise(resolve => setTimeout(resolve, 2000));
 
