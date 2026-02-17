@@ -8,7 +8,7 @@ const localeData = getLocalization();
 // Set page metadata
 export const metadata: Metadata = {
   title: `Documentation - ${localeData.siteName}`,
-  description: "Browse TishCommerce documentation and guides",
+  description: "Browse König Food documentation and guides",
 };
 
 export default function DocumentationPage() {

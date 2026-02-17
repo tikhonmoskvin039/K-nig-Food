@@ -53,91 +53,15 @@ export default function OrderSummaryClient() {
     const recent = localStorage.getItem("recentOrder");
 
     if (recent) {
-      const parsed = JSON.parse(recent) as OrderData & { paypalOrderId?: string };
+      const parsed = JSON.parse(recent) as OrderData;
 
       setOrder(parsed);
 
-      // Clear cart ONCE if we're redirected from Stripe with orderId in query,
+      // Clear cart ONCE if we're redirected with orderId in query,
       if (orderIdFromQuery && parsed.orderId === orderIdFromQuery) {
         dispatch(clearCart());
       }
 
-      // Handle Stripe order - verify payment and display downloads
-      const handleStripeOrder = async (paymentIntent: string) => {
-        // Prevent duplicate API calls for the same payment intent
-        if (processedPaymentRef.current === paymentIntent) {
-          console.log("⏭️ Payment already processed, skipping duplicate API call");
-          return;
-        }
-
-        processedPaymentRef.current = paymentIntent;
-        try {
-          // Verify payment with Stripe and send emails
-          const verifyRes = await fetch("/api/stripe/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ payment_intent_id: paymentIntent }),
-          });
-
-          const verifyData = await verifyRes.json();
-
-          if (!verifyRes.ok || !verifyData.success) {
-            console.error("❌ Payment verification failed:", verifyData);
-            setDownloadError("Payment verification failed. Please contact support.");
-            return;
-          }
-
-          console.log("✅ Payment verified with Stripe");
-
-          if (verifyData.emailsSent) {
-            console.log("✅ Order confirmation emails sent");
-          } else {
-            console.log("ℹ️ Emails already sent previously");
-          }
-
-          // Display download links from verification response
-          if (verifyData.downloads && verifyData.downloads.length > 0) {
-            setDownloads(verifyData.downloads);
-          } else {
-            // Fallback to cart items if no downloads returned
-            const downloadLinks = parsed.cartItems
-              .filter((item) => item.DownloadURL)
-              .map((item) => ({
-                productId: item.ID,
-                productTitle: item.Title,
-                downloadURL: item.DownloadURL!,
-              }));
-            setDownloads(downloadLinks);
-          }
-        } catch (error) {
-          console.error("❌ Error verifying Stripe payment:", error);
-          setDownloadError("Failed to verify payment. Please contact support.");
-        }
-      };
-
-      // Handle PayPal order (already placed) and display direct downloads
-      const handlePayPalDownloads = () => {
-        // Display direct download links from cart items
-        const downloadLinks = parsed.cartItems
-          .filter((item) => item.DownloadURL) // Only products with download URLs
-          .map((item) => ({
-            productId: item.ID,
-            productTitle: item.Title,
-            downloadURL: item.DownloadURL!,
-          }));
-
-        setDownloads(downloadLinks);
-      };
-
-      // Display download links if payment is confirmed
-      const paymentIntent = searchParams.get("payment_intent");
-      const paypalOrderId = parsed.paypalOrderId;
-
-      if (paymentIntent) {
-        handleStripeOrder(paymentIntent);
-      } else if (paypalOrderId) {
-        handlePayPalDownloads();
-      }
     } else {
       router.push("/cart");
     }
@@ -218,11 +142,7 @@ export default function OrderSummaryClient() {
         <div className="mt-6 text-sm text-gray-600 space-y-1">
           <p>
             {labels.paymentMethod || "Payment Method"}:{" "}
-            {order.paymentMethodId === "paypal"
-              ? "PayPal"
-              : order.paymentMethodId === "stripe"
-              ? "Credit Card (Stripe)"
-              : order.paymentMethodId}
+            {order.paymentMethodId}
           </p>
         </div>
 

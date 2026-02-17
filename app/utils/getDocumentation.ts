@@ -15,7 +15,7 @@ const defaultDocumentation: DocumentationPage[] = [];
 /**
  * Get all documentation pages from configs/documentation-pages.json
  * Returns pages sorted by order field
- * Now using direct import for compatibility with Vercel, Cloudflare, and Netlify
+ * Now using direct import for compatibility with Vercel
  */
 export const getDocumentationPages = (): DocumentationPage[] => {
   try {

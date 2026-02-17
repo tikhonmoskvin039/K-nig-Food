@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   try {
     const result = await transporter.sendMail({
-      from: `"TishCommerce Contact Form" <${process.env.GMAIL_USER}>`,
+      from: `"König Food Contact Form" <${process.env.GMAIL_USER}>`,
       to: process.env.GMAIL_USER!,
       subject: `Contact Form Submission from ${name}`,
       html: `

@@ -65,7 +65,7 @@ interface LocalizationData {
 const defaultLocalization: LocalizationData = {
   phone: "+1 234 567 890",
   address: "123 Main Street, Tish City",
-  siteName: "TishCommerce",
+  siteName: "K-nig-Food",
   siteTagline: "Your Database-Free Store",
   labels: {
     phone: "Phone",
@@ -106,7 +106,7 @@ const defaultLocalization: LocalizationData = {
   ],
   homepage: {
     banner: {
-      title: "Welcome to TishCommerce",
+      title: "Welcome to König Food",
       subtitle: "The easiest way to manage and sell your products online.",
       buttonText: "Get Started Now",
       imagePath: "/homepage-banner.jpg",
@@ -130,11 +130,11 @@ const defaultLocalization: LocalizationData = {
     content:
       "We’re a family-owned business dedicated to eco-friendly materials and fair trade practices.\n\nOur mission is to bring you high-quality, sustainable products that make a difference.",
   },
-  copyright: "© 2025 Tishonator. All rights reserved.",
+  copyright: "© 2026 Tikhon Moskvin. All rights reserved.",
 };
 
 // Fetch Localization Data
-// Now using direct import for compatibility with Vercel, Cloudflare, and Netlify
+// Now using direct import for compatibility with Vercel
 export const getLocalization = (): LocalizationData => {
   return localeData as LocalizationData;
 };

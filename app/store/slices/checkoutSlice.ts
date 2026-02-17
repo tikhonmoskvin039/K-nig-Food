@@ -12,8 +12,6 @@ export interface CheckoutState {
   orderDate: string;
   billingForm: FormData;
   paymentMethodId: string;
-  isPayPalApproved: boolean;
-  payPalOrderID: string;
 }
 
 const initialForm: FormData = {
@@ -27,8 +25,6 @@ const initialState: CheckoutState = {
   orderDate: "",
   billingForm: initialForm,
   paymentMethodId: "",
-  isPayPalApproved: false,
-  payPalOrderID: ""
 };
 
 const checkoutSlice = createSlice({
@@ -45,12 +41,6 @@ const checkoutSlice = createSlice({
     setPaymentMethod(state, action: PayloadAction<string>) {
       state.paymentMethodId = action.payload;
     },
-    setPayPalApproved(state, action: PayloadAction<boolean>) {
-      state.isPayPalApproved = action.payload;
-    },
-    setPayPalOrderID(state, action: PayloadAction<string>) {
-      state.payPalOrderID = action.payload;
-    },
   },
 });
 
@@ -58,8 +48,6 @@ export const {
   setOrderInfo,
   setBillingForm,
   setPaymentMethod,
-  setPayPalApproved,
-  setPayPalOrderID
 } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

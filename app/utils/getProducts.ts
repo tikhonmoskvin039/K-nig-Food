@@ -2,7 +2,7 @@ import { Product } from "../../types/Product";
 import productsData from "../../configs/products.json";
 
 // Define function to get all products
-// Now using direct import for compatibility with Vercel, Cloudflare, and Netlify
+// Now using direct import for compatibility with Vercel
 export default async function getProducts(): Promise<Product[]> {
   try {
     const products: Product[] = productsData as Product[];

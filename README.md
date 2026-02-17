@@ -1,37 +1,26 @@
-# TishCommerce - Database-Free eCommerce for Virtual Products
+# König Food - Database-Free eCommerce for Virtual Food Delivery Market
 
-**TishCommerce** is a **database-free, self-hosted eCommerce solution for selling virtual products** (digital downloads, WordPress themes, plugins, ebooks, software, etc.) built with **Next.js 16, TypeScript, Tailwind CSS, and Redux**. It's optimized for **small stores** with up to **200 products**, making it ideal for **independent developers and small business owners** who want to sell digital products online **without monthly SaaS fees** like Shopify, Snipcart, or Medusa.
+**König Food** is a **database-free, self-hosted eCommerce solution for selling Virtual Food products** (digital downloads, WordPress themes, plugins, ebooks, software, etc.) built with **Next.js 16, TypeScript, Tailwind CSS, and Redux**. It's optimized for **small stores** with up to **200 products**, making it ideal for **independent developers and small business owners** who want to sell some products online **without monthly SaaS fees** like Shopify, Snipcart, or Medusa.
 
-
-## Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce&project-name=tishcommerce&env=GMAIL_USER,GMAIL_APP_PASSWORD,NEXT_PUBLIC_RECAPTCHA_SITE_KEY,RECAPTCHA_SECRET_KEY&envDescription=Configuration%20needed%20for%20TishCommerce.%20See%20README%20for%20details.&envLink=https%3A%2F%2Fgithub.com%2Ftishonator%2FTishCommerce%23configuration&demo-title=TishCommerce&demo-description=Database-Free%20eCommerce%20Solution%20built%20with%20Next.js%2C%20TypeScript%2C%20and%20Tailwind%20CSS&demo-url=https%3A%2F%2Ftishcommerce.vercel.app%2F&demo-image=https%3A%2F%2Ftishonator.github.io%2Ftishcommerce.png)
-
-## Live Demo
-https://tishcommerce.vercel.app/
-
-## Screenshot
-![TishCommerce Screenshot](https://tishonator.github.io/tishcommerce.png)
 
 ## Features
 - **Virtual Products Only** – Designed specifically for selling digital downloads (themes, plugins, ebooks, software, courses).
 - **No Database Required** – Products are stored in JSON files.
 - **Fast & Lightweight** – Built with Next.js and optimized for performance.
 - **Dynamic Category Pages** – Automatic category pages at `/products/{category-slug}` with SEO-friendly URLs (e.g., "WordPress Themes" → `/products/wordpress-themes`).
-- **Payment Methods** – Stripe (credit/debit cards) and PayPal (Standard + Express Checkout) for secure online payments.
-- **PayPal Express Checkout** – Available directly from the cart page and product details page for a faster checkout experience.
-- **Secure Digital Downloads** – Payment-verified download links that only appear after successful Stripe/PayPal payment.
+- **Payment Methods**
+- **Secure Digital Downloads**
 - **Free Products Support** – Offer free downloads with direct download buttons, perfect for freemium models or lead magnets.
 - **Product Demos** – Add demo URLs to let customers preview themes, plugins, or products before purchasing.
 - **Newsletter Integration (MailChimp)** – Capture leads via a newsletter signup connected to your MailChimp list.
 - **Contact Form with Google reCAPTCHA v3** – Protects your inbox from spam while collecting user inquiries.
 - **Order Processing via Email (Gmail SMTP)** – Uses Gmail SMTP to send order notifications to admins and customers.
 - **SEO Optimized** – Fast, indexable product pages with automatic static generation.
-- **Deploy Anywhere** – Works on Vercel, Cloudflare Pages, Netlify, or any static hosting.  
+- **Deploy Anywhere** – Works on Vercel or any static hosting.  
 
 ---
 
-## Why Choose TishCommerce?  
+## Why Choose König Food?  
 - **Zero Cost** – 100% Free & Open-Source  
 - **No Vendor Lock-in** – Self-host your store, full control over your data  
 - **Ideal for Developers** – Modify, extend, or integrate with any service
@@ -42,10 +31,6 @@ https://tishcommerce.vercel.app/
 - **Frontend**: Next.js 16, TypeScript, Tailwind CSS, Redux
 - **Storage**: JSON-based file system (No DB required)
 - **Payment Methods**:
-  - **Stripe Payment Element** – Secure credit/debit card payments with support for multiple payment methods.
-  - **PayPal Standard Checkout** – Traditional PayPal checkout flow after form completion.
-  - **PayPal Express Checkout** – One-click checkout available directly from cart and product pages.
-- **Hosting**: Vercel, or any static hosting  
 
 ---
 
@@ -53,13 +38,13 @@ https://tishcommerce.vercel.app/
 
 ### Clone the Repository
 ```sh
-git clone https://github.com/tishonator/TishCommerce.git
-cd TishCommerce
+git clone https://github.com/tikhonmoskvin039/K-nig-Food.git
+cd K-nig-Food
 ```
 
 ### Install Dependencies
 ```sh
-npm install
+pnpm install
 ```
 
 ### Configuration
@@ -68,7 +53,7 @@ npm install
 - ID, Title, Slug, ShortDescription, LongDescription
 - RegularPrice, SalePrice, Currency, FeatureImageURL
 - ProductImageGallery, Category
-- **DownloadURL** (optional) - Add a Google Drive public link or direct download URL. Download URLs are automatically hidden from public APIs and only shown to customers after payment verification with Stripe/PayPal. For free products (price = 0), downloads are directly accessible.
+- **DownloadURL** (optional) - Add a Google Drive public link or direct download URL. Download URLs are automatically hidden from public APIs and only shown to customers after payment verification. For free products (price = 0), downloads are directly accessible.
 - **DemoURL** (optional) - Add a live demo URL for products. A blue "DEMO" button will appear on both listing and detail pages, opening in a new tab.
 
 This file is the source of truth for product listings shown on the site and is fully editable without a database. Perfect for managing WordPress themes, plugins, ebooks, digital assets, and other virtual products.
@@ -83,7 +68,6 @@ This file is the source of truth for product listings shown on the site and is f
 Use this to customize language, structure, and brand messaging across your storefront.
 
 **/configs/checkout.json** - Defines all settings related to the checkout experience:
-- Payment Methods: Includes Stripe and PayPal with enable/disable flags
 
 This file allows you to customize your checkout options without any backend logic. Perfect for enabling/disabling payment methods.
 
@@ -137,9 +121,9 @@ Example page structure:
   {
     "slug": "getting-started",
     "title": "Getting Started",
-    "description": "Learn how to set up and run TishCommerce",
+    "description": "Learn how to set up and run König Food",
     "order": 1,
-    "content": "# Getting Started\n\nWelcome to TishCommerce!..."
+    "content": "# Getting Started\n\nWelcome to König Food!..."
   }
 ]
 ```
@@ -155,14 +139,14 @@ Each documentation page includes:
 
 ## Config-Only Customization Philosophy
 
-**TishCommerce is designed so you NEVER need to modify application code.** All customization happens through JSON configuration files in the `/configs` folder.
+**König Food is designed so you NEVER need to modify application code.** All customization happens through JSON configuration files in the `/configs` folder.
 
 ### Why Config-Only?
 
-When you use TishCommerce, the entire application codebase (components, pages, utilities, APIs) remains **unchanged**. You only edit JSON files to customize your store. This approach provides:
+When you use König Food, the entire application codebase (components, pages, utilities, APIs) remains **unchanged**. You only edit JSON files to customize your store. This approach provides:
 
 1. **Zero Coding Required** – Edit JSON files, no programming knowledge needed
-2. **Safe Updates** – Pull latest TishCommerce updates without merge conflicts
+2. **Safe Updates** – Pull latest König Food updates without merge conflicts
 3. **Easy Backups** – Just backup the `/configs` folder to save all customizations
 4. **Version Control Friendly** – Track configuration changes without code noise
 5. **Fast Customization** – Change content, products, settings instantly
@@ -174,7 +158,7 @@ All store customization happens in these files:
 
 - **`configs/products.json`** – Your entire product catalog (add, edit, remove products)
 - **`configs/locale.en.json`** – All text content, labels, contact info, navigation, pages
-- **`configs/checkout.json`** – Payment method settings (enable/disable Stripe, PayPal)
+- **`configs/checkout.json`** – Payment method settings (enable/disable)
 - **`configs/homepage.json`** – Control which homepage sections appear and how many products to show
 - **`configs/products-listing.json`** – Set page size for products listing page (default: 18 products per page)
 - **`configs/documentation-pages.json`** – Create and manage documentation pages with markdown content
@@ -207,7 +191,7 @@ Instead of editing React components or TypeScript files, you simply:
 - **Agencies** can deliver the same codebase to multiple clients
 - **Updates** are just a `git pull` away without breaking customizations
 
-This is what makes TishCommerce perfect for small businesses and developers who want full control without complexity.
+This is what makes König Food perfect for small businesses and developers who want full control without complexity.
 
 ---
 
@@ -226,137 +210,15 @@ This is what makes TishCommerce perfect for small businesses and developers who 
   - `GMAIL_USER` – Your Gmail address (used for sending all emails AND receiving admin notifications)
   - `GMAIL_APP_PASSWORD` – Gmail App Password (NOT your regular password - see setup guide below)
 
-- **Payment (PayPal)**
-  - `PAYPAL_USE_SANDBOX` – true to use PayPal sandbox (for testing), false for live transactions
-  - `NEXT_PUBLIC_PAYPAL_CLIENT_ID` – PayPal Client ID (sandbox or live, depending on the flag)
-  - `PAYPAL_CLIENT_SECRET` – PayPal Client Secret (used server-side to capture/verify orders)
-
-- **Payment (Stripe Payment Element)**
-  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` – Stripe publishable key used to initialize Stripe.js and the Stripe Payment Element on the client side
-  - `STRIPE_SECRET_KEY` – Stripe secret key used on the server side to create PaymentIntents
-  - `STRIPE_WEBHOOK_SECRET` – Secret used to verify Stripe webhook events (e.g., payment success/failure notifications)
-
 Note: Never commit this file to Git or public repositories.
 
 When deploying to Vercel, add these as Environment Variables in your project's Settings → Environment Variables panel.
 
 ---
 
-### Stripe Webhook Setup (Required for Production)
-
-**IMPORTANT:** Stripe payments are confirmed via webhooks, NOT client-side redirects. Without proper webhook setup, order confirmation emails will NOT be sent.
-
-#### How Stripe Payment Verification Works
-TishCommerce uses a dual-verification system for maximum reliability:
-
-1. **Immediate Verification (Primary):**
-   - When user lands on order confirmation page, payment is verified with Stripe API
-   - If payment succeeded, order emails are sent immediately
-   - Download links displayed instantly
-   - Provides best user experience with immediate confirmation
-
-2. **Webhook Backup (Fallback):**
-   - Stripe webhook also listens for `payment_intent.succeeded` events
-   - If user closes browser before landing on confirmation page, webhook still fires
-   - Webhook checks if emails already sent (to prevent duplicates)
-   - Ensures no orders are lost even if user navigation is interrupted
-
-This dual approach gives you:
-- ✅ Immediate email delivery when users complete checkout normally
-- ✅ Backup processing via webhook if users close browser early
-- ✅ No duplicate emails (system detects and prevents duplicates)
-- ✅ Maximum reliability for order processing
-
-#### Local Development Setup (Using Stripe CLI)
-
-1. **Install Stripe CLI:**
-   ```sh
-   # macOS
-   brew install stripe/stripe-cli/stripe
-
-   # Windows (with Scoop)
-   scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git
-   scoop install stripe
-
-   # Or download from: https://stripe.com/docs/stripe-cli
-   ```
-
-2. **Login to Stripe:**
-   ```sh
-   stripe login
-   ```
-
-3. **Forward webhooks to your local server:**
-   ```sh
-   stripe listen --forward-to http://localhost:3000/api/stripe/webhook
-   ```
-
-4. **Copy the webhook signing secret:**
-   - The CLI will output a webhook secret starting with `whsec_`
-   - Add it to your `.env.local`:
-     ```
-     STRIPE_WEBHOOK_SECRET=whsec_xxx...
-     ```
-
-5. **Test a payment:**
-   - Use test card: `4242 4242 4242 4242`
-   - Check your terminal to see webhook events
-   - Verify emails are sent
-
-#### Production Deployment Setup (Vercel/Netlify/etc.)
-
-1. **Deploy your app** to your hosting platform
-
-2. **Create webhook endpoint in Stripe Dashboard:**
-   - Go to: https://dashboard.stripe.com/webhooks
-   - Click "Add endpoint"
-   - Enter your webhook URL: `https://yourdomain.com/api/stripe/webhook`
-   - Select events to listen to:
-     - `payment_intent.succeeded` (Required)
-     - `payment_intent.payment_failed` (Optional)
-   - Click "Add endpoint"
-
-3. **Copy the webhook signing secret:**
-   - Click on your newly created webhook
-   - Click "Reveal" under "Signing secret"
-   - Copy the secret (starts with `whsec_`)
-
-4. **Add to your environment variables:**
-   - **Vercel:** Project Settings → Environment Variables
-   - **Netlify:** Site Settings → Build & Deploy → Environment
-   - Add: `STRIPE_WEBHOOK_SECRET=whsec_xxx...`
-
-5. **Redeploy your app** to apply the environment variable
-
-6. **Test the webhook:**
-   - In Stripe Dashboard, go to your webhook
-   - Click "Send test webhook"
-   - Select `payment_intent.succeeded`
-   - Check your application logs to verify it received the event
-
-#### Troubleshooting Webhooks
-
-**Emails not being sent?**
-- Check Stripe Dashboard → Webhooks → Your endpoint
-- Look for failed webhook attempts (Stripe retries automatically)
-- Check your application logs for webhook errors
-- Verify `STRIPE_WEBHOOK_SECRET` is correctly set
-
-**Webhook signature verification failing?**
-- Ensure `STRIPE_WEBHOOK_SECRET` matches the one in Stripe Dashboard
-- For production, use the live mode secret (not test mode)
-- Redeploy after changing environment variables
-
-**How to verify webhooks are working:**
-- Stripe Dashboard → Webhooks → Your endpoint shows successful deliveries
-- Application logs show: `✅ Payment succeeded: pi_xxx`
-- Customers receive confirmation emails with download links
-
----
-
 ### Gmail SMTP Setup (For All Emails)
 
-TishCommerce uses **one Gmail account** for all email functionality:
+König Food uses **one Gmail account** for all email functionality:
 - ✉️ Sends order confirmation emails to customers
 - ✉️ Receives admin order notifications (in the same Gmail inbox)
 - ✉️ Receives contact form submissions (in the same Gmail inbox)
@@ -381,8 +243,8 @@ Gmail requires an **App Password** instead of your regular password for security
 1. After enabling 2-Step Verification, go to: https://myaccount.google.com/apppasswords
 2. You might need to sign in again
 3. Under "App passwords", you'll see:
-   - **Select app**: Choose "Mail" or "Other (Custom name)" and enter "TishCommerce"
-   - **Select device**: Choose "Other (Custom name)" and enter "TishCommerce"
+   - **Select app**: Choose "Mail" or "Other (Custom name)" and enter "König Food"
+   - **Select device**: Choose "Other (Custom name)" and enter "König Food"
 4. Click **Generate**
 5. Google will show you a 16-character password like: `abcd efgh ijkl mnop`
 6. **Copy this password** - you won't be able to see it again!
@@ -457,7 +319,7 @@ The production build is optimized for performance and should be used for deploym
 
 ## Deployment
 
-TishCommerce is fully compatible with **Vercel**, **Cloudflare Pages**, and **Netlify**. All configuration files are bundled at build time, eliminating file system dependencies and ensuring seamless deployment across all platforms.
+König Food is fully compatible with **Vercel**. All configuration files are bundled at build time, eliminating file system dependencies and ensuring seamless deployment across all platforms.
 
 ### Deploy to Vercel (Recommended)
 
@@ -491,128 +353,12 @@ vercel
    MAILCHIMP_SERVER_PREFIX
    RECAPTCHA_SECRET_KEY
    NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-   NEXT_PUBLIC_PAYPAL_CLIENT_ID
-   PAYPAL_CLIENT_SECRET
-   PAYPAL_USE_SANDBOX
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-   STRIPE_SECRET_KEY
-   STRIPE_WEBHOOK_SECRET
    ```
 6. Click "Deploy"
 
 **Build Command:** `npm run build` or `npm run build:vercel`
 **Output Directory:** `.next` (auto-detected)
 **Install Command:** `npm install` (auto-detected)
-
----
-
-### Deploy to Cloudflare Workers
-
-Cloudflare Workers offers global edge deployment with excellent performance using the **OpenNext adapter** (the official recommended approach):
-
-#### Prerequisites
-
-OpenNext Cloudflare adapter is already installed in TishCommerce. The project is configured to work with Cloudflare Workers runtime.
-
-#### Option 1: Deploy via CLI
-
-```sh
-# Login to Cloudflare (one-time setup)
-npx wrangler login
-
-# Deploy to Cloudflare Workers
-npm run deploy:cloudflare
-```
-
-This single command:
-1. Builds your Next.js app with OpenNext
-2. Deploys to Cloudflare Workers automatically
-
-#### Option 2: Preview Locally Before Deploy
-
-```sh
-# Build and preview locally on Cloudflare Workers runtime
-npm run preview:cloudflare
-
-# Open http://localhost:8787 to test
-# When ready, deploy with:
-npm run deploy:cloudflare
-```
-
-#### Option 3: Deploy via GitHub Integration (Pages)
-
-1. Push your code to GitHub
-2. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → Pages
-3. Click "Create a project" → "Connect to Git"
-4. Select your repository
-5. Configure build settings:
-   - **Framework preset:** None (or Next.js)
-   - **Build command:** `npm run build:cloudflare`
-   - **Build output directory:** `.open-next/worker`
-   - **Root directory:** `/` (leave empty)
-6. Add environment variables in Settings → Environment Variables
-   (same variables as Vercel list above)
-7. Click "Save and Deploy"
-
-**Important Notes:**
-- Uses **OpenNext** (`@opennextjs/cloudflare`) - the official recommended adapter for Cloudflare
-- Replaced deprecated `@cloudflare/next-on-pages` package
-- All config files are bundled at build time (no runtime file system access needed)
-- Supports Node.js runtime with full Cloudflare Workers compatibility
-- Environment variables work the same way as Vercel
-
-**Build Output:**
-- OpenNext generates output in `.open-next/` directory
-- Add `.open-next` to `.gitignore` (already configured)
-
-**Learn More:**
-- [OpenNext Cloudflare Documentation](https://opennext.js.org/cloudflare)
-- [Cloudflare Blog: Deploying Next.js with OpenNext](https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/)
-
----
-
-### Deploy to Netlify
-
-Netlify provides continuous deployment with automatic HTTPS:
-
-#### Option 1: Deploy via Netlify CLI
-
-```sh
-# Install Netlify CLI globally
-npm install -g netlify-cli
-
-# Login to Netlify
-netlify login
-
-# Build and deploy
-netlify deploy --prod
-
-# Follow the prompts
-```
-
-#### Option 2: Deploy via GitHub Integration
-
-1. Push your code to GitHub
-2. Go to [app.netlify.com](https://app.netlify.com/)
-3. Click "Add new site" → "Import an existing project"
-4. Choose your Git provider and select your repository
-5. Configure build settings:
-   - **Build command:** `npm run build:netlify`
-   - **Publish directory:** `.next`
-   - **Functions directory:** Leave empty (handled by Essential Next.js plugin)
-6. Netlify will automatically detect Next.js and apply the Essential Next.js plugin
-7. Add environment variables in Site Settings → Environment Variables
-   (same variables as Vercel list above)
-8. Click "Deploy site"
-
-**Build Command:** `npm run build:netlify` or `npm run build`
-**Publish Directory:** `.next`
-**Next.js Plugin:** Automatically applied (Essential Next.js)
-
-**Important Notes:**
-- Netlify's Essential Next.js plugin handles Next.js features automatically
-- All config files are bundled at build time
-- No additional configuration needed
 
 ---
 
@@ -639,21 +385,7 @@ RECAPTCHA_SECRET_KEY=your-secret-key
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-site-key
 ```
 
-**Required for PayPal:**
-```
-PAYPAL_USE_SANDBOX=false
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=your-client-id
-PAYPAL_CLIENT_SECRET=your-secret
-```
-
-**Required for Stripe:**
-```
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-```
-
-**Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Keep sensitive keys (like `STRIPE_SECRET_KEY`, `GMAIL_APP_PASSWORD`) without this prefix.
+**Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Keep sensitive keys (like `GMAIL_APP_PASSWORD`) without this prefix.
 
 ---
 
@@ -661,30 +393,19 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 After deploying to any platform:
 
-1. **Configure Stripe Webhook:**
-   - Go to Stripe Dashboard → Webhooks
-   - Add endpoint: `https://yourdomain.com/api/stripe/webhook`
-   - Select event: `payment_intent.succeeded`
-   - Copy webhook signing secret to `STRIPE_WEBHOOK_SECRET`
-
-2. **Test Payment Processing:**
-   - Place a test order with Stripe test card: `4242 4242 4242 4242`
-   - Verify order confirmation email is received
-   - Check that download links work
-
-3. **Verify Email Sending:**
+1. **Verify Email Sending:**
    - Test contact form submission
    - Confirm emails arrive in your Gmail inbox
 
-4. **Check Product Images:**
+2. **Check Product Images:**
    - Verify all product images load correctly
    - Ensure lightbox functionality works
 
-5. **Test Category Pages:**
+3. **Test Category Pages:**
    - Visit `/products` and click on category filters
    - Verify category URLs like `/products/wordpress-themes` work
 
-6. **Review Documentation:**
+4. **Review Documentation:**
    - Check `/documentation` page loads
    - Test navigation between doc pages
 
@@ -699,19 +420,7 @@ npm run dev
 # Build for Vercel (standard Next.js build)
 npm run build:vercel
 
-# Build for Cloudflare Workers (using OpenNext)
-npm run build:cloudflare
-
-# Preview Cloudflare Workers locally
-npm run preview:cloudflare
-
-# Deploy to Cloudflare Workers
-npm run deploy:cloudflare
-
-# Build for Netlify (standard Next.js build)
-npm run build:netlify
-
-# Generic build (works for Vercel and Netlify)
+# Generic build (works for Vercel)
 npm run build
 ```
 
@@ -734,12 +443,6 @@ npm run build
 - Redeploy after adding new environment variables
 - Check that `NEXT_PUBLIC_` prefix is used for client-side variables
 
-**Stripe webhook not working:**
-- Verify webhook URL is correct in Stripe Dashboard
-- Check `STRIPE_WEBHOOK_SECRET` matches the one in Stripe
-- Review deployment logs for webhook errors
-- Test webhook using "Send test webhook" in Stripe Dashboard
-
 **Emails not sending:**
 - Verify Gmail App Password is correct (not regular Gmail password)
 - Ensure 2-Factor Authentication is enabled on Gmail account
@@ -757,11 +460,6 @@ npm run build
   - All category pages are statically generated for maximum performance
   - Examples: "Forms" → `/products/forms`, "eCommerce Plugins" → `/products/ecommerce-plugins`
 - **Cart & Checkout** – Users add products to a cart, which is managed entirely in the browser using LocalStorage. During checkout, users enter billing info (name and email only) and select a payment method.
-- **Payment Processing & Verification**
-  - **PayPal**: Supports Express Checkout directly from the Cart and Product pages using the PayPal JavaScript SDK. Order emails are sent immediately after PayPal payment capture.
-  - **Stripe:** Uses Stripe Payment Element to securely accept card and alternative payments. When user lands on order confirmation page, payment is verified with Stripe API, emails are sent immediately, and download links displayed. Stripe webhook provides backup processing if user closes browser early (no duplicate emails).
-- **Secure Digital Downloads** – After payment verification, download URLs (from products.json) are displayed on the order confirmation page and included in confirmation emails. Free products (price = 0) offer direct downloads without payment.
-- **Order Confirmation & Email** – For Stripe: Payment verified via API on confirmation page, emails sent immediately, webhook provides backup. For PayPal: Emails sent immediately after payment capture. All emails include direct download links.
 
 ### Release Notes
 
@@ -770,22 +468,8 @@ npm run build
 **Security Fixes:**
 - **Fixed Secret Exposure in Build Output** – Resolved critical issue where server-side secrets could be embedded in build artifacts
   - Moved environment variable access from module-level to function-level in all API routes
-  - Changed Stripe client initialization from module constant to lazy-loaded helper function
-  - Prevents build-time inlining of sensitive credentials (Stripe keys, Gmail passwords, Mailchimp keys)
-  - Fixes Netlify deployment failures due to secret scanning detection
-- **Added Netlify Configuration** – Created `netlify.toml` to properly configure secrets scanning
-  - Explicitly allows `NEXT_PUBLIC_*` variables in build output (they're intentionally public)
-  - Prevents false-positive security warnings for client-side API keys
-  - Ensures smooth Netlify deployments without manual configuration
+  - Prevents build-time inlining of sensitive credentials (Gmail passwords, Mailchimp keys)
 
-**Affected Files:**
-- `app/api/newsletter/route.tsx` - Moved Mailchimp keys access inside POST function
-- `app/api/stripe/create-payment-intent/route.tsx` - Created `getStripe()` helper function
-- `app/api/stripe/webhook/route.tsx` - Created `getStripe()` helper function
-- `app/api/stripe/verify-payment/route.tsx` - Created `getStripe()` helper function
-- `app/api/download/route.tsx` - Created `getStripe()` helper function
-- `.gitignore` - Improved patterns to properly exclude all `.env*` files
-- `netlify.toml` - Added configuration for Netlify deployment and secrets scanning
 
 **UI Improvements:**
 - **Conditional Footer Display** – Phone and address now only display if values are provided in `locale.en.json`
@@ -795,7 +479,6 @@ npm run build
 
 **Migration Notes:**
 - No breaking changes - all changes are backward compatible
-- If deploying to Netlify, the new `netlify.toml` file is now required
 - Existing `.env.local` files remain compatible
 
 ##### Release 1.2.2: Gmail SMTP Integration (01-Jan-2026)
@@ -818,128 +501,6 @@ npm run build
 - Enhanced email logging for debugging
 - Simplified from 3 email variables to just 2: `GMAIL_USER` and `GMAIL_APP_PASSWORD`
 - Admin notifications now sent to the same Gmail account that sends emails
-
-##### Release 1.2.1: Stripe Webhook Implementation & Simplified Checkout (31-Dec-2025)
-
-**Critical Fix - Dual Payment Verification:**
-- **Stripe Payment Verification with Backup** – Implemented dual-verification system for maximum reliability
-  - **Primary:** Payment verified via Stripe API when user lands on order confirmation page, emails sent immediately
-  - **Backup:** Stripe webhook (`payment_intent.succeeded`) processes orders if user closes browser before landing on confirmation page
-  - Duplicate email prevention: System marks emails as sent in PaymentIntent metadata
-  - Complete order data (billing info, cart items, order ID) stored in PaymentIntent metadata
-  - Best user experience: Immediate email delivery + webhook backup for reliability
-  - Added comprehensive webhook setup documentation for local development and production
-  - **IMPORTANT:** Stripe webhook setup is REQUIRED for production deployments
-
-**Checkout Simplification:**
-- **Minimal Customer Information** – Checkout now only requires 3 fields for virtual products:
-  - First Name, Last Name, Email
-  - Removed: Country, State, City, Address, Postal Code, Phone
-- **Email Validation** – Real-time client-side email validation with error messages
-- **Download Link Notice** – Added informational text below email field: "Download links will be sent to this email address after payment confirmation"
-
-**Direct Download Links:**
-- **Removed Download API Endpoint** – Download URLs no longer verified via `/api/download`
-- **Direct Downloads** – Product download links (from products.json) displayed immediately on order confirmation page after payment
-- **Email Downloads** – Customer and admin emails now include direct download links for all purchased products
-- **Simplified Flow** – No intermediate verification step, faster checkout experience
-
-**Technical Improvements:**
-- Updated `create-payment-intent` to store complete order data in Stripe metadata
-- Updated webhook handler to process orders and send emails on payment success
-- Updated PayPal Express Checkout buttons to use simplified billing form
-- Enhanced validation in `/api/checkout/placeorder` with detailed error logging
-- Removed shipping-related code from all PayPal integration components
-
-**Migration Notes:**
-- Stripe webhook must be configured for order emails to work
-- See "Stripe Webhook Setup" section in README for detailed instructions
-- Existing orders in localStorage remain compatible
-
-##### Release 1.2.0: Virtual Products Only (30-Dec-2025)
-
-**Breaking Changes:**
-- **Removed Physical Product Support** – TishCommerce is now designed exclusively for virtual/digital products
-  - Removed all shipping functionality (shipping methods, shipping forms, shipping calculations)
-  - Removed shipping address collection from checkout
-  - Simplified checkout to only collect billing information
-  - Updated order emails to remove shipping details
-- **Payment Methods** – Supports Stripe and PayPal for secure online payments:
-  - **Stripe** - Credit/debit card payments via Stripe Payment Element
-  - **PayPal Standard Checkout** - Traditional PayPal checkout flow
-  - **PayPal Express Checkout** - Quick checkout available from cart and product pages
-- **Removed Subscription Product Fields** – Cleaned up Product type to remove SubscriptionEnabled, SubscriptionType, and SaleSubscriptionType
-
-**Product Data Updates:**
-- Updated products.json with realistic virtual product examples (WordPress themes, plugins, ebooks, bundles)
-- Added mix of free and paid products demonstrating all features
-- Removed old book and subscription product examples
-
-**Architecture Improvements:**
-- Simplified checkout flow by removing shipping-related state management
-- Reduced API payload sizes by eliminating shipping data from PayPal/Stripe requests
-- Cleaner validation logic focused on billing and payment only
-- Updated all utility functions and email templates for virtual products
-
-**Why This Change?**
-TishCommerce is now laser-focused on what it does best: selling digital downloads without complexity. If you need to sell physical products with shipping, consider using Release 1.1.0 or other eCommerce platforms designed for that purpose.
-
-##### Release 1.1.0: Digital Products & Bug Fixes (30-Dec-2025)
-
-**New Features:**
-- **Secure Digital Downloads** – Implemented payment-verified download system for selling digital products (WordPress themes, plugins, ebooks)
-  - Download URLs stored in products.json but never exposed via public APIs
-  - Payment verification with Stripe/PayPal APIs before showing download links
-  - Download links displayed on order confirmation page and in customer emails
-- **Free Products Support** – Products with price = 0 are now fully supported
-  - Display "FREE" badge instead of price
-  - Direct download button for free products with DownloadURL
-  - No cart or payment buttons shown for free products
-- **Demo URLs** – Added DemoURL field for products
-  - Blue "DEMO" button displayed on both listing and detail pages
-  - Opens demo in new tab for users to preview before purchasing
-  - Works for both free and paid products
-- **Product URL Structure** – Changed from `/products/[slug]` to `/product/[slug]` for cleaner URLs
-- **Environment Configuration** – Added comprehensive .env.local template with all required variables
-
-**Critical Bug Fixes:**
-- Fixed Stripe payment intent not storing product IDs (downloads wouldn't work)
-- Fixed PayPal orders not including product SKUs (downloads wouldn't work)
-- Fixed download endpoint incorrectly extracting product IDs from Stripe metadata
-- Fixed Stripe orders never being placed on server (no emails were sent)
-- Fixed download endpoint to properly verify payments before returning URLs
-
-**Improvements:**
-- Upgraded all npm packages to latest versions (Next.js 16.1, React 19.2, Stripe 20.1, PayPal 9.1)
-- Added detailed email debugging logs for troubleshooting
-- Updated all internal product links to use new URL structure
-- Enhanced product type definitions with DownloadURL and DemoURL fields
-- Improved button layouts for different product types (free/paid, with/without demo)
-
-**Developer Notes:**
-- Product downloads require payment verification via Stripe/PayPal APIs
-- Free products bypass payment and offer direct downloads
-- DownloadURL field is automatically filtered from public API responses
-- All purchase-related buttons hidden for free products
-
-##### Release 1.0.0: MVP (28-March-2025)
-
-- JSON-based product listings
-- Cart stored in LocalStorage
-- Checkout with PayPal and Stripe payment methods
-- Orders sent via email
-
-
-### License
-TishCommerce is released under the MIT License.
-
-
-### Support My Work
-I built TishCommerce as a free and open-source eCommerce solution to help small businesses and developers sell online without paying monthly SaaS fees.
-Maintaining and improving this project takes a lot of time and effort. If you find it helpful, please consider supporting my work:
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=S88TKD55YVK7S)
-
 
 Your support helps me keep this project alive and improve it further.
 Thank you! ❤️

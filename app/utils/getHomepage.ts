@@ -47,7 +47,7 @@ const defaultHomepageSettings: HomepageSettings = {
 };
 
 // Fetch Homepage Settings
-// Now using direct import for compatibility with Vercel, Cloudflare, and Netlify
+// Now using direct import for compatibility with Vercel
 export const getHomepageSettings = (): HomepageSettings => {
   return homepageData as HomepageSettings;
 };

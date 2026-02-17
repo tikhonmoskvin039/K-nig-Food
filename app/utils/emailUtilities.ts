@@ -20,7 +20,6 @@ export interface MinimalCartItem {
   DownloadURL?: string;
 }
 
-// Full cart item for PayPal orders that send complete product data
 export interface OrderCartItem extends Product {
   quantity: number;
 }
@@ -67,7 +66,7 @@ export async function sendEmail({
     const transporter = createGmailTransporter();
 
     const result = await transporter.sendMail({
-      from: `"${getLocalization().siteName || 'TishCommerce'}" <${process.env.GMAIL_USER}>`,
+      from: `"${getLocalization().siteName || 'König Food'}" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
@@ -178,7 +177,7 @@ ${summary}
 Total: $${total.toFixed(2)}${downloadSection}
 
 Thank you for shopping with us!
-${siteName || "TishCommerce"}
+${siteName || "König Food"}
 `;
 }
 

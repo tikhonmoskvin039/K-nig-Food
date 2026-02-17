@@ -232,7 +232,7 @@
          "/products/product-3.jpg"
       ],
       "ShortDescription":"Create membership sites with recurring subscriptions and content restrictions.",
-      "LongDescription":"Build profitable membership sites with ease. Features include multiple membership levels, recurring payments, content dripping, email notifications, member dashboard, coupon codes, and reports. Integrates with Stripe and PayPal. Perfect for courses, premium content, and communities.",
+      "LongDescription":"Build profitable membership sites with ease. Features include multiple membership levels, recurring payments, content dripping, email notifications, member dashboard, coupon codes, and reports. Perfect for courses, premium content, and communities.",
       "RegularPrice":"79.99",
       "SalePrice":"59.99",
       "Currency":"USD",

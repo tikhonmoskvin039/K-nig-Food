@@ -77,8 +77,8 @@ export default function Footer() {
       <div className="text-center text-sm mt-8">
         {content.copyright}  
         <span className="mx-1">|</span>  
-        <Link href="https://github.com/tishonator/TishCommerce" target="_blank" className="text-gray-300 hover:text-gray-400 transition">
-          Powered by TishCommerce
+        <Link href="https://github.com/tikhonmoskvin039/K-nig-Food" target="_blank" className="text-gray-300 hover:text-gray-400 transition">
+          Powered by König Food
         </Link>
       </div>
 

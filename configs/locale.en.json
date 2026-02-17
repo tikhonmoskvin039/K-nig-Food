@@ -1,7 +1,7 @@
 {
   "phone": "+1 234 567 890",
   "address": "123 Main Street, Tish City",
-  "siteName": "TishCommerce",
+  "siteName": "König Food",
   "siteTagline": "Your Database-Free Store",
   "labels": {
     "phone": "Phone",
@@ -82,7 +82,7 @@
   ],
   "homepage": {
     "banner": {
-      "title": "Welcome to TishCommerce",
+      "title": "Welcome to König Food",
       "subtitle": "The easiest way to manage and sell your products online.",
       "buttonText": "Get Started Now",
       "imagePath": "/homepage-banner.jpg",
@@ -151,5 +151,5 @@
     "errorMessage": "Failed to send message. Please try again later.",
     "captchaError": "reCAPTCHA is not yet available."
   },
-  "copyright": "© 2025 - 2026 Tihomir Ivanov @tishonator. All rights reserved."
+  "copyright": "© 2026 Tikhon Moskvin @tikhonmoskvin039. All rights reserved."
 }

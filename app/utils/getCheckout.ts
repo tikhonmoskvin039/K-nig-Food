@@ -14,14 +14,11 @@ export interface CheckoutSettings {
 
 // Default Fallback
 const defaultCheckoutSettings: CheckoutSettings = {
-  paymentMethods: [
-    { id: "stripe", name: "Stripe", enabled: true, icon: "/payments/stripe.png" },
-    { id: "paypal", name: "PayPal", enabled: true, icon: "/payments/paypal.png" },
-  ],
+  paymentMethods: [],
 };
 
 // Fetch Checkout Settings
-// Now using direct import for compatibility with Vercel, Cloudflare, and Netlify
+// Now using direct import for compatibility with Vercel
 export const getCheckoutSettings = (): CheckoutSettings => {
   return checkoutData as CheckoutSettings;
 };

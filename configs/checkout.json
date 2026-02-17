@@ -1,16 +1,3 @@
 {
-  "paymentMethods": [
-    {
-      "id": "paypal",
-      "name": "PayPal",
-      "enabled": true,
-      "icon": "/payments/paypal.png"
-    },
-    {
-      "id": "stripe",
-      "name": "Stripe (Credit/Debit Card)",
-      "enabled": true,
-      "icon": "/payments/stripe.png"
-    }
-  ]
+  "paymentMethods": []
 }
