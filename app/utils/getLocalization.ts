@@ -68,5 +68,5 @@ interface LocalizationData {
 // Fetch Localization Data
 // Now using direct import for compatibility with Vercel
 export const getLocalization = (): LocalizationData => {
-  return localeData as LocalizationData;
+  return localeData as unknown as LocalizationData;
 };
