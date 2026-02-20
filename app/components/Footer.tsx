@@ -43,10 +43,10 @@ export default function Footer() {
 
         {/* Contact Info */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.labels.contactUs}</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.contactForm.title}</h3>
           <p>
             <Link href="/contact" className="text-gray-300 hover:text-gray-400 transition">
-              {content.labels.contactUs}
+              {content.contactForm.title}
             </Link>
           </p>
           {content.phone && (

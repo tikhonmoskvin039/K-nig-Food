@@ -14,9 +14,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const effectivePrice = parseFloat(product.SalePrice || product.RegularPrice);
-  const isFree = effectivePrice === 0;
-  const hasDiscount = parseFloat(product.SalePrice) < parseFloat(product.RegularPrice);
+  const hasDiscount =
+    parseFloat(product.SalePrice) < parseFloat(product.RegularPrice);
   const currencySymbol = getCurrencySymbol(product.Currency);
   const dispatch = useAppDispatch();
   const { labels } = useLocalization();
@@ -31,7 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden transition hover:scale-105">
+    <div className="bg-white shadow-md rounded-lg overflow-hidden transition hover:scale-105 flex flex-col h-full">
       {/* Product Image with Link to Product Page */}
       <Link href={`/product/${product.Slug}`}>
         <div className="w-full">
@@ -46,21 +45,22 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Product Info */}
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-1">
         <h3 className="text-xl font-semibold text-gray-900 truncate">
-          <Link href={`/product/${product.Slug}`} className="hover:text-gray-600">
+          <Link
+            href={`/product/${product.Slug}`}
+            className="hover:text-gray-600"
+          >
             {product.Title}
           </Link>
         </h3>
 
-        <p className="text-gray-700 mt-2 text-sm line-clamp-2">{product.ShortDescription}</p>
+        <p className="text-gray-700 mt-2 text-sm line-clamp-2">
+          {product.ShortDescription}
+        </p>
 
         <div className="mt-3">
-          {isFree ? (
-            <span className="text-lg font-bold text-green-600">
-              FREE
-            </span>
-          ) : hasDiscount ? (
+          {hasDiscount ? (
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-red-600">
                 {currencySymbol}
@@ -79,32 +79,24 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-auto flex flex-col gap-2 pt-4">
           {/* Main action buttons row */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Link href={`/product/${product.Slug}`} className={(!isFree || !product.DownloadURL) ? "sm:w-1/2" : "sm:w-1/2"}>
-              <span className="w-full inline-block bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition">
-                {labels.viewProduct || "View Product"}
+            <Link
+              href={`/product/${product.Slug}`}
+              className={!product.DownloadURL ? "sm:w-1/2" : "sm:w-1/2"}
+            >
+              <span className="w-full h-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition">
+                {labels.viewProduct || "Узнать больше"}
               </span>
             </Link>
 
-            {isFree && product.DownloadURL ? (
-              <a
-                href={product.DownloadURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-1/2 inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition"
-              >
-                Download
-              </a>
-            ) : !isFree ? (
-              <button
-                onClick={handleAddToCart}
-                className="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition"
-              >
-                {labels.addToCart || "Add to Cart"}
-              </button>
-            ) : null}
+            <button
+              onClick={handleAddToCart}
+              className="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition"
+            >
+              {labels.addToCart || "Добавить в корзину"}
+            </button>
           </div>
 
           {/* Demo button - full width */}

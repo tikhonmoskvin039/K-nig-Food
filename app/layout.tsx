@@ -35,7 +35,7 @@ export default function RootLayout({
       >
         <LocalizationProvider>
           <Header />
-          {children}
+          <div className="pt-(--header-height)">{children}</div>
           <Footer />
         </LocalizationProvider>
       </body>

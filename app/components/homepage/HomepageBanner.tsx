@@ -15,7 +15,7 @@ export default function HomepageBanner() {
 
   return (
     <section
-      className="w-full py-40 md:py-60 lg:py-80 text-white flex justify-center items-center text-center relative overflow-hidden"
+      className="w-full min-h-[calc(100vh-var(--header-height))] text-white flex justify-center items-center text-center relative overflow-hidden"
       style={{
         backgroundImage: `url(${imagePath})`,
         backgroundSize: "cover",
@@ -29,7 +29,9 @@ export default function HomepageBanner() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-4xl mx-auto px-6"
       >
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-6 drop-shadow-lg">{title}</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-6 drop-shadow-lg">
+          {title}
+        </h2>
         <p className="text-lg mb-8 text-gray-200">{subtitle}</p>
         <Link
           href={ctaLink}

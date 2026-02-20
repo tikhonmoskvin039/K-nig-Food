@@ -1,0 +1,171 @@
+{
+  "phone": "+1 234 567 890",
+  "address": "123 Main Street, Tish City",
+  "siteName": "König Food",
+  "siteTagline": "Готовые блюда по рецептам известных поваров.",
+  "labels": {
+    "phone": "Телефон",
+    "address": "Адрес",
+    "quickLinks": "Навигация",
+    "contactUs": "Как с нами связаться",
+    "followUs": "Мы в соцсетях",
+    "searchPlaceholder": "Поиск товаров...",
+    "allCategories": "Все категории",
+    "sortByName": "Сортировать по названию",
+    "sortByPrice": "Сортировать по цене",
+    "sortByNewest": "Сортировать по новизне",
+    "loadingProducts": "Загрузка товаров...",
+    "noProductsFound": "Товары не найдены...",
+    "productDetails": "Информация о товаре",
+    "products": "Меню",
+    "recentProducts": "Новые товары",
+    "addToCart": "Добавить в корзину",
+    "cartEmpty": "Ваша корзина пуста.",
+    "viewCart": "Перейти в корзину",
+    "total": "Итого",
+    "quantity": "Количество",
+    "proceedToCheckout": "Перейти к оформлению",
+    "remove": "Удалить",
+    "unitPrice": "Цена за единицу",
+    "productTotal": "Сумма за товар",
+    "cartTitle": "Ваша корзина",
+    "orderSummary": "Сводка заказа",
+    "subtotal": "Промежуточный итог",
+    "shipping": "Доставка",
+    "noShippingSelected": "Не выбрано",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "country": "Страна",
+    "state": "Регион",
+    "city": "Город",
+    "address1": "Адрес (строка 1)",
+    "address2": "Адрес (строка 2)",
+    "postalCode": "Почтовый индекс",
+    "shippingInformation": "Информация о доставке",
+    "billingInformation": "Платёжная информация",
+    "shippingMethod": "Способ доставки",
+    "paymentMethod": "Способ оплаты",
+    "placeOrder": "Оформить заказ",
+    "placingOrder": "Оформление заказа...",
+    "checkoutValidationError": "Пожалуйста, заполните все обязательные поля.",
+    "orderPlacedSuccess": "Ваш заказ успешно оформлен!",
+    "orderFailed": "Не удалось оформить заказ. Пожалуйста, попробуйте снова.",
+    "sameAsShipping": "Совпадает с адресом доставки",
+    "orderConfirmationTitle": "Подтверждение заказа",
+    "orderConfirmationMessage": "Ваш заказ успешно оформлен. Спасибо за покупку!",
+    "orderDetails": "Детали заказа",
+    "orderId": "Номер заказа",
+    "orderDate": "Дата заказа",
+    "completeBeforePayment": "Пожалуйста, заполните все данные доставки и оплаты перед выбором способа оплаты.",
+    "payNow": "Оплатить сейчас"
+  },
+  "menu": [
+    { "label": "Главная", "href": "/" },
+    { "label": "Товары", "href": "/products" },
+    { "label": "Документация", "href": "/documentation" },
+    { "label": "О нас", "href": "/about" },
+    { "label": "Контакты", "href": "/contact" }
+  ],
+  "footerLinks": [
+    { "label": "Главная", "href": "/" },
+    { "label": "Товары", "href": "/products" },
+    { "label": "Документация", "href": "/documentation" },
+    { "label": "О нас", "href": "/about" },
+    { "label": "Контакты", "href": "/contact" }
+  ],
+  "socialLinks": [
+    {
+      "id": "facebook",
+      "icon": "SiFacebook",
+      "url": "https://facebook.com/yourpage"
+    },
+    { "id": "x", "icon": "SiX", "url": "https://x.com/yourprofile" },
+    {
+      "id": "instagram",
+      "icon": "SiInstagram",
+      "url": "https://instagram.com/yourpage"
+    },
+    {
+      "id": "linkedin",
+      "icon": "SiLinkedin",
+      "url": "https://linkedin.com/in/yourprofile"
+    },
+    {
+      "id": "youtube",
+      "icon": "SiYoutube",
+      "url": "https://youtube.com/@yourchannel"
+    }
+  ],
+  "homepage": {
+    "banner": {
+      "title": "Добро пожаловать в König Food",
+      "subtitle": "Готовые блюда по рецептам известных поваров.",
+      "buttonText": "Начать сейчас",
+      "imagePath": "/homepage-banner.jpg",
+      "ctaLink": "/products"
+    },
+    "brandStory": {
+      "title": "Наша история",
+      "description": "Основанный тремя поколениями страстных любителей книг, наш семейный магазин построен на любви к историям и сообществу. Мы гордимся тщательно подобранными книгами, персональным обслуживанием и тёплой атмосферой для каждого читателя.",
+      "buttonText": "Подробнее",
+      "ctaLink": "/about"
+    },
+    "testimonialsTitle": "Отзывы наших клиентов",
+    "testimonials": [
+      {
+        "id": 1,
+        "name": "Jessica B.",
+        "avatar": "/user1.jpg",
+        "rating": 4.5,
+        "review": "Эта обувь изменила мою жизнь! Удобная и стильная."
+      },
+      {
+        "id": 2,
+        "name": "Ethan Walker",
+        "avatar": "/user2.jpg",
+        "rating": 4,
+        "review": "Лучшая покупка в этом году. Качество на высоте!"
+      },
+      {
+        "id": 3,
+        "name": "Sophia Martinez",
+        "avatar": "/user3.jpg",
+        "rating": 5,
+        "review": "Отличный сервис и быстрая доставка. Рекомендую!"
+      }
+    ],
+    "newsletter": {
+      "title": "Подпишитесь на нашу рассылку",
+      "description": "Присоединяйтесь к нашей рассылке, чтобы получать эксклюзивные обновления и специальные предложения.",
+      "placeholder": "Введите ваш email",
+      "buttonText": "Подписаться"
+    },
+    "brandsTitle": "Нам доверяют ведущие бренды",
+    "brands": [
+      { "name": "Бренд 1", "logo": "/brands/brand1.svg" },
+      { "name": "Бренд 2", "logo": "/brands/brand2.svg" },
+      { "name": "Бренд 3", "logo": "/brands/brand3.svg" },
+      { "name": "Бренд 4", "logo": "/brands/brand4.svg" },
+      { "name": "Бренд 5", "logo": "/brands/brand5.svg" }
+    ]
+  },
+  "about": {
+    "title": "Наша история",
+    "imagePath": "/about-us.jpg",
+    "content": "Наш семейный бизнес начался с общей любви к книгам и мечты создать что-то значимое вместе.\n\nТо, что началось как небольшой проект в гараже, выросло в надёжный магазин с тщательно подобранным ассортиментом, индивидуальным подходом и приверженностью устойчивому развитию.\n\nМы верим в силу историй, ценность независимых авторов и радость от чтения. Каждая книга выбрана с заботой — и каждый клиент становится частью нашей большой семьи."
+  },
+  "contactForm": {
+    "title": "Напишите нам",
+    "nameLabel": "Имя",
+    "emailLabel": "Email",
+    "messageLabel": "Сообщение",
+    "namePlaceholder": "Ваше имя",
+    "emailPlaceholder": "you@example.com",
+    "messagePlaceholder": "Ваше сообщение",
+    "buttonText": "Отправить сообщение",
+    "successMessage": "Ваше сообщение успешно отправлено!",
+    "errorMessage": "Не удалось отправить сообщение. Пожалуйста, попробуйте позже.",
+    "captchaError": "reCAPTCHA пока недоступна."
+  },
+  "copyright": "© 2026 Tikhon Moskvin @tikhonmoskvin039. Все права защищены."
+}

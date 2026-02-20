@@ -1,4 +1,4 @@
-import localeData from "../../configs/locale.en.json";
+import localeData from "../../configs/locale.ru.json";
 
 // Define Localization Structure
 interface LocalizationData {
