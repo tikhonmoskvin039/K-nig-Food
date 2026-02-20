@@ -63,7 +63,7 @@ export default async function DocumentationDetailPage(props: {
             href="/documentation"
             className="text-blue-600 hover:text-blue-800 transition-colors"
           >
-            ← Back to Documentation
+            ← Назад к документации
           </Link>
         </nav>
 
@@ -94,7 +94,7 @@ export default async function DocumentationDetailPage(props: {
                 href={`/documentation/${previousPage.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 group"
               >
-                <div className="text-sm text-gray-500 mb-2">← Previous</div>
+                <div className="text-sm text-gray-500 mb-2">← Предыдущая</div>
                 <div className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                   {previousPage.title}
                 </div>
@@ -108,7 +108,7 @@ export default async function DocumentationDetailPage(props: {
                 href={`/documentation/${nextPage.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 text-right group"
               >
-                <div className="text-sm text-gray-500 mb-2">Next →</div>
+                <div className="text-sm text-gray-500 mb-2">Следующая →</div>
                 <div className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                   {nextPage.title}
                 </div>
@@ -120,7 +120,7 @@ export default async function DocumentationDetailPage(props: {
         {/* All Pages Navigation */}
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            All Documentation Pages
+            Все страницы документации
           </h2>
           <ul className="space-y-2">
             {allPages.map((p) => (

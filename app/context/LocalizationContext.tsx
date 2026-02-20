@@ -36,6 +36,7 @@ interface LocalizationData {
   };
   contactForm: {
     title: string;
+    subtitle: string;
     nameLabel: string;
     emailLabel: string;
     messageLabel: string;

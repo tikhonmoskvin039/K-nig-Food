@@ -20,7 +20,7 @@ export default function DocumentationPage() {
         {/* Page Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Documentation
+            Документация
           </h1>
         </div>
 
@@ -28,7 +28,7 @@ export default function DocumentationPage() {
         {documentationPages.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <p className="text-gray-500">
-              No documentation pages found. Add pages to{" "}
+              Нет страниц документации. Добавьте страницы в{" "}
               <code className="bg-gray-100 px-2 py-1 rounded text-sm">
                 configs/documentation-pages.json
               </code>
@@ -50,7 +50,7 @@ export default function DocumentationPage() {
                     <p className="text-gray-600">{page.description}</p>
                   </div>
                   <svg
-                    className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0 ml-4"
+                    className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0 ml-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

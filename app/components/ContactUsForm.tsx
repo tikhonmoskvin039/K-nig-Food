@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { useLocalization } from '@/app/context/LocalizationContext';
+import { useState, FormEvent } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useLocalization } from "@/app/context/LocalizationContext";
 
 export default function ContactUsForm() {
   const { contactForm } = useLocalization();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [status, setStatus] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -21,20 +21,20 @@ export default function ContactUsForm() {
       return;
     }
 
-    const token = await executeRecaptcha('contact_us');
+    const token = await executeRecaptcha("contact_us");
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message, token }),
       });
 
-      if (!res.ok) throw new Error('Something went wrong');
+      if (!res.ok) throw new Error("Something went wrong");
 
-      setName('');
-      setEmail('');
-      setMessage('');
+      setName("");
+      setEmail("");
+      setMessage("");
       setStatus(contactForm.successMessage);
       setTimeout(() => setStatus(null), 5000);
     } catch {
@@ -45,9 +45,13 @@ export default function ContactUsForm() {
   return (
     <section className="w-full min-h-screen bg-stone-100 py-16">
       <div className="max-w-3xl mx-auto px-6">
-        <h2 className="text-4xl font-bold text-black text-center">{contactForm.title}</h2>
+        <h2 className="text-4xl font-bold text-black text-center">
+          {contactForm.subtitle}
+        </h2>
 
-        {status && <div className="mb-4 text-green-600 font-semibold">{status}</div>}
+        {status && (
+          <div className="mb-4 text-green-600 font-semibold">{status}</div>
+        )}
 
         <form
           onSubmit={handleSubmit}

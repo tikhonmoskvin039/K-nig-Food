@@ -38,9 +38,9 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
 
       {/* Navigation Menu for Mobile & Desktop */}
       <nav
-        className={`absolute md:static top-(--header-height) left-0 w-full md:w-auto bg-gray-100 md:bg-transparent
-    flex flex-col md:flex-row items-start md:items-center px-6 py-0 md:p-0 transition-all
-    ${isMenuOpen ? "block h-[calc(100vh-var(--header-height))] mt-8" : "hidden"}`}
+        className={`absolute md:static top-16 left-0 w-full md:w-auto bg-gray-100 md:bg-transparent md:flex flex-col md:flex-row items-start md:items-center p-6 md:p-0 transition-all ${
+          isMenuOpen ? "block mt-12" : "hidden"
+        }`}
       >
         {menuItems.map(({ label, href }) => (
           <Link
