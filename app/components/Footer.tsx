@@ -22,6 +22,7 @@ const iconMap: Record<SocialIcon, React.ElementType> = {
 
 export default function Footer() {
   const content = getLocalization(); // Load localization data
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-gray-900 text-gray-300 py-12 relative">
@@ -46,7 +47,7 @@ export default function Footer() {
           <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.contactForm.title}</h3>
           <p>
             <Link href="/contact" className="text-gray-300 hover:text-gray-400 transition">
-              {content.contactForm.title}
+              {content.contactForm.subtitle}
             </Link>
           </p>
           {content.phone && (
@@ -75,7 +76,7 @@ export default function Footer() {
 
       {/* Copyright & Attribution */}
       <div className="text-center text-sm mt-8">
-        {content.copyright}  
+         © {currentYear} Все права защищены.
         <span className="mx-1">|</span>  
         <Link href="https://github.com/tikhonmoskvin039/K-nig-Food" target="_blank" className="text-gray-300 hover:text-gray-400 transition">
           Powered by König Food

@@ -20,7 +20,7 @@ export default function ProductsPage() {
     <section className="py-12 bg-stone-100">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-gray-800 text-center mb-8">
-          {localeData.labels.products}
+          {localeData.labels.products || "Меню"}
         </h2>
         <div className="mt-2">
           <ReduxProvider>

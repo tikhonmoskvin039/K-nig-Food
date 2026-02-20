@@ -6,18 +6,16 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Горячие блюда", "Итальянская кухня", "Паста"],
-    "FeatureImag₽L": "/products/food/pasta-carbonara-main.jpg",
+    "FeatureImageURL": "/products/carbonara.jpg",
     "ProductImageGallery": [
-      "/products/food/pasta-carbonara-1.jpg",
-      "/products/food/pasta-carbonara-2.jpg"
+      "/products/carbonara.jpg",
+      "/products/carbonara.jpg"
     ],
     "ShortDescription": "Классическая итальянская паста с беконом, сливочным соусом и пармезаном.",
     "LongDescription": "Паста Карбонара приготовлена по традиционному рецепту с хрустящим беконом, сливочным соусом на основе яиц и сыра пармезан. Подаётся с чёрным перцем и свежей зеленью. Отличный выбор для сытного обеда или ужина.",
     "RegularPrice": "12.99",
     "SalePrice": "10.99",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-002",
@@ -26,18 +24,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Здоровое питание", "Боулы", "Рыба"],
-    "FeatureImag₽L": "/products/food/poke-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/poke-1.jpg",
-      "/products/food/poke-2.jpg"
-    ],
+    "FeatureImageURL": "/products/poke.jpg",
+    "ProductImageGallery": ["/products/poke.jpg", "/products/poke.jpg"],
     "ShortDescription": "Свежий боул с лососем, авокадо, рисом и овощами.",
     "LongDescription": "Поке с лососем — это сочетание свежего филе лосося, авокадо, огурца, моркови и риса с соусом терияки. Идеально подходит для лёгкого и полезного приёма пищи.",
     "RegularPrice": "14.50",
     "SalePrice": "",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-003",
@@ -46,18 +39,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Бургеры", "Фастфуд", "Говядина"],
-    "FeatureImag₽L": "/products/food/burger-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/burger-1.jpg",
-      "/products/food/burger-2.jpg"
-    ],
+    "FeatureImageURL": "/products/burger.jpg",
+    "ProductImageGallery": ["/products/burger.jpg", "/products/burger.jpg"],
     "ShortDescription": "Сочный бургер с говяжьей котлетой и соусом BBQ.",
     "LongDescription": "Бургер BBQ включает 100% говяжью котлету, сыр чеддер, карамелизированный лук, свежие овощи и фирменный соус BBQ в мягкой булочке бриошь.",
-    "RegularPrice": "11.99",
-    "SalePrice": "9.99",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "RegularPrice": "450",
+    "SalePrice": "380",
+    "Currency": "₽"
   },
   {
     "ID": "dish-004",
@@ -66,18 +54,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Суши", "Японская кухня", "Сеты"],
-    "FeatureImag₽L": "/products/food/sushi-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/sushi-1.jpg",
-      "/products/food/sushi-2.jpg"
-    ],
+    "FeatureImageURL": "/products/sushi.jpg",
+    "ProductImageGallery": ["/products/sushi.jpg", "/products/sushi.jpg"],
     "ShortDescription": "Набор роллов Филадельфия с лососем и сливочным сыром.",
     "LongDescription": "Сет включает 24 ролла Филадельфия с нежным лососем и сливочным сыром. Подаётся с соевым соусом, имбирём и васаби.",
     "RegularPrice": "24.99",
     "SalePrice": "21.99",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-005",
@@ -86,18 +69,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Салаты", "Здоровое питание", "Курица"],
-    "FeatureImag₽L": "/products/food/caesar-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/caesar-1.jpg",
-      "/products/food/caesar-2.jpg"
-    ],
+    "FeatureImageURL": "/products/cezar.jpg",
+    "ProductImageGallery": ["/products/cezar.jpg", "/products/cezar.jpg"],
     "ShortDescription": "Классический салат Цезарь с курицей и соусом анчоус.",
     "LongDescription": "Свежие листья романо, куриное филе на гриле, сухарики, пармезан и фирменный соус Цезарь. Отличный вариант лёгкого и сбалансированного блюда.",
     "RegularPrice": "9.99",
     "SalePrice": "",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-006",
@@ -106,18 +84,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Супы", "Тайская кухня", "Морепродукты"],
-    "FeatureImag₽L": "/products/food/tom-yum-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/tom-yum-1.jpg",
-      "/products/food/tom-yum-2.jpg"
-    ],
+    "FeatureImageURL": "/products/tom-yam.jpg",
+    "ProductImageGallery": ["/products/tom-yam.jpg", "/products/tom-yam.jpg"],
     "ShortDescription": "Острый тайский суп с креветками и кокосовым молоком.",
     "LongDescription": "Ароматный суп Том Ям с креветками, грибами, лаймом и кокосовым молоком. Пикантный вкус с балансом остроты и кислинки.",
     "RegularPrice": "13.99",
     "SalePrice": "",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-007",
@@ -126,18 +99,13 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Десерты", "Итальянская кухня", "Сладкое"],
-    "FeatureImag₽L": "/products/food/tiramisu-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/tiramisu-1.jpg",
-      "/products/food/tiramisu-2.jpg"
-    ],
+    "FeatureImageURL": "/products/tiramisu.jpg",
+    "ProductImageGallery": ["/products/tiramisu.jpg", "/products/tiramisu.jpg"],
     "ShortDescription": "Нежный десерт с маскарпоне и кофе.",
     "LongDescription": "Классический тирамису с сыром маскарпоне, пропитанным кофе печеньем савоярди и какао. Идеальное завершение обеда.",
     "RegularPrice": "6.99",
     "SalePrice": "5.99",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   },
   {
     "ID": "dish-008",
@@ -146,17 +114,12 @@
     "Enabled": true,
     "CatalogVisible": true,
     "ProductCategories": ["Напитки", "Холодные напитки", "Безалкогольные"],
-    "FeatureImag₽L": "/products/food/lemonade-main.jpg",
-    "ProductImageGallery": [
-      "/products/food/lemonade-1.jpg",
-      "/products/food/lemonade-2.jpg"
-    ],
+    "FeatureImageURL": "/products/lemonade.jpg",
+    "ProductImageGallery": ["/products/lemonade.jpg", "/products/lemonade.jpg"],
     "ShortDescription": "Освежающий лимонад с манго и маракуйей.",
     "LongDescription": "Домашний лимонад на основе натурального сока манго и маракуйи с добавлением свежей мяты и льда. Отлично освежает в жаркую погоду.",
     "RegularPrice": "4.50",
     "SalePrice": "",
-    "Currency": "₽",
-    "DownloadURL": "",
-    "DemoURL": ""
+    "Currency": "₽"
   }
 ]

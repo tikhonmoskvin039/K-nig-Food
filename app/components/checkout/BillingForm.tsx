@@ -37,7 +37,7 @@ export default function BillingForm() {
   };
 
   return (
-    <div className="space-y-4 mt-8">
+    <div className="space-y-4 mt-8 min-h-[calc(100vh-var(--header-height))]">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
         {labels.billingInformation || "Customer Information"}
       </h3>
@@ -77,7 +77,7 @@ export default function BillingForm() {
           <p className="text-red-500 text-sm">{emailError}</p>
         )}
         <p className="text-sm text-gray-600 mt-2">
-          {labels.downloadLinkEmailNotice || "Download links will be sent to this email address after payment confirmation."}
+          {labels.downloadLinkEmailNotice || "Подробности заказа будут отправлены на этот адрес электронной почты после подтверждения оплаты."}
         </p>
       </div>
     </div>

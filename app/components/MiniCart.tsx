@@ -13,8 +13,9 @@ export default function MiniCart() {
   const cartItems = useAppSelector((state) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = cartItems.reduce(
-    (acc, item) => acc + item.quantity * parseFloat(item.SalePrice || item.RegularPrice),
-    0
+    (acc, item) =>
+      acc + item.quantity * parseFloat(item.SalePrice || item.RegularPrice),
+    0,
   );
 
   const { labels } = useLocalization();
@@ -63,11 +64,11 @@ export default function MiniCart() {
 
       {/* Mini Cart Dropdown */}
       {isVisible && (
-        <div
-          className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 shadow-lg rounded-md z-50 p-4"
-        >
+        <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 shadow-lg rounded-md z-50 p-4">
           {cartItems.length === 0 ? (
-            <p className="text-gray-600 text-sm text-center">{labels.cartEmpty || "Your cart is empty."}</p>
+            <p className="text-gray-600 text-sm text-center">
+              {labels.cartEmpty || "Your cart is empty."}
+            </p>
           ) : (
             <div className="space-y-4 max-h-64 overflow-y-auto">
               {cartItems.map((item) => {
@@ -91,10 +92,11 @@ export default function MiniCart() {
                         {item.Title}
                       </Link>
                       <p className="text-sm text-gray-600">
-                        {labels.quantity || "Qty"}: {item.quantity} × ${price.toFixed(2)}
+                        {labels.quantity || "Количество"}: {item.quantity} ×{" "}
+                        {price.toFixed(2)} ₽
                       </p>
                       <p className="text-sm text-gray-800 font-medium">
-                        {labels.total || "Total"}: ${itemTotal}
+                        {labels.total || "Итого"}: {itemTotal} ₽
                       </p>
                     </div>
                     <button
@@ -115,8 +117,8 @@ export default function MiniCart() {
             <>
               <hr className="my-4" />
               <div className="flex justify-between items-center text-sm font-semibold text-gray-800">
-                <span>{labels.total || "Total"}:</span>
-                <span>${totalAmount.toFixed(2)}</span>
+                <span>{labels.total || "Итого"}:</span>
+                <span>{totalAmount.toFixed(2)} ₽</span>
               </div>
               <Link
                 href="/cart"

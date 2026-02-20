@@ -11,8 +11,16 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
-  const { filteredProducts, categories, setSearchQuery, setCategoryFilter, setSortBy } = useProductContext();
+  const {
+    filteredProducts,
+    categories,
+    setSearchQuery,
+    setCategoryFilter,
+    setSortBy,
+  } = useProductContext();
   const { labels } = useLocalization();
+
+  console.log(filteredProducts, Array.isArray(filteredProducts));
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,7 +31,7 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
   // Get products for the current page
   const displayedProducts = filteredProducts.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   return (
@@ -37,11 +45,19 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
       />
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
+      <div className="mt-6 min-h-[calc(100vh-var(--header-height-plus-top-section-height))]">
         {displayedProducts.length > 0 ? (
-          displayedProducts.map((product) => <ProductCard key={product.ID} product={product} />)
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedProducts.map((product) => (
+              <ProductCard key={product.ID} product={product} />
+            ))}
+          </div>
         ) : (
-          <p className="text-center text-gray-600">{labels.noProductsFound}</p>
+          <div className="flex items-center justify-center h-full text-center px-4">
+            <p className="text-gray-600 font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl">
+              {labels.noProductsFound || "Товары не найдены..."}
+            </p>
+          </div>
         )}
       </div>
 

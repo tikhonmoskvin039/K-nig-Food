@@ -16,8 +16,9 @@ function CartContent() {
   const items = useAppSelector((state) => state.cart.items);
 
   const total = items.reduce(
-    (sum, item) => sum + item.quantity * parseFloat(item.SalePrice || item.RegularPrice),
-    0
+    (sum, item) =>
+      sum + item.quantity * parseFloat(item.SalePrice || item.RegularPrice),
+    0,
   );
 
   const handleQtyChange = (id: string, delta: number) => {
@@ -32,12 +33,16 @@ function CartContent() {
   };
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-12 bg-white min-h-[calc(100vh-var(--header-height))]">
       <div className="max-w-6xl mx-auto px-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">{labels.yourCart || "Your Cart"}</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          {labels.yourCart || "Ваша корзина"}
+        </h1>
 
         {items.length === 0 ? (
-          <p className="text-gray-600 mt-10 mb-30 text-center">{labels.cartEmpty || "Your cart is empty."}</p>
+          <p className="text-gray-600 mt-10 mb-30 text-center">
+            {labels.cartEmpty || "Корзина пуста."}
+          </p>
         ) : (
           <>
             <div className="space-y-6">
@@ -46,7 +51,10 @@ function CartContent() {
                 const itemTotal = price * item.quantity;
 
                 return (
-                  <div key={item.ID} className="flex gap-4 items-center border-b pb-4">
+                  <div
+                    key={item.ID}
+                    className="flex gap-4 items-center border-b pb-4"
+                  >
                     <Image
                       src={item.FeatureImageURL}
                       alt={item.Title}
@@ -62,7 +70,7 @@ function CartContent() {
                         {item.Title}
                       </Link>
                       <p className="text-sm text-gray-600">
-                        {labels.price || "Price"}: ${price.toFixed(2)}
+                        {labels.price || "Цена"}: {price.toFixed(2)} ₽
                       </p>
                       <div className="flex items-center mt-2 gap-2">
                         <button
@@ -71,7 +79,9 @@ function CartContent() {
                         >
                           <Minus size={16} />
                         </button>
-                        <span className="text-sm font-medium">{item.quantity}</span>
+                        <span className="text-sm font-medium">
+                          {item.quantity}
+                        </span>
                         <button
                           onClick={() => handleQtyChange(item.ID, 1)}
                           className="text-gray-700 border px-2 rounded hover:bg-gray-200"
@@ -80,7 +90,7 @@ function CartContent() {
                         </button>
                       </div>
                       <p className="text-sm text-gray-800 mt-1">
-                        {labels.total || "Total"}: ${itemTotal.toFixed(2)}
+                        {labels.total || "Итого"}: {itemTotal.toFixed(2)} ₽
                       </p>
                     </div>
                     <button
@@ -99,7 +109,7 @@ function CartContent() {
 
             <div className="mt-8 text-right space-y-4">
               <p className="text-xl font-semibold text-gray-800">
-                {labels.total || "Total"}: ${total.toFixed(2)}
+                {labels.total || "Всего"}: {total.toFixed(2)} ₽
               </p>
 
               {/* Checkout Button Below */}
@@ -107,10 +117,9 @@ function CartContent() {
                 href="/checkout"
                 className="inline-block bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-md text-sm font-semibold transition"
               >
-                {labels.proceedToCheckout || "Proceed to Checkout"}
+                {labels.proceedToCheckout || "Перейти к оформлению"}
               </Link>
             </div>
-
           </>
         )}
       </div>

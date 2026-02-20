@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { Product } from "../../types/Product";
 
 // Define context type
@@ -29,10 +35,22 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
-      .then((data: Product[]) => {
-        setProducts(data);
-        setFilteredProducts(data);
-        setCategories([...new Set(data.flatMap((p) => p.ProductCategories))].sort());
+      .then((data: any) => {
+        // Убедимся, что data — массив
+        const productsArray: Product[] = Array.isArray(data) ? data : [];
+
+        setProducts(productsArray);
+        setFilteredProducts(productsArray);
+
+        // Собираем категории только из массивов
+        const categoriesSet = new Set<string>();
+        productsArray.forEach((p) => {
+          if (Array.isArray(p.ProductCategories)) {
+            p.ProductCategories.forEach((cat) => categoriesSet.add(cat));
+          }
+        });
+
+        setCategories([...categoriesSet].sort());
       })
       .catch((err) => console.error("Failed to load products", err));
   }, []);
@@ -42,18 +60,19 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
     if (searchQuery) {
       updatedProducts = updatedProducts.filter((product) =>
-        product.Title.toLowerCase().includes(searchQuery.toLowerCase())
+        product.Title.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     if (categoryFilter) {
       updatedProducts = updatedProducts.filter((product) =>
-        product.ProductCategories.includes(categoryFilter)
+        product.ProductCategories.includes(categoryFilter),
       );
     }
 
     updatedProducts.sort((a, b) => {
-      if (sortBy === "price") return parseFloat(a.SalePrice) - parseFloat(b.SalePrice);
+      if (sortBy === "price")
+        return parseFloat(a.SalePrice) - parseFloat(b.SalePrice);
       if (sortBy === "newest") return b.ID.localeCompare(a.ID);
       return a.Title.localeCompare(b.Title);
     });

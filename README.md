@@ -10,7 +10,6 @@
 - **Dynamic Category Pages** – Automatic category pages at `/products/{category-slug}` with SEO-friendly URLs (e.g., "WordPress Themes" → `/products/wordpress-themes`).
 - **Payment Methods**
 - **Secure Digital Downloads**
-- **Free Products Support** – Offer free downloads with direct download buttons, perfect for freemium models or lead magnets.
 - **Product Demos** – Add demo URLs to let customers preview themes, plugins, or products before purchasing.
 - **Newsletter Integration (MailChimp)** – Capture leads via a newsletter signup connected to your MailChimp list.
 - **Contact Form with Google reCAPTCHA v3** – Protects your inbox from spam while collecting user inquiries.
@@ -53,8 +52,6 @@ pnpm install
 - ID, Title, Slug, ShortDescription, LongDescription
 - RegularPrice, SalePrice, Currency, FeatureImageURL
 - ProductImageGallery, Category
-- **DownloadURL** (optional) - Add a Google Drive public link or direct download URL. Download URLs are automatically hidden from public APIs and only shown to customers after payment verification. For free products (price = 0), downloads are directly accessible.
-- **DemoURL** (optional) - Add a live demo URL for products. A blue "DEMO" button will appear on both listing and detail pages, opening in a new tab.
 
 This file is the source of truth for product listings shown on the site and is fully editable without a database. Perfect for managing WordPress themes, plugins, ebooks, digital assets, and other virtual products.
 

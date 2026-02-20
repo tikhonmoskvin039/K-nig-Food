@@ -57,13 +57,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Enrich cart items with download URLs for email
-    // Cart items from frontend don't have DownloadURL for security
     // We need to populate them from products.json before sending emails
     const enrichedCartItems = body.cartItems.map(item => {
       const product = allProducts.find((p) => p.ID === item.ID);
       return {
-        ...item,
-        ...(product?.DownloadURL && { DownloadURL: product.DownloadURL }),
+        ...item
       };
     });
 
@@ -72,8 +70,6 @@ export async function POST(req: NextRequest) {
       ...body,
       cartItems: enrichedCartItems,
     };
-
-    console.log(`📦 Enriched ${enrichedCartItems.filter(item => item.DownloadURL).length} items with download URLs`);
 
     // Send emails with priority: customer first, then admin after delay (rate limit)
     console.log(`📧 Sending order confirmation emails for order ${body.orderId}...`);

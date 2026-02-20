@@ -48,11 +48,7 @@ export async function generateMetadata({
 /**
  * The route itself must also treat `params` as a Promise.
  */
-export default async function ProductPage({
-  params,
-}: {
-  params: AsyncParams;
-}) {
+export default async function ProductPage({ params }: { params: AsyncParams }) {
   // First await for the real param
   const { slug } = await params;
   if (!slug) {
@@ -67,19 +63,15 @@ export default async function ProductPage({
 
   // Check if product is free
   const effectivePrice = parseFloat(product.SalePrice || product.RegularPrice);
-  const isFree = effectivePrice === 0;
 
   // Check if there's a valid sale price different from regular price
-  const hasSalePrice = product.SalePrice &&
-                       product.SalePrice.trim() !== "" &&
-                       parseFloat(product.SalePrice) !== parseFloat(product.RegularPrice);
+  const hasSalePrice =
+    product.SalePrice &&
+    product.SalePrice.trim() !== "" &&
+    parseFloat(product.SalePrice) !== parseFloat(product.RegularPrice);
 
   // Build SSR UI
-  const priceBlock = isFree ? (
-    <p className="text-2xl font-bold text-green-600">
-      FREE
-    </p>
-  ) : hasSalePrice ? (
+  const priceBlock = hasSalePrice ? (
     <p className="text-xl font-bold text-red-600">
       {getCurrencySymbol(product.Currency)}
       {product.SalePrice}
@@ -96,58 +88,33 @@ export default async function ProductPage({
   );
 
   return (
-    <section className="py-12 bg-stone-100">
+    <section className="py-12 bg-stone-100 min-h-[calc(100vh-var(--header-height))]">
       <div className="max-w-6xl mx-auto px-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800">{product.Title}</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          {product.Title}
+        </h1>
 
-        <div className="grid mt-2 grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {/* LEFT COLUMN: IMAGES */}
-          <ProductLightbox images={[product.FeatureImageURL, ...product.ProductImageGallery]} />
+          <ProductLightbox
+            images={[product.FeatureImageURL, ...product.ProductImageGallery]}
+          />
 
           {/* RIGHT COLUMN: DETAILS */}
           <div>
             <p className="text-lg text-gray-700">{product.ShortDescription}</p>
             <div className="mt-4">{priceBlock}</div>
 
-            {isFree && product.DownloadURL ? (
-              <div className="mt-4">
-                <a
-                  href={product.DownloadURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md text-base font-semibold transition"
-                >
-                  Download Now
-                </a>
-              </div>
-            ) : !isFree ? (
-              <>
-                <div className="mt-4">
-                  <AddToCartButtonWrapper product={product} />
-                </div>
-              </>
-            ) : null}
-
-            {product.DemoURL && (
-              <div className="mt-4">
-                <a
-                  href={product.DemoURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md text-base font-semibold transition"
-                >
-                  View DEMO
-                </a>
-              </div>
-            )}
-
+            <div className="mt-4">
+              <AddToCartButtonWrapper product={product} />
+            </div>
           </div>
         </div>
 
         {/* LONG DESCRIPTION */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold text-gray-800">
-            {localeData.labels.productDetails || "Product Details"}
+            {localeData.labels.productDetails || "Информация о товаре"}
           </h2>
           <p className="text-gray-700 mt-4">{product.LongDescription}</p>
         </div>

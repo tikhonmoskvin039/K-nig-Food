@@ -82,10 +82,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="mt-auto flex flex-col gap-2 pt-4">
           {/* Main action buttons row */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Link
-              href={`/product/${product.Slug}`}
-              className={!product.DownloadURL ? "sm:w-1/2" : "sm:w-1/2"}
-            >
+            <Link href={`/product/${product.Slug}`} className="sm:w-1/2">
               <span className="w-full h-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition">
                 {labels.viewProduct || "Узнать больше"}
               </span>
@@ -98,18 +95,6 @@ export default function ProductCard({ product }: ProductCardProps) {
               {labels.addToCart || "Добавить в корзину"}
             </button>
           </div>
-
-          {/* Demo button - full width */}
-          {product.DemoURL && (
-            <a
-              href={product.DemoURL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition"
-            >
-              DEMO
-            </a>
-          )}
         </div>
       </div>
     </div>

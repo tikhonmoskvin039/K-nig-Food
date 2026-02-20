@@ -150,6 +150,5 @@
     "successMessage": "Your message has been sent successfully!",
     "errorMessage": "Failed to send message. Please try again later.",
     "captchaError": "reCAPTCHA is not yet available."
-  },
-  "copyright": "© 2026 Tikhon Moskvin @tikhonmoskvin039. All rights reserved."
+  }
 }

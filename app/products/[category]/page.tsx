@@ -28,13 +28,13 @@ export async function generateMetadata(props: {
 
   if (!categoryName) {
     return {
-      title: `Category Not Found - ${localeData.siteName}`,
+      title: `Категория не найдена - ${localeData.siteName}`,
     };
   }
 
   return {
     title: `${categoryName} - ${localeData.labels.products} - ${localeData.siteName}`,
-    description: `Browse ${categoryName} products at ${localeData.siteName}`,
+    description: `Поиск ${categoryName} в продуктах ${localeData.siteName}`,
   };
 }
 

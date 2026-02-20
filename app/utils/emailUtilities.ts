@@ -17,7 +17,6 @@ export interface MinimalCartItem {
   RegularPrice: string;
   SalePrice: string;
   quantity: number;
-  DownloadURL?: string;
 }
 
 export interface OrderCartItem extends Product {
@@ -114,14 +113,6 @@ export function generateAdminEmail(
   total: number
 ): string {
   // Generate download links section
-  const downloadableItems = body.cartItems.filter(item => item.DownloadURL);
-  console.log(`📧 Admin email: Including ${downloadableItems.length} download links`);
-
-  const downloadSection = downloadableItems.length > 0
-    ? `\n\nDownload Links:\n${downloadableItems.map(item =>
-        `- ${item.Title}: ${item.DownloadURL}`
-      ).join('\n')}\n`
-    : '';
 
   return `New Order Received
 
@@ -135,7 +126,7 @@ Payment Method: ${body.paymentMethodId.toUpperCase()}
 Order Summary:
 ${summary}
 
-Total: $${total.toFixed(2)}${downloadSection}
+Total: $${total.toFixed(2)}
 
 Date: ${new Date().toLocaleString()}
 `;
@@ -150,19 +141,6 @@ export function generateCustomerEmail(
 ): string {
   const { labels, siteName } = getLocalization();
 
-  // Generate download links section for products with download URLs
-  const downloadableItems = body.cartItems.filter(item => item.DownloadURL);
-  console.log(`📧 Customer email: Including ${downloadableItems.length} download links`);
-  if (downloadableItems.length > 0) {
-    console.log(`📧 Download links:`, downloadableItems.map(item => `${item.Title}: ${item.DownloadURL}`));
-  }
-
-  const downloadSection = downloadableItems.length > 0
-    ? `\n\nDownload Your Products:\n${downloadableItems.map(item =>
-        `- ${item.Title}: ${item.DownloadURL}`
-      ).join('\n')}\n\nPlease download your products as soon as possible. These links do not expire, but we recommend saving your products to your device.`
-    : '';
-
   return `Hi ${body.billingForm.firstName},
 
 ${labels.orderConfirmationMessage || "Your order was placed successfully. Thank you for your purchase!"}
@@ -174,7 +152,7 @@ Payment Method: ${body.paymentMethodId.toUpperCase()}
 Order Summary:
 ${summary}
 
-Total: $${total.toFixed(2)}${downloadSection}
+Total: $${total.toFixed(2)}
 
 Thank you for shopping with us!
 ${siteName || "König Food"}
