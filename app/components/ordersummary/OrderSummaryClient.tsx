@@ -7,29 +7,9 @@ import { useProductContext } from "../../context/ProductContext";
 import { useAppDispatch } from "../../store/hooks";
 import { clearCart } from "../../store/slices/cartSlice";
 import Image from "next/image";
-import { Product } from "../../../types/Product";
-
-// Interfaces
-interface CartItem extends Product {
-  quantity: number;
-}
-
-interface Address {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-interface OrderData {
-  orderId: string;
-  orderDate: string;
-  cartItems: CartItem[];
-  billingForm: Address;
-  paymentMethodId: string;
-}
 
 export default function OrderSummaryClient() {
-  const [order, setOrder] = useState<OrderData | null>(null);
+  const [order, setOrder] = useState<DTOrderData | null>(null);
   const { labels } = useLocalization();
   const { products } = useProductContext();
   const router = useRouter();
@@ -42,7 +22,7 @@ export default function OrderSummaryClient() {
     const recent = localStorage.getItem("recentOrder");
 
     if (recent) {
-      const parsed = JSON.parse(recent) as OrderData;
+      const parsed = JSON.parse(recent) as DTOrderData;
 
       setOrder(parsed);
 
@@ -69,7 +49,7 @@ export default function OrderSummaryClient() {
     return product?.FeatureImageURL || "/placeholder.png";
   };
 
-  const renderCustomerInfo = (title: string, data: Address) => (
+  const renderCustomerInfo = (title: string, data: DTAddress) => (
     <div className="mb-6">
       <h3 className="font-semibold text-gray-800 mb-2">{title}</h3>
       <p className="text-sm text-gray-700">

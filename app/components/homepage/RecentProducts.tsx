@@ -1,7 +1,6 @@
 import ProductCardWithProvider from "../products/ProductCardWithProvider";
 import { getLocalization } from "../../utils/getLocalization";
 import getProducts from "../../utils/getProducts";
-import { Product } from "../../../types/Product";
 
 interface RecentProductsProps {
   count?: number;
@@ -26,7 +25,7 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 mt-4 md:grid-cols-3 gap-6">
-          {recentProducts.map((product: Product) => (
+          {recentProducts.map((product: DTProduct) => (
             <ProductCardWithProvider key={product.ID} product={product} />
           ))}
         </div>

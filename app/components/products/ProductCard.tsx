@@ -3,14 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
-import { Product } from "../../../types/Product";
 import { useAppDispatch } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
 import { showMiniCart } from "../../utils/MiniCartController";
 
 interface ProductCardProps {
-  product: Product;
+  product: DTProduct;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -33,13 +32,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-white shadow-md rounded-lg overflow-hidden transition hover:scale-105 flex flex-col h-full">
       {/* Product Image with Link to Product Page */}
       <Link href={`/product/${product.Slug}`}>
-        <div className="w-full">
+        <div className="relative w-full aspect-4/3">
           <Image
             src={product.FeatureImageURL}
             alt={product.Title}
-            width={400}
-            height={0}
-            className="w-full h-auto object-contain rounded-t-lg"
+            fill
+            className="object-cover rounded-t-lg"
           />
         </div>
       </Link>
@@ -63,18 +61,18 @@ export default function ProductCard({ product }: ProductCardProps) {
           {hasDiscount ? (
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-red-600">
-                {currencySymbol}
                 {product.SalePrice}
+                {currencySymbol}
               </span>
               <span className="text-gray-500 line-through">
-                {currencySymbol}
                 {product.RegularPrice}
+                {currencySymbol}
               </span>
             </div>
           ) : (
             <span className="text-lg font-bold text-gray-900">
-              {currencySymbol}
               {product.RegularPrice}
+              {currencySymbol}
             </span>
           )}
         </div>

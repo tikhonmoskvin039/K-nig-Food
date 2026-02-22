@@ -54,8 +54,8 @@ export default function NewsletterSignup() {
           </button>
         </form>
 
-        {status === "success" && <p className="mt-3 text-green-600">Thank you for subscribing!</p>}
-        {status === "error" && <p className="mt-3 text-red-600">Subscription failed. Try again.</p>}
+        {status === "success" && <p className="mt-3 text-green-600">Подписка прошла успешно!</p>}
+        {status === "error" && <p className="mt-3 text-red-600">Подписка не удалась. Попробуйте снова.</p>}
       </div>
     </section>
   );

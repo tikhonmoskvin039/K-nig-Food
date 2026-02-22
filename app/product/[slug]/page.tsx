@@ -61,9 +61,6 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
     return notFound();
   }
 
-  // Check if product is free
-  const effectivePrice = parseFloat(product.SalePrice || product.RegularPrice);
-
   // Check if there's a valid sale price different from regular price
   const hasSalePrice =
     product.SalePrice &&
@@ -73,17 +70,17 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
   // Build SSR UI
   const priceBlock = hasSalePrice ? (
     <p className="text-xl font-bold text-red-600">
-      {getCurrencySymbol(product.Currency)}
       {product.SalePrice}
+      {getCurrencySymbol(product.Currency)}
       <span className="ml-2 text-gray-500 line-through">
-        {getCurrencySymbol(product.Currency)}
         {product.RegularPrice}
+        {getCurrencySymbol(product.Currency)}
       </span>
     </p>
   ) : (
     <p className="text-xl font-bold text-gray-900">
-      {getCurrencySymbol(product.Currency)}
       {product.RegularPrice}
+      {getCurrencySymbol(product.Currency)}
     </p>
   );
 

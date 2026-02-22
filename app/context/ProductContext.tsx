@@ -7,13 +7,12 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { Product } from "../../types/Product";
 
 // Define context type
 interface ProductContextType {
-  products: Product[];
-  filteredProducts: Product[];
-  setFilteredProducts: (products: Product[]) => void;
+  products: DTProduct[];
+  filteredProducts: DTProduct[];
+  setFilteredProducts: (products: DTProduct[]) => void;
   categories: string[];
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: string) => void;
@@ -25,8 +24,8 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 // Context provider component
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<DTProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<DTProduct[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -37,7 +36,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       .then((res) => res.json())
       .then((data: any) => {
         // Убедимся, что data — массив
-        const productsArray: Product[] = Array.isArray(data) ? data : [];
+        const productsArray: DTProduct[] = Array.isArray(data) ? data : [];
 
         setProducts(productsArray);
         setFilteredProducts(productsArray);

@@ -4,17 +4,13 @@
 // -----------------------------
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Product } from "../../../types/Product";
 
-interface CartItem extends Product {
-  quantity: number;
-}
 
 interface CartState {
-  items: CartItem[];
+  items: DTCartItem[];
 }
 
-const loadFromLocalStorage = (): CartItem[] => {
+const loadFromLocalStorage = (): DTCartItem[] => {
   try {
     const data = localStorage.getItem("cart");
     return data ? JSON.parse(data) : [];
@@ -23,7 +19,7 @@ const loadFromLocalStorage = (): CartItem[] => {
   }
 };
 
-const saveToLocalStorage = (items: CartItem[]) => {
+const saveToLocalStorage = (items: DTCartItem[]) => {
   localStorage.setItem("cart", JSON.stringify(items));
 };
 
@@ -35,7 +31,7 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<Product>) => {
+    addToCart: (state, action: PayloadAction<DTProduct>) => {
       const existing = state.items.find((item) => item.ID === action.payload.ID);
       if (existing) {
         existing.quantity += 1;
@@ -62,7 +58,7 @@ const cartSlice = createSlice({
       state.items = [];
       saveToLocalStorage([]);
     },
-    setCartItems: (state, action: PayloadAction<CartItem[]>) => {
+    setCartItems: (state, action: PayloadAction<DTCartItem[]>) => {
       state.items = action.payload;
       saveToLocalStorage(state.items);
     },    

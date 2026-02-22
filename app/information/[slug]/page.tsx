@@ -10,7 +10,7 @@ import { getLocalization } from "../../utils/getLocalization";
 
 const localeData = getLocalization();
 
-// Generate static paths for all documentation pages
+// Generate static paths for all information pages
 export function generateStaticParams() {
   const slugs = getDocumentationSlugs();
   return slugs.map((slug) => ({
@@ -18,7 +18,7 @@ export function generateStaticParams() {
   }));
 }
 
-// Generate metadata for each documentation page
+// Generate metadata for each information page
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
@@ -32,7 +32,7 @@ export async function generateMetadata(props: {
   }
 
   return {
-    title: `${page.title} - Documentation - ${localeData.siteName}`,
+    title: `${page.title} - Information - ${localeData.siteName}`,
     description: page.description,
   };
 }
@@ -60,7 +60,7 @@ export default async function DocumentationDetailPage(props: {
         {/* Breadcrumb */}
         <nav className="mb-8 text-sm">
           <Link
-            href="/documentation"
+            href="/information"
             className="text-blue-600 hover:text-blue-800 transition-colors"
           >
             ← Назад к документации
@@ -91,7 +91,7 @@ export default async function DocumentationDetailPage(props: {
           <nav className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
             {previousPage ? (
               <Link
-                href={`/documentation/${previousPage.slug}`}
+                href={`/information/${previousPage.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 group"
               >
                 <div className="text-sm text-gray-500 mb-2">← Предыдущая</div>
@@ -105,7 +105,7 @@ export default async function DocumentationDetailPage(props: {
 
             {nextPage && (
               <Link
-                href={`/documentation/${nextPage.slug}`}
+                href={`/information/${nextPage.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 text-right group"
               >
                 <div className="text-sm text-gray-500 mb-2">Следующая →</div>
@@ -126,7 +126,7 @@ export default async function DocumentationDetailPage(props: {
             {allPages.map((p) => (
               <li key={p.slug}>
                 <Link
-                  href={`/documentation/${p.slug}`}
+                  href={`/information/${p.slug}`}
                   className={`block py-2 px-3 rounded transition-colors ${
                     p.slug === params.slug
                       ? "bg-blue-50 text-blue-700 font-medium"

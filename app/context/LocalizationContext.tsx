@@ -46,7 +46,6 @@ interface LocalizationData {
     buttonText: string;
     successMessage: string;
     errorMessage: string;
-    captchaError: string;
   };
   email: string;
   phone: string;

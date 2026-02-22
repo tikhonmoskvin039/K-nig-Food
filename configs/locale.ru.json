@@ -20,7 +20,7 @@
     "products": "Меню",
     "recentProducts": "Новые товары",
     "addToCart": "Добавить в корзину",
-    "cartEmpty": "Ваша корзина пуста.",
+    "cartEmpty": "Добавьте товары, чтобы продолжить.",
     "viewCart": "Перейти в корзину",
     "total": "Итого",
     "quantity": "Количество",
@@ -63,14 +63,14 @@
   "menu": [
     { "label": "Главная", "href": "/" },
     { "label": "Товары", "href": "/products" },
-    { "label": "Документация", "href": "/documentation" },
+    { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
     { "label": "Контакты", "href": "/contact" }
   ],
   "footerLinks": [
     { "label": "Главная", "href": "/" },
     { "label": "Товары", "href": "/products" },
-    { "label": "Документация", "href": "/documentation" },
+    { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
     { "label": "Контакты", "href": "/contact" }
   ],
@@ -79,6 +79,11 @@
       "id": "facebook",
       "icon": "SiFacebook",
       "url": "https://facebook.com/yourpage"
+    },
+    {
+      "id": "telegram",
+      "icon": "SiTelegram",
+      "url": "https://t.me/koenigfood"
     },
     { "id": "x", "icon": "SiX", "url": "https://x.com/yourprofile" },
     {
@@ -166,7 +171,6 @@
     "messagePlaceholder": "Ваше сообщение",
     "buttonText": "Отправить сообщение",
     "successMessage": "Ваше сообщение успешно отправлено!",
-    "errorMessage": "Не удалось отправить сообщение. Пожалуйста, попробуйте позже.",
-    "captchaError": "reCAPTCHA пока недоступна."
+    "errorMessage": "Не удалось отправить сообщение. Пожалуйста, попробуйте позже."
   }
 }

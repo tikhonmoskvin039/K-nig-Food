@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ error: "Поле Email должно быть заполнено" }, { status: 400 });
     }
 
     // Access env vars inside the function to prevent build-time inlining

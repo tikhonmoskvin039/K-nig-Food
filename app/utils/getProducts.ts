@@ -1,11 +1,10 @@
-import { Product } from "../../types/Product";
 import productsData from "../../configs/products.json";
 
 // Define function to get all products
 // Now using direct import for compatibility with Vercel
-export default async function getProducts(): Promise<Product[]> {
+export default async function getProducts(): Promise<DTProduct[]> {
   try {
-    const products: Product[] = productsData as Product[];
+    const products: DTProduct[] = productsData as DTProduct[];
     return products.filter((product) => product.CatalogVisible);
   } catch (error) {
     console.error("Error loading products file:", error);
@@ -14,9 +13,9 @@ export default async function getProducts(): Promise<Product[]> {
 }
 
 // Function to get a product by slug
-export function getProductBySlug(slug: string): Product | undefined {
+export function getProductBySlug(slug: string): DTProduct | undefined {
   try {
-    const products: Product[] = productsData as Product[];
+    const products: DTProduct[] = productsData as DTProduct[];
     return products.find((product) => product.Slug === slug);
   } catch (error) {
     console.error(`Error fetching product with slug "${slug}":`, error);
@@ -27,7 +26,7 @@ export function getProductBySlug(slug: string): Product | undefined {
 // Function to get all unique categories from products
 export function getAllCategories(): string[] {
   try {
-    const products: Product[] = productsData as Product[];
+    const products: DTProduct[] = productsData as DTProduct[];
 
     // Extract all categories from all products
     const allCategories = products

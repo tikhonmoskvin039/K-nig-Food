@@ -62,19 +62,20 @@
   "menu": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
-    { "label": "Docs", "href": "/documentation" },
+    { "label": "Docs", "href": "/information" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }
   ],
   "footerLinks": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
-    { "label": "Docs", "href": "/documentation" },
+    { "label": "Docs", "href": "/information" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }
   ],
   "socialLinks": [
     { "id": "facebook", "icon": "SiFacebook", "url": "https://facebook.com/yourpage" },
+    { "id": "telegram", "icon": "SiTelegram", "url": "https://t.me/koenigfood" },
     { "id": "x", "icon": "SiX", "url": "https://x.com/yourprofile" },
     { "id": "instagram", "icon": "SiInstagram", "url": "https://instagram.com/yourpage" },
     { "id": "linkedin", "icon": "SiLinkedin", "url": "https://linkedin.com/in/yourprofile" },
@@ -148,7 +149,6 @@
     "messagePlaceholder": "Your Message",
     "buttonText": "Send Message",
     "successMessage": "Your message has been sent successfully!",
-    "errorMessage": "Failed to send message. Please try again later.",
-    "captchaError": "reCAPTCHA is not yet available."
+    "errorMessage": "Failed to send message. Please try again later."
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -12,6 +12,12 @@ interface ProductLightboxProps {
 export default function ProductLightbox({ images }: ProductLightboxProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  useEffect(() => {
+    if (!lightboxOpen) {
+      document.body.style.overflow = "";
+    }
+  }, [lightboxOpen]);
 
   if (!images || images.length === 0) return null;
 
@@ -66,6 +72,7 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
           close={() => setLightboxOpen(false)}
           index={lightboxIndex}
           slides={images.map((src) => ({ src }))}
+          noScroll={{ disabled: true }}
         />
       )}
     </div>

@@ -24,7 +24,7 @@ export default function BillingForm() {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      setEmailError("Email is required");
+      setEmailError("Поле Email должно быть заполнено");
     } else if (!emailRegex.test(email)) {
       setEmailError("Please enter a valid email address");
     } else {
@@ -37,16 +37,16 @@ export default function BillingForm() {
   };
 
   return (
-    <div className="space-y-4 mt-8 min-h-[calc(100vh-var(--header-height))]">
+    <div className="space-y-4 mt-8">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
-        {labels.billingInformation || "Customer Information"}
+        {labels.billingInformation || "Платежная информация"}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           name="firstName"
           value={billingForm.firstName}
           onChange={handleChange}
-          placeholder={labels.firstName || "First Name"}
+          placeholder={labels.firstName || "Имя"}
           className="input bg-white border border-gray-300 p-2 pl-3 rounded focus:border-blue-500 focus:outline-none"
           required
         />
@@ -54,7 +54,7 @@ export default function BillingForm() {
           name="lastName"
           value={billingForm.lastName}
           onChange={handleChange}
-          placeholder={labels.lastName || "Last Name"}
+          placeholder={labels.lastName || "Фамилия"}
           className="input bg-white border border-gray-300 p-2 pl-3 rounded focus:border-blue-500 focus:outline-none"
           required
         />
@@ -67,17 +67,18 @@ export default function BillingForm() {
           value={billingForm.email}
           onChange={handleChange}
           onBlur={handleEmailBlur}
-          placeholder={labels.email || "Email Address"}
+          placeholder={labels.email || "Введите email"}
           className={`input bg-white border p-2 pl-3 rounded w-full focus:outline-none ${
-            emailError ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+            emailError
+              ? "border-red-500"
+              : "border-gray-300 focus:border-blue-500"
           }`}
           required
         />
-        {emailError && (
-          <p className="text-red-500 text-sm">{emailError}</p>
-        )}
+        {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
         <p className="text-sm text-gray-600 mt-2">
-          {labels.downloadLinkEmailNotice || "Подробности заказа будут отправлены на этот адрес электронной почты после подтверждения оплаты."}
+          {labels.downloadLinkEmailNotice ||
+            "Подробности заказа будут отправлены на этот адрес электронной почты после подтверждения оплаты."}
         </p>
       </div>
     </div>

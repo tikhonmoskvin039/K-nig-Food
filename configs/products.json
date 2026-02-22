@@ -13,9 +13,9 @@
     ],
     "ShortDescription": "Классическая итальянская паста с беконом, сливочным соусом и пармезаном.",
     "LongDescription": "Паста Карбонара приготовлена по традиционному рецепту с хрустящим беконом, сливочным соусом на основе яиц и сыра пармезан. Подаётся с чёрным перцем и свежей зеленью. Отличный выбор для сытного обеда или ужина.",
-    "RegularPrice": "12.99",
-    "SalePrice": "10.99",
-    "Currency": "₽"
+    "RegularPrice": "690",
+    "SalePrice": "590",
+    "Currency": "RUR"
   },
   {
     "ID": "dish-002",
@@ -28,9 +28,9 @@
     "ProductImageGallery": ["/products/poke.jpg", "/products/poke.jpg"],
     "ShortDescription": "Свежий боул с лососем, авокадо, рисом и овощами.",
     "LongDescription": "Поке с лососем — это сочетание свежего филе лосося, авокадо, огурца, моркови и риса с соусом терияки. Идеально подходит для лёгкого и полезного приёма пищи.",
-    "RegularPrice": "14.50",
+    "RegularPrice": "890",
     "SalePrice": "",
-    "Currency": "₽"
+    "Currency": "RUR"
   },
   {
     "ID": "dish-003",
@@ -45,7 +45,7 @@
     "LongDescription": "Бургер BBQ включает 100% говяжью котлету, сыр чеддер, карамелизированный лук, свежие овощи и фирменный соус BBQ в мягкой булочке бриошь.",
     "RegularPrice": "450",
     "SalePrice": "380",
-    "Currency": "₽"
+    "Currency": "RUR"
   },
   {
     "ID": "dish-004",
@@ -60,7 +60,7 @@
     "LongDescription": "Сет включает 24 ролла Филадельфия с нежным лососем и сливочным сыром. Подаётся с соевым соусом, имбирём и васаби.",
     "RegularPrice": "24.99",
     "SalePrice": "21.99",
-    "Currency": "₽"
+    "Currency": "RUR"
   },
   {
     "ID": "dish-005",
@@ -73,9 +73,9 @@
     "ProductImageGallery": ["/products/cezar.jpg", "/products/cezar.jpg"],
     "ShortDescription": "Классический салат Цезарь с курицей и соусом анчоус.",
     "LongDescription": "Свежие листья романо, куриное филе на гриле, сухарики, пармезан и фирменный соус Цезарь. Отличный вариант лёгкого и сбалансированного блюда.",
-    "RegularPrice": "9.99",
+    "RegularPrice": "430",
     "SalePrice": "",
-    "Currency": "₽"
+    "Currency": "RUR"
   },
   {
     "ID": "dish-006",
@@ -88,9 +88,9 @@
     "ProductImageGallery": ["/products/tom-yam.jpg", "/products/tom-yam.jpg"],
     "ShortDescription": "Острый тайский суп с креветками и кокосовым молоком.",
     "LongDescription": "Ароматный суп Том Ям с креветками, грибами, лаймом и кокосовым молоком. Пикантный вкус с балансом остроты и кислинки.",
-    "RegularPrice": "13.99",
+    "RegularPrice": "550",
     "SalePrice": "",
-    "Currency": "₽"
+    "Currency": "RUR"
   },
   {
     "ID": "dish-007",
@@ -103,9 +103,9 @@
     "ProductImageGallery": ["/products/tiramisu.jpg", "/products/tiramisu.jpg"],
     "ShortDescription": "Нежный десерт с маскарпоне и кофе.",
     "LongDescription": "Классический тирамису с сыром маскарпоне, пропитанным кофе печеньем савоярди и какао. Идеальное завершение обеда.",
-    "RegularPrice": "6.99",
-    "SalePrice": "5.99",
-    "Currency": "₽"
+    "RegularPrice": "690",
+    "SalePrice": "590",
+    "Currency": "RUR"
   },
   {
     "ID": "dish-008",
@@ -118,8 +118,8 @@
     "ProductImageGallery": ["/products/lemonade.jpg", "/products/lemonade.jpg"],
     "ShortDescription": "Освежающий лимонад с манго и маракуйей.",
     "LongDescription": "Домашний лимонад на основе натурального сока манго и маракуйи с добавлением свежей мяты и льда. Отлично освежает в жаркую погоду.",
-    "RegularPrice": "4.50",
+    "RegularPrice": "250",
     "SalePrice": "",
-    "Currency": "₽"
+    "Currency": "RUR"
   }
 ]

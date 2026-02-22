@@ -1,35 +1,5 @@
 import nodemailer from 'nodemailer';
 import { getLocalization } from "./getLocalization";
-import { Product } from "../../types/Product";
-
-// ----- Interfaces -----
-
-export interface Address {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-// Minimal cart item interface with only required fields for emails
-export interface MinimalCartItem {
-  ID: string;
-  Title: string;
-  RegularPrice: string;
-  SalePrice: string;
-  quantity: number;
-}
-
-export interface OrderCartItem extends Product {
-  quantity: number;
-}
-
-export interface OrderBody {
-  orderId: string,
-  orderDate: string;
-  cartItems: MinimalCartItem[] | OrderCartItem[];
-  billingForm: Address;
-  paymentMethodId: string;
-}
 
 // ----- Gmail SMTP Transporter -----
 
@@ -83,7 +53,7 @@ export async function sendEmail({
 
 // ----- Format Order Summary -----
 
-export function formatOrderSummary(cartItems: MinimalCartItem[] | OrderCartItem[]): {
+export function formatOrderSummary(cartItems: DTMinimalCartItem[] | DTOrderCartItem[]): {
   lines: string;
   subtotal: number;
 } {
@@ -108,34 +78,34 @@ export function formatOrderSummary(cartItems: MinimalCartItem[] | OrderCartItem[
 // ----- Admin Email -----
 
 export function generateAdminEmail(
-  body: OrderBody,
+  body: DTOrderBody,
   summary: string,
   total: number
 ): string {
   // Generate download links section
 
-  return `New Order Received
+  return `Новый заказ получен
 
-Order ID: ${body.orderId}
-Order Date: ${body.orderDate}
-Customer: ${body.billingForm.firstName} ${body.billingForm.lastName}
+Номер заказа: ${body.orderId}
+Дата заказа: ${body.orderDate}
+Клиент: ${body.billingForm.firstName} ${body.billingForm.lastName}
 Email: ${body.billingForm.email}
 
-Payment Method: ${body.paymentMethodId.toUpperCase()}
+Метод оплаты: ${body.paymentMethodId.toUpperCase()}
 
-Order Summary:
+Состав заказа:
 ${summary}
 
-Total: $${total.toFixed(2)}
+Всего: ${total.toFixed(2)}
 
-Date: ${new Date().toLocaleString()}
+Дата: ${new Date().toLocaleString()}
 `;
 }
 
 // ----- Customer Email -----
 
 export function generateCustomerEmail(
-  body: OrderBody,
+  body: DTOrderBody,
   summary: string,
   total: number
 ): string {
@@ -143,30 +113,30 @@ export function generateCustomerEmail(
 
   return `Hi ${body.billingForm.firstName},
 
-${labels.orderConfirmationMessage || "Your order was placed successfully. Thank you for your purchase!"}
+${labels.orderConfirmationMessage || "Ваш заказ был успешно размещён. Спасибо за вашу покупку!"}
 
-Order ID: ${body.orderId}
-Order Date: ${body.orderDate}
-Payment Method: ${body.paymentMethodId.toUpperCase()}
+Номер заказа: ${body.orderId}
+Дата заказа: ${body.orderDate}
+Метод оплаты: ${body.paymentMethodId.toUpperCase()}
 
-Order Summary:
+Состав заказа:
 ${summary}
 
-Total: $${total.toFixed(2)}
+Всего: ${total.toFixed(2)} ₽
 
-Thank you for shopping with us!
+Спасибо за то что вы с нами!
 ${siteName || "König Food"}
 `;
 }
 
 // ----- Send Admin Email -----
 
-export async function sendAdminEmail(body: OrderBody) {
+export async function sendAdminEmail(body: DTOrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
   const total = subtotal;
 
   const text = generateAdminEmail(body, lines, total);
-  const subject = `🛒 New Order from ${body.billingForm.firstName} ${body.billingForm.lastName}`;
+  const subject = `🛒 Новый заказ от ${body.billingForm.firstName} ${body.billingForm.lastName}`;
 
   await sendEmail({
     to: process.env.GMAIL_USER!,
@@ -177,13 +147,13 @@ export async function sendAdminEmail(body: OrderBody) {
 
 // ----- Send Customer Email -----
 
-export async function sendCustomerEmail(body: OrderBody) {
+export async function sendCustomerEmail(body: DTOrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
   const total = subtotal;
 
   const text = generateCustomerEmail(body, lines, total);
   const subject =
-    getLocalization().labels.orderConfirmationTitle || "Your Order Confirmation";
+    getLocalization().labels.orderConfirmationTitle || "Подтверждение вашего заказа";
 
   await sendEmail({
     to: body.billingForm.email,

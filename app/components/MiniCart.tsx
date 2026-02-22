@@ -57,7 +57,7 @@ export default function MiniCart() {
         aria-label={labels.viewCart || "View cart"}
       >
         <ShoppingCart size={24} />
-        <span className="absolute top-[-8px] right-[-10px] bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">
+        <span className="absolute -top-2 -right-2.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">
           {totalQuantity}
         </span>
       </Link>
@@ -102,7 +102,7 @@ export default function MiniCart() {
                     <button
                       onClick={() => dispatch(removeFromCart(item.ID))}
                       className="text-gray-400 hover:text-red-600"
-                      title={labels.remove || "Remove"}
+                      title={labels.remove || "Удалить"}
                     >
                       <X size={16} />
                     </button>
@@ -124,14 +124,14 @@ export default function MiniCart() {
                 href="/cart"
                 className="mt-4 inline-block w-full text-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
               >
-                {labels.viewCart || "View Cart"}
+                {labels.viewCart || "Посмотореть корзину"}
               </Link>
 
               <Link
                 href="/checkout"
                 className="mt-4 inline-block w-full text-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
               >
-                {labels.proceedToCheckout || "Proceed to Checkout"}
+                {labels.proceedToCheckout || "Перейти к оформлению заказа"}
               </Link>
             </>
           )}

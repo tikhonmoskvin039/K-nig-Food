@@ -7,8 +7,8 @@ const localeData = getLocalization();
 
 // Set page metadata
 export const metadata: Metadata = {
-  title: `Documentation - ${localeData.siteName}`,
-  description: "Browse König Food documentation and guides",
+  title: `Information - ${localeData.siteName}`,
+  description: "Browse König Food information and guides",
 };
 
 export default function DocumentationPage() {
@@ -20,7 +20,7 @@ export default function DocumentationPage() {
         {/* Page Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Документация
+            Информация
           </h1>
         </div>
 
@@ -30,7 +30,7 @@ export default function DocumentationPage() {
             <p className="text-gray-500">
               Нет страниц документации. Добавьте страницы в{" "}
               <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                configs/documentation-pages.json
+                configs/information-pages.json
               </code>
             </p>
           </div>
@@ -39,7 +39,7 @@ export default function DocumentationPage() {
             {documentationPages.map((page) => (
               <Link
                 key={page.slug}
-                href={`/documentation/${page.slug}`}
+                href={`/information/${page.slug}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 block group"
               >
                 <div className="flex items-start justify-between">

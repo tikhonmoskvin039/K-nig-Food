@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiFacebook, SiInstagram, SiLinkedin, SiX, SiYoutube } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiLinkedin, SiX, SiYoutube, SiTelegram } from "react-icons/si";
 import ScrollToTopButton from "./ScrollToTopButton"; // Keep this as a client component
 import { getLocalization } from "../utils/getLocalization";
 
@@ -9,11 +9,10 @@ interface FooterLink {
   href: string;
 }
 
-type SocialIcon = "SiFacebook" | "SiX" | "SiInstagram" | "SiLinkedin" | "SiYoutube";
-
 // Map icon strings to components
-const iconMap: Record<SocialIcon, React.ElementType> = {
+const iconMap: Record<DTSocialIcon, React.ElementType> = {
   SiFacebook: SiFacebook,
+  SiTelegram: SiTelegram,
   SiX: SiX,
   SiInstagram: SiInstagram,
   SiLinkedin: SiLinkedin,
@@ -63,7 +62,7 @@ export default function Footer() {
           <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.labels.followUs}</h3>
           <div className="flex justify-center md:justify-start space-x-4">
             {content.socialLinks.map((social) => {
-              const IconComponent = iconMap[social.icon as SocialIcon]; // Type assertion to ensure TS compliance
+              const IconComponent = iconMap[social.icon as DTSocialIcon]; // Type assertion to ensure TS compliance
               return (
                 <Link key={social.id} href={social.url} target="_blank" className="text-gray-300 hover:text-gray-400 transition">
                   <IconComponent size={24} />

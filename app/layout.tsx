@@ -1,22 +1,23 @@
-import { Poppins, Inter } from "next/font/google";
+import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";
+import { Toaster } from "sonner";
 
 // Load two fonts: one for headings, one for body
-const poppins = Poppins({
-  subsets: ["latin"],
+const roboto = Roboto({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "700"],
+  variable: "--font-body",
   display: "swap",
-  variable: "--font-poppins",
-  weight: ["400", "700"], // normal + bold, for headings
 });
 
-const inter = Inter({
-  subsets: ["latin"],
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-main",
   display: "swap",
-  variable: "--font-inter",
-  weight: ["300", "400", "500", "700"], // typical body range
 });
 
 export default function RootLayout({
@@ -29,14 +30,15 @@ export default function RootLayout({
       <body
         className={`
           antialiased
-          ${poppins.variable}
-          ${inter.variable}
+          ${roboto.variable}
+          ${manrope.variable}
         `}
       >
         <LocalizationProvider>
           <Header />
           <div className="pt-(--header-height)">{children}</div>
           <Footer />
+          <Toaster position="top-right" richColors />
         </LocalizationProvider>
       </body>
     </html>

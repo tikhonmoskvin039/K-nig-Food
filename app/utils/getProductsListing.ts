@@ -5,11 +5,6 @@ export interface ProductsListingSettings {
   pageSize: number;
 }
 
-// Default Fallback
-const defaultProductsListingSettings: ProductsListingSettings = {
-  pageSize: 18,
-};
-
 /**
  * Get products listing settings from configs/products-listing.json
  * Returns settings like page size for product listings

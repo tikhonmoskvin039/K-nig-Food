@@ -3,10 +3,9 @@
 import { Provider } from "react-redux";
 import { store } from "../../store/store";
 import AddToCartButton from "./AddToCartButton";
-import { Product } from "../../../types/Product";
 
 interface WrapperProps {
-  product: Product;
+  product: DTProduct;
 }
 
 export default function AddToCartButtonWrapper({ product }: WrapperProps) {

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendAdminEmail, sendCustomerEmail, OrderBody } from "../../../utils/emailUtilities";
+import {
+  sendAdminEmail,
+  sendCustomerEmail,
+} from "../../../utils/emailUtilities";
 import getProducts from "../../../utils/getProducts";
 import { getCheckoutSettings } from "../../../utils/getCheckout";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as OrderBody;
+    const body = (await req.json()) as DTOrderBody;
 
     // 1. Basic validation
     if (!body.orderId) {
@@ -14,7 +17,10 @@ export async function POST(req: NextRequest) {
     }
     if (!body.orderDate) {
       console.error("❌ Validation failed: Missing orderDate");
-      return NextResponse.json({ error: "Missing order date." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing order date." },
+        { status: 400 },
+      );
     }
     if (!body.cartItems?.length) {
       console.error("❌ Validation failed: No cart items");
@@ -22,22 +28,34 @@ export async function POST(req: NextRequest) {
     }
     if (!body.billingForm?.email) {
       console.error("❌ Validation failed: Missing billing email");
-      return NextResponse.json({ error: "Missing billing email." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing billing email." },
+        { status: 400 },
+      );
     }
     if (!body.paymentMethodId) {
       console.error("❌ Validation failed: Missing payment method");
-      return NextResponse.json({ error: "Missing payment method." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing payment method." },
+        { status: 400 },
+      );
     }
 
     // 2. Load settings and validate payment method
     const settings = getCheckoutSettings();
     const paymentMethodValid = settings.paymentMethods.some(
-      (pm) => pm.id === body.paymentMethodId && pm.enabled
+      (pm) => pm.id === body.paymentMethodId && pm.enabled,
     );
 
     if (!paymentMethodValid) {
-      console.error("❌ Validation failed: Invalid payment method:", body.paymentMethodId);
-      return NextResponse.json({ error: "Invalid payment method." }, { status: 400 });
+      console.error(
+        "❌ Validation failed: Invalid payment method:",
+        body.paymentMethodId,
+      );
+      return NextResponse.json(
+        { error: "Invalid payment method." },
+        { status: 400 },
+      );
     }
 
     // 3. Validate product prices and IDs
@@ -46,22 +64,30 @@ export async function POST(req: NextRequest) {
       const found = allProducts.find((p) => p.ID === item.ID);
       if (!found) {
         console.error("❌ Validation failed: Product not found:", item.ID);
-        return NextResponse.json({ error: `Product not found: ${item.ID}` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Product not found: ${item.ID}` },
+          { status: 400 },
+        );
       }
       const expectedPrice = parseFloat(found.SalePrice || found.RegularPrice);
       const submittedPrice = parseFloat(item.SalePrice || item.RegularPrice);
       if (expectedPrice !== submittedPrice) {
-        console.error(`❌ Validation failed: Price mismatch for ${item.ID}. Expected: ${expectedPrice}, Got: ${submittedPrice}`);
-        return NextResponse.json({ error: `Invalid price for product: ${item.Title}` }, { status: 400 });
+        console.error(
+          `❌ Validation failed: Price mismatch for ${item.ID}. Expected: ${expectedPrice}, Got: ${submittedPrice}`,
+        );
+        return NextResponse.json(
+          { error: `Invalid price for product: ${item.Title}` },
+          { status: 400 },
+        );
       }
     }
 
     // 4. Enrich cart items with download URLs for email
     // We need to populate them from products.json before sending emails
-    const enrichedCartItems = body.cartItems.map(item => {
+    const enrichedCartItems = body.cartItems.map((item) => {
       const product = allProducts.find((p) => p.ID === item.ID);
       return {
-        ...item
+        ...item,
       };
     });
 
@@ -72,7 +98,9 @@ export async function POST(req: NextRequest) {
     };
 
     // Send emails with priority: customer first, then admin after delay (rate limit)
-    console.log(`📧 Sending order confirmation emails for order ${body.orderId}...`);
+    console.log(
+      `📧 Sending order confirmation emails for order ${body.orderId}...`,
+    );
     console.log(`📧 Customer email: ${body.billingForm.email}`);
     console.log(`📧 Admin email: ${process.env.GMAIL_USER}`);
 
@@ -89,8 +117,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Wait 2 seconds to respect Gmail SMTP rate limit
-    console.log("⏳ Waiting 2 seconds before sending admin email (rate limit)...");
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log(
+      "⏳ Waiting 2 seconds before sending admin email (rate limit)...",
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // 3. Send admin email
     try {
@@ -102,7 +132,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!adminEmailSent || !customerEmailSent) {
-      console.error("⚠️ Some emails failed to send. Admin:", adminEmailSent, "Customer:", customerEmailSent);
+      console.error(
+        "⚠️ Some emails failed to send. Admin:",
+        adminEmailSent,
+        "Customer:",
+        customerEmailSent,
+      );
     }
 
     // Return success with enriched cart items (including download URLs)
@@ -113,6 +148,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("❌ Order placement error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

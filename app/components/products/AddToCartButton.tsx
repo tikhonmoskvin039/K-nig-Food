@@ -2,15 +2,14 @@
 
 import { useAppDispatch } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
-import { Product } from "../../../types/Product";
 import { useLocalization } from "../../context/LocalizationContext";
 import { showMiniCart } from "../../utils/MiniCartController";
 
-interface Props {
-  product: Product;
+interface IAddToCartButtonProps {
+  product: DTProduct;
 }
 
-export default function AddToCartButton({ product }: Props) {
+export default function AddToCartButton({ product }: IAddToCartButtonProps) {
   const dispatch = useAppDispatch();
   const { labels } = useLocalization();
 

@@ -1,4 +1,4 @@
-import documentationData from "../../configs/documentation-pages.json";
+import documentationData from "../../configs/information-pages.json";
 
 // Documentation Page Interface
 export interface DocumentationPage {
@@ -9,11 +9,11 @@ export interface DocumentationPage {
   content: string;
 }
 
-// Default fallback (empty documentation)
+// Default fallback (empty information)
 const defaultDocumentation: DocumentationPage[] = [];
 
 /**
- * Get all documentation pages from configs/documentation-pages.json
+ * Get all information pages from configs/information-pages.json
  * Returns pages sorted by order field
  * Now using direct import for compatibility with Vercel
  */
@@ -24,13 +24,13 @@ export const getDocumentationPages = (): DocumentationPage[] => {
     // Sort by order field
     return pages.sort((a, b) => a.order - b.order);
   } catch (error) {
-    console.error("Error loading configs/documentation-pages.json:", error);
+    console.error("Error loading configs/information-pages.json:", error);
     return defaultDocumentation;
   }
 };
 
 /**
- * Get a single documentation page by slug
+ * Get a single information page by slug
  * Returns undefined if not found
  */
 export const getDocumentationPageBySlug = (slug: string): DocumentationPage | undefined => {
@@ -39,7 +39,7 @@ export const getDocumentationPageBySlug = (slug: string): DocumentationPage | un
 };
 
 /**
- * Get all valid documentation slugs for static path generation
+ * Get all valid information slugs for static path generation
  */
 export const getDocumentationSlugs = (): string[] => {
   const pages = getDocumentationPages();

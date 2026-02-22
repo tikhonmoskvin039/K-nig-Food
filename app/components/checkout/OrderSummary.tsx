@@ -39,7 +39,7 @@ export default function OrderSummary() {
                 {item.Title}
               </Link>
               <p className="text-sm text-gray-600">
-                {labels.quantity || "Qty"}: {item.quantity} ×{" "}
+                {labels.quantity || "Количество"}: {item.quantity} ×{" "}
                 {parseFloat(item.SalePrice || item.RegularPrice).toFixed(2)} ₽
               </p>
             </div>

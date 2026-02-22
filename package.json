@@ -17,10 +17,10 @@
     "nodemailer": "^7.0.12",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-google-recaptcha-v3": "^1.11.0",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-responsive": "^10.0.1",
+    "sonner": "^2.0.7",
     "uuid": "^13.0.0",
     "yet-another-react-lightbox": "^3.28.0"
   },

@@ -12,7 +12,7 @@ export default async function BrandStory() {
   const { title, description, buttonText, ctaLink } = homepage.brandStory;
 
   return (
-    <section className="relative w-full py-24 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white">
+    <section className="relative w-full py-24 bg-linear-to-r from-gray-900 via-gray-800 to-gray-700 text-white">
       <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Title */}
         <h2 className="text-4xl font-extrabold mb-6 tracking-wide">
@@ -34,7 +34,7 @@ export default async function BrandStory() {
       </div>
 
       {/* Decorative Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-800/30 to-transparent pointer-events-none"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-gray-800/30 to-transparent pointer-events-none"></div>
     </section>
   );
 }

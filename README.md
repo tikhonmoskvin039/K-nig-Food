@@ -11,8 +11,6 @@
 - **Payment Methods**
 - **Secure Digital Downloads**
 - **Product Demos** – Add demo URLs to let customers preview themes, plugins, or products before purchasing.
-- **Newsletter Integration (MailChimp)** – Capture leads via a newsletter signup connected to your MailChimp list.
-- **Contact Form with Google reCAPTCHA v3** – Protects your inbox from spam while collecting user inquiries.
 - **Order Processing via Email (Gmail SMTP)** – Uses Gmail SMTP to send order notifications to admins and customers.
 - **SEO Optimized** – Fast, indexable product pages with automatic static generation.
 - **Deploy Anywhere** – Works on Vercel or any static hosting.  
@@ -104,13 +102,13 @@ Example:
 
 To show 12 products per page instead, simply change the value to `12`.
 
-**/configs/documentation-pages.json** - Defines all documentation pages displayed at `/documentation`:
-- **Dynamic Routing**: Each page becomes accessible at `/documentation/{slug}` (e.g., `/documentation/getting-started`)
+**/configs/information-pages.json** - Defines all information pages displayed at `/information`:
+- **Dynamic Routing**: Each page becomes accessible at `/information/{slug}` (e.g., `/information/getting-started`)
 - **Content Management**: All page content, titles, descriptions managed in JSON
 - **Order Control**: Set display order with the `order` field
 - **Markdown Support**: Write content using markdown syntax (headings, lists, links, code blocks, bold, italic)
 
-This file lets you create and manage a complete documentation system without touching any application code.
+This file lets you create and manage a complete information system without touching any application code.
 
 Example page structure:
 ```json
@@ -125,10 +123,10 @@ Example page structure:
 ]
 ```
 
-Each documentation page includes:
-- Automatic breadcrumb navigation back to documentation index
+Each information page includes:
+- Automatic breadcrumb navigation back to information index
 - Previous/Next page navigation at the bottom
-- Sidebar showing all documentation pages
+- Sidebar showing all information pages
 - Full markdown rendering (headings, code blocks, lists, links)
 - SEO-optimized metadata (title, description)
 
@@ -158,7 +156,7 @@ All store customization happens in these files:
 - **`configs/checkout.json`** – Payment method settings (enable/disable)
 - **`configs/homepage.json`** – Control which homepage sections appear and how many products to show
 - **`configs/products-listing.json`** – Set page size for products listing page (default: 18 products per page)
-- **`configs/documentation-pages.json`** – Create and manage documentation pages with markdown content
+- **`configs/information-pages.json`** – Create and manage information pages with markdown content
 
 ### How It Works
 
@@ -167,7 +165,7 @@ Instead of editing React components or TypeScript files, you simply:
 1. **Add Products**: Edit `configs/products.json` → Products appear instantly
 2. **Customize Text**: Edit `configs/locale.en.json` → All UI text updates
 3. **Toggle Features**: Edit `configs/homepage.json` → Sections show/hide
-4. **Create Docs**: Edit `configs/documentation-pages.json` → New pages available
+4. **Create Docs**: Edit `configs/information-pages.json` → New pages available
 
 **Example:** Want to hide the newsletter section and show 6 recent products?
 
@@ -193,15 +191,6 @@ This is what makes König Food perfect for small businesses and developers who w
 ---
 
 **/.env.local** – Stores sensitive environment variables and runtime configuration for your store:
-
-- **Newsletter (Mailchimp)**  
-  - `MAILCHIMP_API_KEY` – Your Mailchimp API key  
-  - `MAILCHIMP_AUDIENCE_ID` – ID of your Mailchimp Audience/List  
-  - `MAILCHIMP_SERVER_PREFIX` – Server prefix from your Mailchimp account (e.g., `us19`, `us8`)
-
-- **Google reCAPTCHA v3**  
-  - `RECAPTCHA_SECRET_KEY` – Server-side reCAPTCHA key  
-  - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` – Client-side reCAPTCHA key  
 
 - **Email Notifications (Gmail SMTP)**
   - `GMAIL_USER` – Your Gmail address (used for sending all emails AND receiving admin notifications)
@@ -348,8 +337,6 @@ vercel
    MAILCHIMP_API_KEY
    MAILCHIMP_AUDIENCE_ID
    MAILCHIMP_SERVER_PREFIX
-   RECAPTCHA_SECRET_KEY
-   NEXT_PUBLIC_RECAPTCHA_SITE_KEY
    ```
 6. Click "Deploy"
 
@@ -367,19 +354,6 @@ All three platforms require the same environment variables. Add these in your de
 ```
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=your-app-password
-```
-
-**Required for Newsletter (MailChimp):**
-```
-MAILCHIMP_API_KEY=your-api-key
-MAILCHIMP_AUDIENCE_ID=your-audience-id
-MAILCHIMP_SERVER_PREFIX=us19
-```
-
-**Required for Contact Form (Google reCAPTCHA v3):**
-```
-RECAPTCHA_SECRET_KEY=your-secret-key
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-site-key
 ```
 
 **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Keep sensitive keys (like `GMAIL_APP_PASSWORD`) without this prefix.
@@ -403,7 +377,7 @@ After deploying to any platform:
    - Verify category URLs like `/products/wordpress-themes` work
 
 4. **Review Documentation:**
-   - Check `/documentation` page loads
+   - Check `/information` page loads
    - Test navigation between doc pages
 
 ---
