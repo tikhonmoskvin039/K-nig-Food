@@ -11,6 +11,10 @@ const handler = NextAuth({
     }),
   ],
 
+  session: {
+    strategy: "jwt",
+  },
+
   callbacks: {
     async signIn({ user, profile }) {
       const email = user.email || profile?.email;
