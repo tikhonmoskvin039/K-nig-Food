@@ -65,7 +65,8 @@
     { "label": "Товары", "href": "/products" },
     { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
-    { "label": "Контакты", "href": "/contact" }
+    { "label": "Контакты", "href": "/contact" },
+    { "label": "Сотрудникам", "href": "/admin/login" }
   ],
   "footerLinks": [
     { "label": "Главная", "href": "/" },
