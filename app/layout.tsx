@@ -4,6 +4,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";
 import { Toaster } from "sonner";
+import AuthProvider from "./providers/SessionProvider";
+import { Suspense } from "react";
+import GlobalLoader from "./components/GlobalLoader";
 
 // Load two fonts: one for headings, one for body
 const roboto = Roboto({
@@ -34,12 +37,16 @@ export default function RootLayout({
           ${manrope.variable}
         `}
       >
-        <LocalizationProvider>
-          <Header />
-          <div className="pt-(--header-height)">{children}</div>
-          <Footer />
-          <Toaster position="top-right" richColors />
-        </LocalizationProvider>
+        <Suspense fallback={<GlobalLoader />}>
+          <AuthProvider>
+            <LocalizationProvider>
+              <Header />
+              <div className="pt-(--header-height)">{children}</div>
+              <Footer />
+              <Toaster position="top-right" richColors />
+            </LocalizationProvider>
+          </AuthProvider>
+        </Suspense>
       </body>
     </html>
   );

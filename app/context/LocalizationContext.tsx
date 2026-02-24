@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import GlobalLoader from "../components/GlobalLoader";
 
 // Define Localization Structure
 interface LocalizationData {
@@ -69,7 +70,7 @@ export function LocalizationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   if (!localization) {
-    return <p className="text-center text-gray-600">Loading...</p>; // Show loading state while fetching
+    return <GlobalLoader />; // Show loading state while fetching
   }
 
   return <LocalizationContext.Provider value={localization}>{children}</LocalizationContext.Provider>;
