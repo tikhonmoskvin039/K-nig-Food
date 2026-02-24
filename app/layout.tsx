@@ -37,16 +37,16 @@ export default function RootLayout({
           ${manrope.variable}
         `}
       >
-        <Suspense fallback={<GlobalLoader />}>
-          <AuthProvider>
-            <LocalizationProvider>
-              <Header />
+        <AuthProvider>
+          <LocalizationProvider>
+            <Header />
+            <Suspense fallback={<GlobalLoader />}>
               <div className="pt-(--header-height)">{children}</div>
-              <Footer />
-              <Toaster position="top-right" richColors />
-            </LocalizationProvider>
-          </AuthProvider>
-        </Suspense>
+            </Suspense>
+            <Footer />
+            <Toaster position="top-right" richColors />
+          </LocalizationProvider>
+        </AuthProvider>
       </body>
     </html>
   );
