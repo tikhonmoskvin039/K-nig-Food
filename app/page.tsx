@@ -5,7 +5,6 @@ import HomepageBanner from "./components/homepage/HomepageBanner";
 import RecentProducts from "./components/homepage/RecentProducts";
 import BrandStory from "./components/homepage/BrandStory";
 import Testimonials from "./components/homepage/Testimonials";
-import NewsletterSignup from "./components/homepage/NewsletterSignup";
 import Brands from "./components/homepage/Brands";
 
 const localeData = getLocalization();
@@ -27,7 +26,6 @@ export default function Home() {
       )}
       {homepageSettings.brandStory.enabled && <BrandStory />}
       {homepageSettings.testimonials.enabled && <Testimonials />}
-      {homepageSettings.newsletter.enabled && <NewsletterSignup />}
       {homepageSettings.brands.enabled && <Brands />}
     </main>
   );

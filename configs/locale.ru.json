@@ -106,7 +106,7 @@
     "banner": {
       "title": "Добро пожаловать в König Food",
       "subtitle": "Готовые блюда по рецептам известных поваров.",
-      "buttonText": "Начать сейчас",
+      "buttonText": "Перейти к меню",
       "imagePath": "/homepage-banner.jpg",
       "ctaLink": "/products"
     },
