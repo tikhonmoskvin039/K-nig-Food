@@ -152,7 +152,7 @@ When you use König Food, the entire application codebase (components, pages, ut
 All store customization happens in these files:
 
 - **`configs/products.json`** – Your entire product catalog (add, edit, remove products)
-- **`configs/locale.en.json`** – All text content, labels, contact info, navigation, pages
+- **`configs/locale.(en/ru).json`** – All text content, labels, contact info, navigation, pages
 - **`configs/checkout.json`** – Payment method settings (enable/disable)
 - **`configs/homepage.json`** – Control which homepage sections appear and how many products to show
 - **`configs/products-listing.json`** – Set page size for products listing page (default: 18 products per page)

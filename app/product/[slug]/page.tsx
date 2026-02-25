@@ -63,9 +63,9 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
 
   // Check if there's a valid sale price different from regular price
   const hasSalePrice =
-    product.SalePrice &&
-    product.SalePrice.trim() !== "" &&
-    parseFloat(product.SalePrice) !== parseFloat(product.RegularPrice);
+    product.SalePrice !== null &&
+    product.SalePrice !== undefined &&
+    product.SalePrice !== product.RegularPrice;
 
   // Build SSR UI
   const priceBlock = hasSalePrice ? (
@@ -100,6 +100,14 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
           {/* RIGHT COLUMN: DETAILS */}
           <div>
             <p className="text-lg text-gray-700">{product.ShortDescription}</p>
+
+            {/* PORTION INFO */}
+            {product.PortionWeight && product.PortionUnit && (
+              <p className="mt-2 text-sm text-gray-500">
+                Выход: {product.PortionWeight} {product.PortionUnit}
+              </p>
+            )}
+
             <div className="mt-4">{priceBlock}</div>
 
             <div className="mt-4">

@@ -47,7 +47,7 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
       {/* Product Grid */}
       <div className="mt-6 min-h-[calc(100vh-var(--header-height-plus-top-section-height))]">
         {displayedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
             {displayedProducts.map((product) => (
               <ProductCard key={product.ID} product={product} />
             ))}

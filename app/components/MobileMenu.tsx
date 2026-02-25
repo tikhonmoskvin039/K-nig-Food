@@ -49,7 +49,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           // если это пункт "Сотрудникам"
           if (href === "/admin/login") {
             finalHref = session ? "/admin" : "/admin/login";
-            label = session ? "Админка" : "Сотрудникам";
+            label = session ? "Администраторам" : "Сотрудникам";
           }
 
           return (

@@ -31,50 +31,64 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden transition hover:scale-105 flex flex-col h-full">
       {/* Product Image with Link to Product Page */}
+      {/* Product Image with Overlay Portion Info */}
       <Link href={`/product/${product.Slug}`}>
-        <div className="relative w-full aspect-4/3">
+        <div className="relative w-full aspect-4/3 group">
           <Image
             src={product.FeatureImageURL}
             alt={product.Title}
             fill
-            className="object-cover rounded-t-lg"
+            className="object-cover rounded-t-lg transition group-hover:scale-105"
           />
+
+          {/* Portion + Unit Badge */}
+          {product.PortionUnit && (
+            <div className="absolute bottom-2 right-2 bg-gray-700/40 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+              {product.PortionWeight} {product.PortionUnit}
+            </div>
+          )}
         </div>
       </Link>
 
       {/* Product Info */}
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="text-xl font-semibold text-gray-900 truncate">
-          <Link
-            href={`/product/${product.Slug}`}
-            className="hover:text-gray-600"
-          >
-            {product.Title}
-          </Link>
-        </h3>
+        <div className="flex flex-col flex-1 h-full">
+          <h3 className="text-xl font-semibold text-gray-900 truncate">
+            <Link
+              href={`/product/${product.Slug}`}
+              className="hover:text-gray-600"
+            >
+              {product.Title}
+            </Link>
+          </h3>
 
-        <p className="text-gray-700 mt-2 text-sm line-clamp-2">
-          {product.ShortDescription}
-        </p>
+          <p className="text-gray-700 mt-2 text-sm line-clamp-2">
+            {product.ShortDescription}
+          </p>
 
-        <div className="mt-3">
-          {hasDiscount ? (
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-red-600">
-                {product.SalePrice}
-                {currencySymbol}
-              </span>
-              <span className="text-gray-500 line-through">
+          {/* Spacer pushes price block down */}
+          <div className="grow" />
+
+          {/* Price block */}
+          <div className="mt-3">
+            {hasDiscount ? (
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-red-600">
+                  {product.SalePrice}
+                  {currencySymbol}
+                </span>
+                <span className="text-gray-500 line-through">
+                  {product.RegularPrice}
+                  {currencySymbol}
+                </span>
+              </div>
+            ) : (
+              <span className="text-lg font-bold text-gray-900">
                 {product.RegularPrice}
                 {currencySymbol}
               </span>
-            </div>
-          ) : (
-            <span className="text-lg font-bold text-gray-900">
-              {product.RegularPrice}
-              {currencySymbol}
-            </span>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="mt-auto flex flex-col gap-2 pt-4">

@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
     // 4. Enrich cart items with download URLs for email
     // We need to populate them from products.json before sending emails
     const enrichedCartItems = body.cartItems.map((item) => {
-      const product = allProducts.find((p) => p.ID === item.ID);
       return {
         ...item,
       };

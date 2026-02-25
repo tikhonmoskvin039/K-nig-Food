@@ -5,6 +5,10 @@
     "Slug": "pasta-carbonara",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 350,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Горячие блюда", "Итальянская кухня", "Паста"],
     "FeatureImageURL": "/products/carbonara.jpg",
     "ProductImageGallery": [
@@ -23,6 +27,10 @@
     "Slug": "salmon-poke-bowl",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 400,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Здоровое питание", "Боулы", "Рыба"],
     "FeatureImageURL": "/products/poke.jpg",
     "ProductImageGallery": ["/products/poke.jpg", "/products/poke.jpg"],
@@ -38,6 +46,10 @@
     "Slug": "bbq-beef-burger",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 300,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Бургеры", "Фастфуд", "Говядина"],
     "FeatureImageURL": "/products/burger.jpg",
     "ProductImageGallery": ["/products/burger.jpg", "/products/burger.jpg"],
@@ -53,13 +65,17 @@
     "Slug": "philadelphia-sushi-set",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 600,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Суши", "Японская кухня", "Сеты"],
     "FeatureImageURL": "/products/sushi.jpg",
     "ProductImageGallery": ["/products/sushi.jpg", "/products/sushi.jpg"],
     "ShortDescription": "Набор роллов Филадельфия с лососем и сливочным сыром.",
     "LongDescription": "Сет включает 24 ролла Филадельфия с нежным лососем и сливочным сыром. Подаётся с соевым соусом, имбирём и васаби.",
-    "RegularPrice": "24.99",
-    "SalePrice": "21.99",
+    "RegularPrice": "750",
+    "SalePrice": "550",
     "Currency": "RUR"
   },
   {
@@ -68,6 +84,10 @@
     "Slug": "caesar-salad-chicken",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 250,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Салаты", "Здоровое питание", "Курица"],
     "FeatureImageURL": "/products/cezar.jpg",
     "ProductImageGallery": ["/products/cezar.jpg", "/products/cezar.jpg"],
@@ -83,6 +103,10 @@
     "Slug": "tom-yum-shrimp",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 400,
+    "PortionUnit": "мл",
+
     "ProductCategories": ["Супы", "Тайская кухня", "Морепродукты"],
     "FeatureImageURL": "/products/tom-yam.jpg",
     "ProductImageGallery": ["/products/tom-yam.jpg", "/products/tom-yam.jpg"],
@@ -98,6 +122,10 @@
     "Slug": "tiramisu-dessert",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 180,
+    "PortionUnit": "г",
+
     "ProductCategories": ["Десерты", "Итальянская кухня", "Сладкое"],
     "FeatureImageURL": "/products/tiramisu.jpg",
     "ProductImageGallery": ["/products/tiramisu.jpg", "/products/tiramisu.jpg"],
@@ -113,6 +141,10 @@
     "Slug": "mango-passion-lemonade",
     "Enabled": true,
     "CatalogVisible": true,
+
+    "PortionWeight": 400,
+    "PortionUnit": "мл",
+
     "ProductCategories": ["Напитки", "Холодные напитки", "Безалкогольные"],
     "FeatureImageURL": "/products/lemonade.jpg",
     "ProductImageGallery": ["/products/lemonade.jpg", "/products/lemonade.jpg"],

@@ -17,8 +17,8 @@
     "loadingProducts": "Загрузка товаров...",
     "noProductsFound": "Товары не найдены...",
     "productDetails": "Информация о товаре",
-    "products": "Меню",
-    "recentProducts": "Новые товары",
+    "products": "Наше меню",
+    "recentProducts": "Новинки",
     "addToCart": "Добавить в корзину",
     "cartEmpty": "Добавьте товары, чтобы продолжить.",
     "viewCart": "Перейти в корзину",
@@ -62,7 +62,7 @@
   },
   "menu": [
     { "label": "Главная", "href": "/" },
-    { "label": "Товары", "href": "/products" },
+    { "label": "Меню", "href": "/products" },
     { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
     { "label": "Контакты", "href": "/contact" },
@@ -70,7 +70,7 @@
   ],
   "footerLinks": [
     { "label": "Главная", "href": "/" },
-    { "label": "Товары", "href": "/products" },
+    { "label": "Меню", "href": "/products" },
     { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
     { "label": "Контакты", "href": "/contact" }

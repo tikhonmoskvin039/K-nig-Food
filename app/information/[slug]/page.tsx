@@ -63,7 +63,7 @@ export default async function DocumentationDetailPage(props: {
             href="/information"
             className="text-blue-600 hover:text-blue-800 transition-colors"
           >
-            ← Назад к документации
+            ← Назад к общей информации
           </Link>
         </nav>
 

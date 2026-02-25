@@ -1,44 +1,44 @@
 [
   {
-    "slug": "getting-started",
-    "title": "Стандарты качества",
-    "description": "Все продукты König Food имеют сертификаты соответствия стандартам качества.",
+    "slug": "quality-standards",
+    "title": "⭐ Стандарты качества",
+    "description": "Свежесть, безопасность и строгий контроль на каждом этапе.",
     "order": 1,
-    "content": "# Getting Started\n\nWelcome to König Food! This guide will help you get started with your database-free e-commerce store.\n\n## Prerequisites\n\n- Node.js 18.17 or later\n- npm or yarn package manager\n- A text editor (VS Code recommended)\n\n## Installation Steps\n\n1. Clone the repository or download the source code\n2. Navigate to the project directory\n3. Install dependencies: `npm install`\n4. Copy `.env.local.example` to `.env.local`\n5. Configure your environment variables\n6. Run the development server: `npm run dev`\n7. Open [http://localhost:3000](http://localhost:3000) in your browser\n\n## Next Steps\n\nOnce you have König Food running, you can:\n\n- Configure your products in `configs/products.json`\n- Customize site settings in `configs/locale.en.json`\n- Set up payment providers\n- Configure email settings for order notifications"
+    "content": "# ⭐ Стандарты качества\n\nВ König Food качество — это не опция, а стандарт.\n\n## 🏅 Наши гарантии\n\n✔ Сертифицированные поставщики\n✔ Только свежие ингредиенты\n✔ Ежедневный контроль кухни\n✔ Соблюдение температурных режимов\n✔ HACCP-контроль производства\n\n## 📜 Сертификаты\n\nВсе блюда соответствуют требованиям:\n\n• СанПиН\n• Технических регламентов Таможенного союза\n• Норм пищевой безопасности\n\nМы готовы предоставить подтверждающие документы по запросу.\n\n## 🔍 Контроль перед отправкой\n\nПеред доставкой каждое блюдо проверяется:\n\n✔ Соответствие заявленному весу\n✔ Свежесть и внешний вид\n✔ Правильная упаковка\n✔ Безопасность транспортировки\n\nМы отвечаем за то, что попадает на ваш стол."
   },
   {
-    "slug": "configuration",
-    "title": "Configuration Guide",
-    "description": "Learn how to configure König Food using JSON files",
+    "slug": "menu-and-dishes",
+    "title": "🍽 Меню и ассортимент",
+    "description": "Широкий выбор блюд для любого вкуса и настроения.",
     "order": 2,
-    "content": "# Configuration Guide\n\nKönig Food uses a **config-only customization approach**. All customization is done through JSON files in the `/configs` folder. You never need to modify the application code.\n\n## Configuration Files\n\n### configs/products.json\nDefines all products in your store. Each product includes:\n- Basic info (ID, Title, Description)\n- Pricing (RegularPrice, SalePrice)\n- Media (FeaturedImage, Gallery)\n- Categories and Tags\n- Download URL for virtual products\n\n### configs/locale.en.json\nControls all text content and labels:\n- Site name and tagline\n- Contact information (phone, address)\n- All UI labels and messages\n- Navigation menu items\n\n### configs/homepage.json\nControls which sections appear on the homepage:\n- Banner visibility\n- Recent products (show/hide + count)\n- Brand story section\n- Testimonials\n- Newsletter signup\n- Partner brands\n\n### configs/information-pages.json\nDefines all information pages (this information system!):\n- Page slugs and titles\n- Content for each page\n- Navigation order\n\n## Why Config-Only?\n\nThis approach provides several benefits:\n\n1. **No coding required** - Just edit JSON files\n2. **Safe updates** - Never touch application code\n3. **Easy backups** - Just backup the configs folder\n4. **Version control friendly** - Track your changes easily\n5. **Fast customization** - Change content without rebuilding"
+    "content": "# 🍽 Меню и ассортимент\n\nМы готовим с любовью и вниманием к деталям.\n\n## 🥘 Основные категории\n\n🔥 Горячие блюда  \n🥗 Салаты  \n🍲 Супы  \n🍔 Бургеры  \n🍣 Суши и роллы  \n🍰 Десерты  \n🥤 Напитки\n\n## 🆕 Обновления меню\n\nМы регулярно:\n\n• Добавляем сезонные позиции  \n• Вводим специальные предложения  \n• Тестируем новые рецепты\n\n## 📌 Прозрачность информации\n\nДля каждого блюда указаны:\n\n✔ Подробное описание  \n✔ Состав ингредиентов  \n✔ Выход (г / мл)  \n✔ Актуальная цена  \n✔ Информация об акции\n\nНикаких скрытых деталей — только честная информация."
   },
   {
-    "slug": "products-management",
-    "title": "Managing Products",
-    "description": "How to add, edit, and organize products",
+    "slug": "delivery-and-payment",
+    "title": "🚚 Доставка и оплата",
+    "description": "Быстро, удобно и безопасно.",
     "order": 3,
-    "content": "# Managing Products\n\nAll products are stored in `configs/products.json`. König Food is designed for virtual/digital products.\n\n## Product Structure\n\n```json\n{\n  \"ID\": \"unique-product-id\",\n  \"Title\": \"Product Name\",\n  \"Description\": \"Product description...\",\n  \"RegularPrice\": \"99.00\",\n  \"SalePrice\": \"79.00\",\n  \"FeaturedImage\": \"/images/products/product-image.jpg\",\n  \"Gallery\": [\"/images/products/gallery1.jpg\"],\n  \"Categories\": [\"Category Name\"],\n  \"Tags\": [\"tag1\", \"tag2\"],\n  \"Stock\": \"In Stock\",\n"
+    "content": "# 🚚 Доставка и оплата\n\n## ⏱ Доставка\n\nМы доставляем блюда по городу и ближайшим районам.\n\n📦 Минимальная сумма заказа действует согласно зоне доставки.  \n🕒 Среднее время доставки — 45–90 минут.  \n🌡 Используется термоупаковка для сохранения температуры.\n\nСтоимость рассчитывается в зависимости от района.\n\n## 💳 Способы оплаты\n\n✔ Онлайн-оплата банковской картой  \n✔ Оплата при получении  \n✔ Безналичный расчёт для корпоративных клиентов\n\nПосле оформления заказа вы получаете подтверждение."
   },
   {
-    "slug": "payment-setup",
-    "title": "Payment Setup",
-    "description": "Configure payment providers",
+    "slug": "food-safety",
+    "title": "🛡 Пищевая безопасность",
+    "description": "Мы строго соблюдаем нормы хранения и приготовления.",
     "order": 4,
-    "content": "# Payment Setup."
+    "content": "# 🛡 Пищевая безопасность\n\nБезопасность клиентов — наш главный приоритет.\n\n## ❄ Хранение\n\n✔ Раздельное хранение продуктов  \n✔ Контроль сроков годности  \n✔ Строгое соблюдение температурных режимов\n\n## 🧼 Производство\n\n✔ Ежедневная санитарная обработка кухни  \n✔ Медицинские книжки сотрудников  \n✔ Профессиональное оборудование\n\n## ⚠ Информация об аллергенах\n\nМы указываем возможное содержание аллергенов.\n\nЕсли у вас есть пищевая аллергия — обязательно сообщите об этом при оформлении заказа."
   },
   {
-    "slug": "email-setup",
-    "title": "Email Configuration",
-    "description": "Set up Gmail SMTP for order notifications",
+    "slug": "corporate-orders",
+    "title": "🏢 Корпоративные заказы",
+    "description": "Питание для офисов и мероприятий любого масштаба.",
     "order": 5,
-    "content": "# Email Configuration\n\nKönig Food uses Gmail SMTP to send order confirmation emails to customers and admin notifications.\n\n## Why Gmail?\n\n- **Free**: 500 emails per day at no cost\n- **Reliable**: Enterprise-grade delivery\n- **Simple**: Only 2 configuration values needed\n\n## Setup Steps\n\n### 1. Enable 2-Factor Authentication\n\n1. Go to [myaccount.google.com](https://myaccount.google.com)\n2. Navigate to Security\n3. Enable 2-Step Verification\n\n### 2. Generate App Password\n\n1. Go to Security > 2-Step Verification\n2. Scroll down to App passwords\n3. Select \"Mail\" and \"Other (Custom name)\"\n4. Enter \"König Food\" as the name\n5. Click Generate\n6. Copy the 16-character password\n\n### 3. Configure Environment Variables\n\nUpdate `.env.local`:\n\n```env\nGMAIL_USER=your-email@gmail.com\nGMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx\n```\n\n## How It Works\n\n- **Customer emails**: Order confirmation with download links\n- **Admin emails**: Order notification sent to the same Gmail inbox\n- **Contact form**: Submissions sent to your Gmail\n\n## Troubleshooting\n\nIf emails aren't sending:\n\n1. Verify 2FA is enabled on your Google account\n2. Use an App Password, not your regular Gmail password\n3. Check spam/junk folders\n4. Review server logs for error messages"
+    "content": "# 🏢 Корпоративные заказы\n\nМы организуем питание для:\n\n🎯 Офисных мероприятий  \n🎤 Презентаций  \n🎉 Праздников  \n🤝 Бизнес-встреч\n\n## 🌟 Наши преимущества\n\n✔ Индивидуальное меню  \n✔ Гибкие условия оплаты  \n✔ Доставка к точному времени  \n✔ Возможность крупных объёмов\n\nСвяжитесь с нами для расчёта стоимости и согласования меню."
   },
   {
-    "slug": "customization",
-    "title": "Customization Options",
-    "description": "Customize your store appearance and behavior",
+    "slug": "contacts",
+    "title": "📞 Контакты",
+    "description": "Свяжитесь с нами любым удобным способом.",
     "order": 6,
-    "content": "# Customization Options\n\n## Site Information\n\nEdit `configs/locale.en.json`:\n\n```json\n{\n  \"siteName\": \"Your Store Name\",\n  \"siteTagline\": \"Your Store Tagline\",\n  \"phone\": \"+1 234 567 890\",\n  \"address\": \"123 Main Street, City\"\n}\n```\n\n## Homepage Sections\n\nEdit `configs/homepage.json` to show/hide sections:\n\n```json\n{\n  \"banner\": { \"enabled\": true },\n  \"recentProducts\": { \"enabled\": true, \"count\": 3 },\n  \"brandStory\": { \"enabled\": true },\n  \"testimonials\": { \"enabled\": true },\n  \"newsletter\": { \"enabled\": false },\n  \"brands\": { \"enabled\": true }\n}\n```\n\n## Labels and Messages\n\nAll UI text is configurable in `configs/locale.en.json` under the `labels` section:\n\n- Button text\n- Form labels\n- Error messages\n- Success messages\n- Navigation items\n\n## Styling\n\nKönig Food uses Tailwind CSS. To customize colors and styling:\n\n1. Edit `tailwind.config.ts` for theme customization\n2. Modify component styles directly if needed\n\n## Adding Custom Pages\n\nTo add custom static pages:\n\n1. Create a new file in `/app/your-page/page.tsx`\n2. Add a link in the navigation (edit Header component)\n3. The page is automatically available at `/your-page`\n\nFor dynamic content pages (like these docs), use the JSON configuration approach!"
+    "content": "# 📞 Контакты\n\n## 📱 Телефон\n\n+7 (XXX) XXX-XX-XX\n\n## 📍 Адрес\n\nВаш город, ул. Примерная, 1\n\n## 🕒 Режим работы\n\nЕжедневно с 10:00 до 22:00\n\n## ✉ Обратная связь\n\nВы можете связаться с нами:\n\n✔ По телефону  \n✔ Через форму обратной связи  \n✔ По электронной почте\n\nМы ценим каждый отзыв ❤️"
   }
 ]
