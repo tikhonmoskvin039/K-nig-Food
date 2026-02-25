@@ -1,7 +1,18 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AdminLogin() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      router.replace("/admin");
+    }
+  }, [session, router]);
+
   return (
     <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center bg-white py-16 px-6 text-center">
       <div className="max-w-xl w-full space-y-8">

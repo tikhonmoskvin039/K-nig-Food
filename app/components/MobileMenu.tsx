@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import MiniCart from "./MiniCart";
 import { ReduxProvider } from "../providers";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 interface MenuItem {
   label: string;
@@ -56,33 +56,13 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
             <Link
               key={label}
               href={finalHref}
-              className="px-4 py-2 block text-sm md:text-base text-gray-900 hover:text-gray-700"
+              className={`px-4 py-2 block text-sm md:text-base ${session && label == "Администраторам" ?  "text-red-600 hover:text-red-800" : "text-gray-900 hover:text-gray-700"}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {label}
             </Link>
           );
         })}
-
-        {/* Employee/Admin section */}
-        {session && (
-          <>
-            <Link
-              href="/admin"
-              className="px-4 py-2 block text-sm md:text-base text-blue-600 hover:text-blue-800"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Панель сотрудников
-            </Link>
-
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="px-4 py-2 text-sm text-red-600 hover:text-red-800"
-            >
-              Выйти
-            </button>
-          </>
-        )}
 
         {!isCartOrCheckoutPage && (
           <div className="hidden md:flex md:ml-4">
