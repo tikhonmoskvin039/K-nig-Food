@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import ProductFormModal from "./ProductFormModal";
+import ConfirmModal from "../common/ConfirmModal";
 
 export default function ProductAdminPanel() {
   const [products, setProducts] = useState<DTProduct[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<DTProduct | null>(null);
 
   const [editingProduct, setEditingProduct] = useState<DTProduct | null>(null);
 
@@ -41,9 +43,14 @@ export default function ProductAdminPanel() {
     await loadProducts();
   };
 
-  const deleteProduct = async (id: string) => {
-    const filtered = products.filter((p) => p.ID !== id);
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    const filtered = products.filter((p) => p.ID !== deleteTarget.ID);
+
     await saveProducts(filtered);
+
+    setDeleteTarget(null);
   };
 
   const updateProductField = (
@@ -133,7 +140,7 @@ export default function ProductAdminPanel() {
                 </button>
 
                 <button
-                  onClick={() => deleteProduct(product.ID)}
+                  onClick={() => setDeleteTarget(product)}
                   className="px-3 py-1 bg-red-600 text-white rounded"
                 >
                   Удалить
@@ -153,6 +160,15 @@ export default function ProductAdminPanel() {
           onClose={() => setEditingProduct(null)}
         />
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Удалить товар?"
+        description={`Вы действительно хотите удалить "${deleteTarget?.Title}"? Это действие нельзя отменить.`}
+        confirmText="Удалить"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

@@ -24,6 +24,7 @@ async function getSHA() {
     owner,
     repo: repoName,
     path,
+    ref: "main",
   });
 
   // @ts-ignore
@@ -52,10 +53,28 @@ export async function GET(req: NextRequest) {
     const content = Buffer.from(res.data.content, "base64").toString();
 
     return NextResponse.json(JSON.parse(content));
-  } catch {
+  } catch (error: unknown) {
+    console.error("GITHUB GET ERROR:", error);
+
+    let message = "Getting products failed";
+    let status = undefined;
+
+    if (error instanceof Error) {
+      message = error.message;
+    }
+
+    if (typeof error === "object" && error !== null && "status" in error) {
+      // @ts-ignore — потому что GitHub SDK ошибки плохо типизированы
+      status = (error as { status?: number }).status;
+    }
+
     return NextResponse.json(
-      { error: "Failed to load products" },
-      { status: 500 }
+      {
+        error: "Update failed",
+        message,
+        status,
+      },
+      { status: 500 },
     );
   }
 }
@@ -74,9 +93,9 @@ export async function PUT(req: NextRequest) {
   try {
     const products = await req.json();
 
-    const encoded = Buffer.from(
-      JSON.stringify(products, null, 2)
-    ).toString("base64");
+    const encoded = Buffer.from(JSON.stringify(products, null, 2)).toString(
+      "base64",
+    );
 
     const sha = await getSHA();
 
@@ -91,7 +110,28 @@ export async function PUT(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("GITHUB UPDATE ERROR:", error);
+
+    let message = "Update failed";
+    let status = undefined;
+
+    if (error instanceof Error) {
+      message = error.message;
+    }
+
+    if (typeof error === "object" && error !== null && "status" in error) {
+      // @ts-ignore — потому что GitHub SDK ошибки плохо типизированы
+      status = (error as { status?: number }).status;
+    }
+
+    return NextResponse.json(
+      {
+        error: "Update failed",
+        message,
+        status,
+      },
+      { status: 500 },
+    );
   }
 }
