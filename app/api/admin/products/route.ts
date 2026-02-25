@@ -19,10 +19,21 @@ async function isAuthenticated(req: NextRequest) {
   return !!token;
 }
 
+async function getSHA() {
+  const res = await octokit.rest.repos.getContent({
+    owner,
+    repo: repoName,
+    path,
+  });
+
+  // @ts-ignore
+  return res.data.sha;
+}
+
 /*
-=========================================
-GET — получить список товаров
-=========================================
+========================
+GET — list products
+========================
 */
 export async function GET(req: NextRequest) {
   if (!(await isAuthenticated(req))) {
@@ -41,8 +52,7 @@ export async function GET(req: NextRequest) {
     const content = Buffer.from(res.data.content, "base64").toString();
 
     return NextResponse.json(JSON.parse(content));
-  } catch (error) {
-    console.error(error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to load products" },
       { status: 500 }
@@ -51,10 +61,11 @@ export async function GET(req: NextRequest) {
 }
 
 /*
-=========================================
-PUT — обновить каталог товаров
-=========================================
+========================
+POST / PUT — rewrite catalog
+========================
 */
+
 export async function PUT(req: NextRequest) {
   if (!(await isAuthenticated(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -67,7 +78,7 @@ export async function PUT(req: NextRequest) {
       JSON.stringify(products, null, 2)
     ).toString("base64");
 
-    const sha = await getFileSHA();
+    const sha = await getSHA();
 
     await octokit.rest.repos.createOrUpdateFileContents({
       owner,
@@ -77,34 +88,10 @@ export async function PUT(req: NextRequest) {
       content: encoded,
       branch: "main",
       sha,
-      committer: {
-        name: "Admin Bot",
-        email: process.env.GITHUB_USER_EMAIL || "admin@bot.local",
-      },
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Update products error:", error);
-    return NextResponse.json(
-      { error: "Update failed" },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
-}
-
-/*
-=========================================
-Получить SHA файла для GitHub API
-=========================================
-*/
-async function getFileSHA(): Promise<string> {
-  const res = await octokit.rest.repos.getContent({
-    owner,
-    repo: repoName,
-    path,
-  });
-
-  // @ts-ignore
-  return res.data.sha;
 }

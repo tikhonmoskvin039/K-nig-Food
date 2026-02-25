@@ -16,13 +16,14 @@ export default function AdminLogin() {
   return (
     <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center bg-white py-16 px-6 text-center">
       <div className="max-w-xl w-full space-y-8">
-        <h1 className="text-3xl md:text-5xl font-bold p-3 text-gray-900 leading-tight">
-          Авторизация
-        </h1>
+        <div>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 text-gray-900 leading-tight">
+            Авторизация
+          </h1>
+        </div>
 
         <p className="text-gray-600 text-base md:text-lg">
-          Вход в административную панель через аккаунт GitHub. Только для
-          сотрудников.
+          Вход в административную панель через oAuth. Только для сотрудников.
         </p>
 
         <button
@@ -37,7 +38,7 @@ export default function AdminLogin() {
             w-full sm:w-auto
           "
         >
-          Авторизоваться через GitHub
+          Войти
         </button>
       </div>
     </section>
