@@ -1,22 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProductFormModal from "./ProductFormModal";
 
 export default function ProductAdminPanel() {
   const [products, setProducts] = useState<DTProduct[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const [editingProduct, setEditingProduct] = useState<DTProduct | null>(null);
 
-  /*
-  =====================
-  Load Products
-  =====================
-  */
+  const isNew = !products.some((p) => p.ID === editingProduct?.ID);
+
   const loadProducts = async () => {
     try {
-      setLoading(true);
-
       const res = await fetch("/api/admin/products", {
         credentials: "include",
       });
@@ -27,8 +22,6 @@ export default function ProductAdminPanel() {
       setProducts(data);
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -36,12 +29,6 @@ export default function ProductAdminPanel() {
     loadProducts();
   }, []);
 
-  /*
-  =====================
-  Save Products Catalog
-  Rewrite JSON file
-  =====================
-  */
   const saveProducts = async (updated: DTProduct[]) => {
     await fetch("/api/admin/products", {
       method: "PUT",
@@ -54,21 +41,11 @@ export default function ProductAdminPanel() {
     await loadProducts();
   };
 
-  /*
-  =====================
-  Delete Product
-  =====================
-  */
   const deleteProduct = async (id: string) => {
     const filtered = products.filter((p) => p.ID !== id);
     await saveProducts(filtered);
   };
 
-  /*
-  =====================
-  Edit Product (Simple Inline Editor)
-  =====================
-  */
   const updateProductField = (
     field: keyof DTProduct,
     value: string | number | boolean,
@@ -84,23 +61,15 @@ export default function ProductAdminPanel() {
   const saveEdit = async () => {
     if (!editingProduct) return;
 
-    const updated = products.map((p) =>
-      p.ID === editingProduct.ID ? editingProduct : p,
-    );
+    const exists = products.some((p) => p.ID === editingProduct.ID);
+
+    const updated = exists
+      ? products.map((p) => (p.ID === editingProduct.ID ? editingProduct : p))
+      : [...products, editingProduct];
 
     await saveProducts(updated);
     setEditingProduct(null);
   };
-
-  /*
-  =====================
-  Render
-  =====================
-  */
-
-  if (loading) {
-    return <p className="text-gray-500">Загрузка каталога...</p>;
-  }
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
@@ -175,52 +144,14 @@ export default function ProductAdminPanel() {
         </tbody>
       </table>
 
-      {/* EDIT MODAL */}
       {editingProduct && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-6">
-          <div className="bg-white p-6 rounded-xl w-full max-w-2xl space-y-4">
-            <input
-              className="w-full border p-2 rounded"
-              placeholder="Название"
-              value={editingProduct.Title}
-              onChange={(e) => updateProductField("Title", e.target.value)}
-            />
-
-            <input
-              className="w-full border p-2 rounded"
-              placeholder="Цена"
-              value={editingProduct.RegularPrice}
-              onChange={(e) =>
-                updateProductField("RegularPrice", e.target.value)
-              }
-            />
-
-            <input
-              className="w-full border p-2 rounded"
-              placeholder="Порция"
-              value={editingProduct.PortionWeight}
-              onChange={(e) =>
-                updateProductField("PortionWeight", Number(e.target.value))
-              }
-            />
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                onClick={() => setEditingProduct(null)}
-                className="px-4 py-2 border rounded"
-              >
-                Отмена
-              </button>
-
-              <button
-                onClick={saveEdit}
-                className="px-4 py-2 bg-green-600 text-white rounded"
-              >
-                Сохранить
-              </button>
-            </div>
-          </div>
-        </div>
+        <ProductFormModal
+          product={editingProduct}
+          isNew={isNew}
+          onChange={updateProductField}
+          onSave={saveEdit}
+          onClose={() => setEditingProduct(null)}
+        />
       )}
     </div>
   );
