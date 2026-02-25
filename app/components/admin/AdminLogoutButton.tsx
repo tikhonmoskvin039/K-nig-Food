@@ -1,14 +1,44 @@
 "use client";
 
+import { useState } from "react";
 import { signOut } from "next-auth/react";
+import ConfirmModal from "../common/ConfirmModal";
 
 export function AdminLogoutButton() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+
+      await signOut({
+        callbackUrl: "/admin/login",
+      });
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+    }
+  };
+
   return (
-    <button
-      onClick={() => signOut({ callbackUrl: "/admin/login" })}
-      className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition"
-    >
-      Выйти
-    </button>
+    <>
+      <button
+        onClick={() => setConfirmOpen(true)}
+        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition"
+      >
+        Выйти
+      </button>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Выход из системы"
+        description="Вы уверены, что хотите выйти? Все несохранённые данные будут потеряны."
+        confirmText={loading ? "Выход..." : "Выйти"}
+        cancelText="Отмена"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   );
 }
