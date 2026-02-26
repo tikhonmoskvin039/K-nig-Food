@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import MobileMenu from "./MobileMenu";
@@ -10,6 +10,35 @@ export default function Header() {
   const content = getLocalization();
 
   const [visible, setVisible] = useState(true);
+  const headerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const updateHeaderHeightVar = () => {
+      const header = headerRef.current;
+      if (!header) return;
+
+      const height = Math.ceil(header.getBoundingClientRect().height);
+      if (height <= 0) return;
+
+      document.documentElement.style.setProperty("--header-height", `${height}px`);
+    };
+
+    updateHeaderHeightVar();
+
+    const rafId = window.requestAnimationFrame(updateHeaderHeightVar);
+    const resizeObserver = new ResizeObserver(updateHeaderHeightVar);
+    if (headerRef.current) {
+      resizeObserver.observe(headerRef.current);
+    }
+
+    window.addEventListener("resize", updateHeaderHeightVar);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateHeaderHeightVar);
+    };
+  }, []);
 
   useEffect(() => {
     let lastScroll = 0;
@@ -37,7 +66,10 @@ export default function Header() {
       transition={{ duration: 0.25 }}
       className="fixed top-0 left-0 w-full z-50"
     >
-      <header className="border-b border-slate-200/80 bg-white/90 text-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
+      <header
+        ref={headerRef}
+        className="border-b border-slate-200/80 bg-white/90 text-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm"
+      >
         <div className="app-shell py-3.5 flex justify-between items-center gap-4">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold truncate">
