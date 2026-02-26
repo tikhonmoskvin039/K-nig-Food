@@ -2,6 +2,12 @@
 
 import { useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
+import {
+  readFileAsDataUrl,
+  sanitizeNumericString,
+  slugifyProductTitle,
+  validateJpgFile,
+} from "../../services/admin/productForm";
 
 type Props = {
   product: DTProduct;
@@ -33,78 +39,6 @@ export default function ProductForm({
 }: Props) {
   const [fileErrors, setFileErrors] = useState<FileErrorState>({});
   const [categoryToAdd, setCategoryToAdd] = useState("");
-
-  const slugify = (value: string) => {
-    const map: Record<string, string> = {
-      а: "a",
-      б: "b",
-      в: "v",
-      г: "g",
-      д: "d",
-      е: "e",
-      ё: "e",
-      ж: "zh",
-      з: "z",
-      и: "i",
-      й: "y",
-      к: "k",
-      л: "l",
-      м: "m",
-      н: "n",
-      о: "o",
-      п: "p",
-      р: "r",
-      с: "s",
-      т: "t",
-      у: "u",
-      ф: "f",
-      х: "h",
-      ц: "ts",
-      ч: "ch",
-      ш: "sh",
-      щ: "sch",
-      ъ: "",
-      ы: "y",
-      ь: "",
-      э: "e",
-      ю: "yu",
-      я: "ya",
-    };
-
-    return value
-      .trim()
-      .toLowerCase()
-      .split("")
-      .map((char) => map[char] ?? char)
-      .join("")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .replace(/-+/g, "-");
-  };
-
-  const sanitizeNumericString = (value: string) => value.replace(/[^\d]/g, "");
-
-  const validateJpgFile = (file: File): string | null => {
-    const isJpg = file.name.toLowerCase().endsWith(".jpg");
-
-    if (!isJpg) {
-      return `Формат файла "${file.name}" должен быть .jpg`;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      return `Файл "${file.name}" больше 5 МБ`;
-    }
-
-    return null;
-  };
-
-  const readFileAsDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(new Error("File read failed"));
-      reader.readAsDataURL(file);
-    });
 
   const handleFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -251,8 +185,8 @@ export default function ProductForm({
   const saveDisabled = hasErrors || isSaving || !canSave;
 
   const handleTitleChange = (value: string) => {
-    const currentAutoSlug = slugify(product.Title);
-    const nextAutoSlug = slugify(value);
+    const currentAutoSlug = slugifyProductTitle(product.Title);
+    const nextAutoSlug = slugifyProductTitle(value);
 
     onChange("Title", value);
     if (!product.Slug || product.Slug === currentAutoSlug) {

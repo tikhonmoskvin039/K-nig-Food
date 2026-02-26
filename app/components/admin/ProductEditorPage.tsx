@@ -18,44 +18,13 @@ import {
   SAFE_FUNCTION_BODY_LIMIT_BYTES,
   VERCEL_FUNCTION_BODY_LIMIT_BYTES,
 } from "../../lib/payloadSize";
+import { cloneProduct, createEmptyProduct } from "../../services/admin/productEditor";
+import { readApiErrorMessage } from "../../services/shared/http";
 
 type Props = {
   mode: "create" | "edit";
   productId?: string;
 };
-
-function createEmptyProduct(): DTProduct {
-  return {
-    ID: crypto.randomUUID(),
-    Title: "",
-    Slug: "",
-    Enabled: true,
-    CatalogVisible: true,
-    PortionWeight: 0,
-    PortionUnit: "г",
-    ProductCategories: [],
-    FeatureImageURL: "",
-    ProductImageGallery: [],
-    ShortDescription: "",
-    LongDescription: "",
-    RegularPrice: "",
-    SalePrice: "",
-    Currency: "RUR",
-    CreatedAt: "",
-    UpdatedAt: "",
-  };
-}
-
-function cloneProduct(product: DTProduct): DTProduct {
-  return {
-    ...product,
-    Currency: "RUR",
-    CreatedAt: product.CreatedAt || "",
-    UpdatedAt: product.UpdatedAt || "",
-    ProductCategories: [...(product.ProductCategories || [])],
-    ProductImageGallery: [...(product.ProductImageGallery || [])],
-  };
-}
 
 export default function ProductEditorPage({ mode, productId }: Props) {
   const router = useRouter();
@@ -209,20 +178,10 @@ export default function ProductEditorPage({ mode, productId }: Props) {
           );
         }
 
-        let message = "Не удалось сохранить товар";
-        try {
-          const payload = (await res.json()) as {
-            message?: string;
-            error?: string;
-          };
-          if (payload.message) {
-            message = payload.message;
-          } else if (payload.error) {
-            message = payload.error;
-          }
-        } catch {
-          // ignore
-        }
+        const message = await readApiErrorMessage(
+          res,
+          "Не удалось сохранить товар",
+        );
         throw new Error(message);
       }
 
