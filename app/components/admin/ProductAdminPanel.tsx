@@ -12,6 +12,12 @@ import {
   popAdminProductToast,
   shouldShowAdminPropagationWarning,
 } from "../../lib/adminProductToast";
+import {
+  formatBytes,
+  getJsonPayloadSizeBytes,
+  SAFE_FUNCTION_BODY_LIMIT_BYTES,
+  VERCEL_FUNCTION_BODY_LIMIT_BYTES,
+} from "../../lib/payloadSize";
 
 type EnabledFilter = "all" | "enabled" | "disabled";
 type VisibleFilter = "all" | "visible" | "hidden";
@@ -185,6 +191,14 @@ export default function ProductAdminPanel() {
       error: string;
     },
   ) => {
+    const payloadBytes = getJsonPayloadSizeBytes(updated);
+    if (payloadBytes > SAFE_FUNCTION_BODY_LIMIT_BYTES) {
+      toast.error("Слишком большой объем данных для сохранения", {
+        description: `Размер запроса: ${formatBytes(payloadBytes)}. Лимит Vercel: ${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}. Уменьшите размер/количество изображений.`,
+      });
+      return false;
+    }
+
     setIsSaving(true);
 
     if (shouldShowAdminPropagationWarning()) {
@@ -206,6 +220,12 @@ export default function ProductAdminPanel() {
       });
 
       if (!res.ok) {
+        if (res.status === 413) {
+          throw new Error(
+            `Размер запроса превышает лимит Vercel (${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}).`,
+          );
+        }
+
         let message = "Не удалось сохранить изменения";
         try {
           const payload = (await res.json()) as {
@@ -516,8 +536,7 @@ export default function ProductAdminPanel() {
     });
   };
 
-  const filterControlClass =
-    "w-full border border-gray-300 bg-white/90 rounded-lg px-3 py-2 text-sm text-gray-800 outline-none transition focus:ring-2 focus:ring-amber-300 focus:border-amber-400";
+  const filterControlClass = "form-control bg-white/90";
   const filterControlActiveClass =
     "border-rose-500 shadow-[0_0_0_1px_rgba(244,63,94,0.45)] animate-[pulse_2.8s_ease-in-out_infinite]";
   const filterLabelClass =
@@ -538,14 +557,14 @@ export default function ProductAdminPanel() {
     `${filterControlClass} ${isActive ? filterControlActiveClass : ""}`;
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
+    <div className="surface-card p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-xl md:text-2xl font-bold">Каталог товаров</h2>
         <ProductCreateControl />
       </div>
 
       {!isLoading && products.length > 0 && (
-        <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 shadow-sm p-4 md:p-5 space-y-4">
+        <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-4 md:p-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-sm md:text-base font-semibold text-gray-800">
               Фильтры и поиск
@@ -725,7 +744,7 @@ export default function ProductAdminPanel() {
             type="button"
             onClick={() => setIsBulkDeleteOpen(true)}
             disabled={selectedProductsCount === 0 || isSaving}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded disabled:opacity-50"
+            className="btn-danger"
           >
             Удалить выбранные ({selectedProductsCount})
           </button>
@@ -771,13 +790,13 @@ export default function ProductAdminPanel() {
                     <div className="mt-4 flex flex-col gap-2">
                       <ProductEditControl
                         productId={product.ID}
-                        className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded inline-flex items-center justify-center text-center"
+                        className="w-full btn-secondary text-center"
                       />
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(product)}
                         disabled={isSaving}
-                        className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded disabled:opacity-50"
+                        className="w-full btn-danger"
                       >
                         Удалить
                       </button>
@@ -796,7 +815,7 @@ export default function ProductAdminPanel() {
                 ))}
               </div>
 
-              <div className="hidden md:block overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto table-shell">
                 <table className="w-full min-w-[1040px] table-fixed">
                   <thead className="bg-gray-100">
                     <tr>
@@ -872,7 +891,7 @@ export default function ProductAdminPanel() {
                               type="button"
                               onClick={() => setDeleteTarget(product)}
                               disabled={isSaving}
-                              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded disabled:opacity-50"
+                              className="btn-danger px-3 py-1.5"
                             >
                               Удалить
                             </button>
@@ -906,7 +925,7 @@ export default function ProductAdminPanel() {
                     type="button"
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50"
+                    className="btn-secondary px-3 py-1.5"
                   >
                     Назад
                   </button>
@@ -917,9 +936,9 @@ export default function ProductAdminPanel() {
                         key={page}
                         type="button"
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1.5 rounded border ${
+                        className={`btn px-3 py-1.5 border ${
                           page === currentPage
-                            ? "bg-gray-800 text-white border-gray-800"
+                            ? "bg-amber-600 text-white border-amber-600"
                             : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
                         }`}
                       >
@@ -932,7 +951,7 @@ export default function ProductAdminPanel() {
                     type="button"
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 rounded border border-gray-300 bg-white text-gray-800 disabled:opacity-50"
+                    className="btn-secondary px-3 py-1.5"
                   >
                     Вперед
                   </button>

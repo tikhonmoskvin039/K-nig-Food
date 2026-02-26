@@ -27,10 +27,10 @@ export default function Testimonials() {
   };  
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-6 text-center">
+    <section className="section-wrap">
+      <div className="app-shell text-center">
         {/* Section Title */}
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-12">
+        <h2 className="section-title mb-12">
           {homepage.testimonialsTitle || "What Our Customers Say"}
         </h2>
 
@@ -39,7 +39,7 @@ export default function Testimonials() {
           {homepage.testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-gray-100 p-8 rounded-lg shadow-md flex flex-col items-center text-center transition-transform transform hover:scale-105"
+              className="surface-card-soft p-8 flex flex-col items-center text-center transition-transform hover:-translate-y-0.5"
             >
               {/* User Avatar */}
               <Image

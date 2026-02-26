@@ -16,9 +16,9 @@ export default function AboutPage() {
   if (!about) return null;
 
   return (
-    <section className="min-h-[calc(100vh-var(--header-height))] flex items-center bg-white py-16">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 items-start">
+    <section className="section-wrap min-h-[calc(100vh-var(--header-height))] flex items-center">
+      <div className="app-shell">
+        <div className="surface-card p-5 md:p-8 grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 md:gap-10 items-start">
           {/* Feature Image */}
           <div className="relative w-full h-64 md:h-96">
             <Image
@@ -32,10 +32,10 @@ export default function AboutPage() {
 
           {/* Text Content */}
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            <h1 className="page-title mb-4">
               {about.title}
             </h1>
-            <p className="text-lg text-gray-700 whitespace-pre-line">
+            <p className="text-lg text-slate-700 whitespace-pre-line leading-relaxed">
               {about.content}
             </p>
           </div>

@@ -88,13 +88,13 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
   );
 
   return (
-    <section className="py-12 bg-stone-100 min-h-[calc(100vh-var(--header-height))]">
-      <div className="max-w-6xl mx-auto px-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800">
+    <section className="section-wrap min-h-[calc(100vh-var(--header-height))]">
+      <div className="app-shell">
+        <h1 className="page-title text-center">
           {product.Title}
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="surface-card p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {/* LEFT COLUMN: IMAGES */}
           <ProductLightbox
             images={[product.FeatureImageURL, ...product.ProductImageGallery]}
@@ -102,7 +102,7 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
 
           {/* RIGHT COLUMN: DETAILS */}
           <div>
-            <p className="text-lg text-gray-700">{product.ShortDescription}</p>
+            <p className="text-lg text-slate-700">{product.ShortDescription}</p>
 
             {/* PORTION INFO */}
             {product.PortionWeight && product.PortionUnit && (
@@ -120,11 +120,13 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
         </div>
 
         {/* LONG DESCRIPTION */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-semibold text-gray-800">
+        <div className="mt-8 surface-card p-5 md:p-6">
+          <h2 className="section-title">
             {localeData.labels.productDetails || "Информация о товаре"}
           </h2>
-          <p className="text-gray-700 mt-4">{product.LongDescription}</p>
+          <p className="text-slate-700 mt-4 leading-relaxed">
+            {product.LongDescription}
+          </p>
         </div>
       </div>
     </section>

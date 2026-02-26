@@ -49,7 +49,7 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
         {isLoading ? (
           <GlobalLoader mode="inline" className="h-full min-h-[320px]" />
         ) : displayedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
             {displayedProducts.map((product) => (
               <ProductCard key={product.ID} product={product} />
             ))}
@@ -65,14 +65,17 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="mt-8 flex justify-center space-x-2">
+        <div className="mt-8 flex justify-center flex-wrap gap-2">
           {/* Page Numbers */}
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded-md border transition-all 
-                ${currentPage === i + 1 ? "bg-gray-800 text-white" : "bg-white text-gray-800 hover:bg-gray-200"}`}
+              className={`btn px-3 min-w-9 ${
+                currentPage === i + 1
+                  ? "bg-amber-600 text-white"
+                  : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
             >
               {i + 1}
             </button>

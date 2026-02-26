@@ -3,6 +3,7 @@ import { Octokit } from "octokit";
 import { getToken } from "next-auth/jwt";
 import { invalidateProductsCache } from "../../../lib/githubStorage";
 import { setRuntimeProducts } from "../../../lib/runtimeProductsStore";
+import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "../../../lib/payloadSize";
 
 const repo = process.env.GITHUB_REPO!;
 const [owner, repoName] = repo.split("/");
@@ -109,11 +110,22 @@ export async function PUT(req: NextRequest) {
 
   try {
     const bodyText = await req.text();
+    const bodyBytes = Buffer.byteLength(bodyText, "utf8");
 
     if (!bodyText.trim()) {
       return NextResponse.json(
         { error: "Update failed", message: "Empty request body" },
         { status: 400 },
+      );
+    }
+
+    if (bodyBytes > VERCEL_FUNCTION_BODY_LIMIT_BYTES) {
+      return NextResponse.json(
+        {
+          error: "Payload too large",
+          message: `Request body is too large for Vercel Functions limit (${Math.round(VERCEL_FUNCTION_BODY_LIMIT_BYTES / 1024 / 1024 * 10) / 10} MB).`,
+        },
+        { status: 413 },
       );
     }
 

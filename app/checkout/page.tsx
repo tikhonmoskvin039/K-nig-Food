@@ -8,8 +8,8 @@ export default function CheckoutPage() {
   return (
     <ReduxProvider>
       <CheckoutProvider>
-        <section className="py-10 px-4 md:px-8 bg-gray-50">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section className="section-wrap min-h-[calc(100vh-var(--header-height))]">
+          <div className="app-shell grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Left Column - Main Forms */}
             <div className="lg:col-span-2 space-y-8">
               <OrderInfoInitializer />

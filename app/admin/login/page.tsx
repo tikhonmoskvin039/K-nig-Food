@@ -14,29 +14,21 @@ export default function AdminLogin() {
   }, [session, router]);
 
   return (
-    <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center bg-white py-16 px-6 text-center">
-      <div className="max-w-xl w-full space-y-8">
+    <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center py-16 px-4 text-center">
+      <div className="surface-card max-w-xl w-full p-6 md:p-8 space-y-6">
         <div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 text-gray-900 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 text-slate-900 leading-tight">
             Авторизация
           </h1>
         </div>
 
-        <p className="text-gray-600 text-base md:text-lg">
+        <p className="text-slate-600 text-base md:text-lg">
           Вход в административную панель через oAuth. Только для сотрудников.
         </p>
 
         <button
           onClick={() => signIn("github", { callbackUrl: "/admin" })}
-          className="
-            bg-white text-gray-600
-            hover:bg-gray-200 hover:text-gray-800
-            px-8 py-4 rounded-full
-            text-lg md:text-xl font-bold
-            shadow-lg transition-transform
-            hover:scale-105 md:hover:scale-110
-            w-full sm:w-auto
-          "
+          className="btn-primary text-lg md:text-xl px-8 py-3 w-full sm:w-auto"
         >
           Войти
         </button>

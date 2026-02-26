@@ -25,7 +25,7 @@ export function AdminLogoutButton() {
     <>
       <button
         onClick={() => setConfirmOpen(true)}
-        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition"
+        className="btn-danger px-6"
       >
         Выйти
       </button>

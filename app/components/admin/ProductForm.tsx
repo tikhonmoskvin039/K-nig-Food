@@ -284,7 +284,7 @@ export default function ProductForm({
   );
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 sm:p-5 space-y-3">
+    <div className="surface-card p-4 sm:p-5 space-y-3">
       <h3 className="text-xl font-semibold">
         {isNew ? "Добавление товара" : "Редактирование товара"}
       </h3>
@@ -292,7 +292,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Название")}
         <input
-          className="w-full border p-2 rounded"
+          className="form-control"
           placeholder="Название, например: Борщ домашний"
           value={product.Title}
           onChange={(e) => handleTitleChange(e.target.value)}
@@ -303,7 +303,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Slug")}
         <input
-          className="w-full border p-2 rounded"
+          className="form-control"
           placeholder="Слаг, например: borsch-domashniy"
           value={product.Slug}
           onChange={(e) => onChange("Slug", e.target.value.toLowerCase())}
@@ -338,7 +338,7 @@ export default function ProductForm({
         <div className="space-y-1">
           {renderFieldLabel("Стандартная цена")}
           <input
-            className="w-full border p-2 rounded"
+            className="form-control"
             placeholder="Цена, например: 350"
             value={product.RegularPrice}
             inputMode="numeric"
@@ -353,7 +353,7 @@ export default function ProductForm({
         <div className="space-y-1">
           {renderFieldLabel("Акционная цена")}
           <input
-            className="w-full border p-2 rounded"
+            className="form-control"
             placeholder="Цена со скидкой (необязательно), например: 300"
             value={product.SalePrice}
             inputMode="numeric"
@@ -370,7 +370,7 @@ export default function ProductForm({
         <div className="space-y-1">
           {renderFieldLabel("Вес/объем порции")}
           <input
-            className="w-full border p-2 rounded"
+            className="form-control"
             placeholder="Порция, например: 300"
             value={portionWeightValue}
             inputMode="numeric"
@@ -386,7 +386,7 @@ export default function ProductForm({
         <div className="space-y-1">
           {renderFieldLabel("Единица измерения")}
           <select
-            className="w-full border p-2 rounded"
+            className="form-control"
             value={product.PortionUnit}
             onChange={(e) => onChange("PortionUnit", e.target.value)}
           >
@@ -403,7 +403,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Валюта")}
         <input
-          className="w-full border p-2 rounded bg-gray-100 text-gray-600 cursor-not-allowed"
+          className="form-control bg-gray-100 text-gray-600 cursor-not-allowed"
           value="RUR (рубли)"
           disabled
           readOnly
@@ -414,7 +414,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Категории")}
         <select
-          className="w-full border p-2 rounded"
+          className="form-control"
           value={categoryToAdd}
           onChange={(e) => {
             const nextCategory = e.target.value;
@@ -477,7 +477,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Краткое описание")}
         <textarea
-          className="w-full border p-2 rounded min-h-20"
+          className="form-control min-h-20"
           placeholder="Краткое описание, например: Насыщенный борщ со сметаной"
           value={product.ShortDescription}
           onChange={(e) => onChange("ShortDescription", e.target.value)}
@@ -488,7 +488,7 @@ export default function ProductForm({
       <div className="space-y-1">
         {renderFieldLabel("Полное описание")}
         <textarea
-          className="w-full border p-2 rounded min-h-28"
+          className="form-control min-h-28"
           placeholder="Полное описание, например: Готовим на наваристом бульоне..."
           value={product.LongDescription}
           onChange={(e) => onChange("LongDescription", e.target.value)}
@@ -499,7 +499,7 @@ export default function ProductForm({
       <div className="space-y-2">
         {renderFieldLabel("Главное изображение (.jpg до 5 МБ)")}
 
-        <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 border rounded cursor-pointer hover:bg-gray-200 transition">
+        <label className="btn-secondary cursor-pointer">
           Загрузить главное изображение
           <input
             type="file"
@@ -523,7 +523,7 @@ export default function ProductForm({
       <div className="space-y-2">
         {renderFieldLabel("Галерея (.jpg до 5 МБ, максимум 5)")}
 
-        <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 border rounded cursor-pointer hover:bg-gray-200 transition">
+        <label className="btn-secondary cursor-pointer">
           Загрузить изображения галереи
           <input
             type="file"
@@ -560,7 +560,7 @@ export default function ProductForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border rounded"
+          className="btn-secondary"
           disabled={isSaving}
         >
           Отмена
@@ -569,7 +569,7 @@ export default function ProductForm({
         <button
           type="button"
           onClick={handleSave}
-          className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 flex items-center justify-center min-w-32"
+          className="btn-primary min-w-32"
           disabled={saveDisabled}
         >
           {isSaving ? (

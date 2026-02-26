@@ -22,10 +22,10 @@ export default function AdminPageFrame({
 }: Props) {
   return (
     <div className="pt-(--header-height)">
-      <div className="p-4 md:p-8 min-h-[calc(100vh-var(--header-height))] bg-white flex flex-col gap-6">
-        <div className="flex flex-col gap-4 bg-gray-100 p-4 rounded-xl">
+      <div className="p-4 md:p-6 min-h-[calc(100vh-var(--header-height))] flex flex-col gap-5">
+        <div className="surface-card-soft p-4 md:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-center sm:text-left">
+            <h1 className="text-2xl md:text-3xl font-bold text-center sm:text-left text-slate-900">
               {title}
             </h1>
 
@@ -35,7 +35,7 @@ export default function AdminPageFrame({
                   href={actionHref}
                   className={
                     actionClassName ||
-                    "inline-flex items-center justify-center px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+                    "btn-primary"
                   }
                 >
                   {actionLabel}

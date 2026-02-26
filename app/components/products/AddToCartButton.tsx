@@ -26,7 +26,7 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
   return (
     <button
       onClick={handleAddToCart}
-      className="mt-4 w-full sm:w-auto bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-md text-sm font-semibold transition"
+      className="mt-4 w-full sm:w-auto btn-primary"
     >
       {labels.addToCart || "Add to Cart"}
     </button>

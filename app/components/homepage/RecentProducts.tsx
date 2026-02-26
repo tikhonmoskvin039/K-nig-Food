@@ -18,9 +18,9 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
   }
 
   return (
-    <section className="py-12 bg-gray-100">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
+    <section className="section-wrap">
+      <div className="app-shell">
+        <h2 className="section-title text-center mb-8">
           {labels.recentProducts}
         </h2>
 

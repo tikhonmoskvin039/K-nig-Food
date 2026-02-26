@@ -12,8 +12,8 @@ export default async function BrandStory() {
   const { title, description, buttonText, ctaLink } = homepage.brandStory;
 
   return (
-    <section className="relative w-full py-24 bg-linear-to-r from-gray-900 via-gray-800 to-gray-700 text-white">
-      <div className="max-w-6xl mx-auto px-6 text-center">
+    <section className="relative w-full py-20 bg-linear-to-r from-slate-900 via-slate-800 to-slate-700 text-white">
+      <div className="app-shell text-center">
         {/* Title */}
         <h2 className="text-4xl font-extrabold mb-6 tracking-wide">
           {title}
@@ -27,7 +27,7 @@ export default async function BrandStory() {
         {/* Call to Action Button */}
         <Link
           href={ctaLink}
-          className="mt-8 inline-block bg-white text-gray-800 hover:bg-gray-200 px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition transform hover:scale-105"
+          className="mt-8 btn-primary text-lg px-8 py-3 rounded-full shadow-lg hover:scale-105"
         >
           {buttonText}
         </Link>

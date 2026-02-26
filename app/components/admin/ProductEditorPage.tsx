@@ -12,6 +12,12 @@ import {
   queueAdminProductToast,
   shouldShowAdminPropagationWarning,
 } from "../../lib/adminProductToast";
+import {
+  formatBytes,
+  getJsonPayloadSizeBytes,
+  SAFE_FUNCTION_BODY_LIMIT_BYTES,
+  VERCEL_FUNCTION_BODY_LIMIT_BYTES,
+} from "../../lib/payloadSize";
 
 type Props = {
   mode: "create" | "edit";
@@ -174,6 +180,14 @@ export default function ProductEditorPage({ mode, productId }: Props) {
               : item,
           );
 
+    const payloadBytes = getJsonPayloadSizeBytes(updatedProducts);
+    if (payloadBytes > SAFE_FUNCTION_BODY_LIMIT_BYTES) {
+      toast.error("Слишком большой объем данных для публикации", {
+        description: `Размер запроса: ${formatBytes(payloadBytes)}. Лимит Vercel: ${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}. Уменьшите размер/количество изображений.`,
+      });
+      return;
+    }
+
     setIsSaving(true);
     const loadingToastId = toast.loading(
       mode === "create" ? "Создаем товар..." : "Сохраняем изменения...",
@@ -189,6 +203,12 @@ export default function ProductEditorPage({ mode, productId }: Props) {
       });
 
       if (!res.ok) {
+        if (res.status === 413) {
+          throw new Error(
+            `Размер запроса превышает лимит Vercel (${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}).`,
+          );
+        }
+
         let message = "Не удалось сохранить товар";
         try {
           const payload = (await res.json()) as {
@@ -243,12 +263,12 @@ export default function ProductEditorPage({ mode, productId }: Props) {
 
   if (!product) {
     return (
-      <div className="bg-white rounded-xl shadow p-6 text-center space-y-4">
+      <div className="surface-card p-6 text-center space-y-4">
         <p className="text-red-600">{loadError || "Товар не найден"}</p>
         <button
           type="button"
           onClick={() => router.push("/admin")}
-          className="px-4 py-2 border rounded"
+          className="btn-secondary"
         >
           Вернуться в админку
         </button>

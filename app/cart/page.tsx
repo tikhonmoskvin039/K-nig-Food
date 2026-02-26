@@ -72,14 +72,14 @@ function CartContent() {
     : null;
 
   return (
-    <section className="py-12 bg-white min-h-[calc(100vh-var(--header-height))]">
-      <div className="max-w-6xl mx-auto px-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+    <section className="section-wrap min-h-[calc(100vh-var(--header-height))]">
+      <div className="app-shell">
+        <h1 className="page-title mb-6 text-center">
           {labels.yourCart || "Ваша корзина"}
         </h1>
 
         {items.length > 0 && formattedExpiry && (
-          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             Товары в корзине хранятся 24 часа после последнего изменения. Если
             заказ не будет оформлен, корзина очистится автоматически{" "}
             <strong>{formattedExpiry}</strong>.
@@ -92,16 +92,13 @@ function CartContent() {
           </p>
         ) : (
           <>
-            <div className="space-y-6">
+            <div className="surface-card p-4 sm:p-5 space-y-6">
               {items.map((item) => {
                 const price = parseFloat(item.SalePrice || item.RegularPrice);
                 const itemTotal = price * item.quantity;
 
                 return (
-                  <div
-                    key={item.ID}
-                    className="flex gap-4 items-center border-b pb-4"
-                  >
+                  <div key={item.ID} className="flex gap-4 items-center border-b pb-4">
                     <Image
                       src={item.FeatureImageURL}
                       alt={item.Title}
@@ -112,17 +109,17 @@ function CartContent() {
                     <div className="flex-1">
                       <Link
                         href={`/product/${item.Slug}`}
-                        className="text-lg font-semibold text-gray-800 hover:text-gray-600"
+                        className="text-lg font-semibold text-slate-900 hover:text-amber-700"
                       >
                         {item.Title}
                       </Link>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-600">
                         {labels.price || "Цена"}: {price.toFixed(2)} ₽
                       </p>
                       <div className="flex items-center mt-2 gap-2">
                         <button
                           onClick={() => handleQtyChange(item.ID, -1)}
-                          className="text-gray-700 border px-2 rounded hover:bg-gray-200"
+                          className="text-slate-700 border px-2 rounded hover:bg-slate-100"
                         >
                           <Minus size={16} />
                         </button>
@@ -131,12 +128,12 @@ function CartContent() {
                         </span>
                         <button
                           onClick={() => handleQtyChange(item.ID, 1)}
-                          className="text-gray-700 border px-2 rounded hover:bg-gray-200"
+                          className="text-slate-700 border px-2 rounded hover:bg-slate-100"
                         >
                           <Plus size={16} />
                         </button>
                       </div>
-                      <p className="text-sm text-gray-800 mt-1">
+                      <p className="text-sm text-slate-900 mt-1">
                         {labels.total || "Итого"}: {itemTotal.toFixed(2)} ₽
                       </p>
                     </div>
@@ -155,14 +152,14 @@ function CartContent() {
             </div>
 
             <div className="mt-8 text-right space-y-4">
-              <p className="text-xl font-semibold text-gray-800">
+              <p className="text-xl font-semibold text-slate-900">
                 {labels.total || "Всего"}: {total.toFixed(2)} ₽
               </p>
 
               {/* Checkout Button Below */}
               <Link
                 href="/checkout"
-                className="inline-block bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-md text-sm font-semibold transition"
+                className="btn-primary"
               >
                 {labels.proceedToCheckout || "Перейти к оформлению"}
               </Link>

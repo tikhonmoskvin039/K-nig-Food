@@ -59,13 +59,7 @@ export default function HomepageBanner() {
 
         <Link
           href={ctaLink}
-          className="
-            bg-white text-gray-600
-            hover:bg-gray-200 hover:text-gray-800
-            px-8 py-4 rounded-full text-xl font-bold
-            shadow-lg transition-transform
-            hover:scale-110
-          "
+          className="btn-primary text-lg md:text-xl px-8 py-3 rounded-full shadow-lg hover:scale-105"
         >
           {buttonText}
         </Link>

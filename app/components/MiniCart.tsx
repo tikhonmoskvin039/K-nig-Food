@@ -57,16 +57,16 @@ export default function MiniCart() {
         aria-label={labels.viewCart || "View cart"}
       >
         <ShoppingCart size={24} />
-        <span className="absolute -top-2 -right-2.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">
+        <span className="absolute -top-2 -right-2.5 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">
           {totalQuantity}
         </span>
       </Link>
 
       {/* Mini Cart Dropdown */}
       {isVisible && (
-        <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 shadow-lg rounded-md z-50 p-4">
+        <div className="absolute right-0 mt-2 w-[22rem] surface-card z-50 p-4">
           {cartItems.length === 0 ? (
-            <p className="text-gray-600 text-sm text-center">
+            <p className="text-slate-600 text-sm text-center">
               {labels.cartEmpty || "Your cart is empty."}
             </p>
           ) : (
@@ -87,15 +87,15 @@ export default function MiniCart() {
                     <div className="flex-1">
                       <Link
                         href={`/product/${item.Slug}`}
-                        className="text-sm font-semibold text-gray-800 hover:text-gray-600"
+                        className="text-sm font-semibold text-slate-900 hover:text-amber-700"
                       >
                         {item.Title}
                       </Link>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-600">
                         {labels.quantity || "Количество"}: {item.quantity} ×{" "}
                         {price.toFixed(2)} ₽
                       </p>
-                      <p className="text-sm text-gray-800 font-medium">
+                      <p className="text-sm text-slate-900 font-medium">
                         {labels.total || "Итого"}: {itemTotal} ₽
                       </p>
                     </div>
@@ -116,20 +116,20 @@ export default function MiniCart() {
           {cartItems.length > 0 && (
             <>
               <hr className="my-4" />
-              <div className="flex justify-between items-center text-sm font-semibold text-gray-800">
+              <div className="flex justify-between items-center text-sm font-semibold text-slate-900">
                 <span>{labels.total || "Итого"}:</span>
                 <span>{totalAmount.toFixed(2)} ₽</span>
               </div>
               <Link
                 href="/cart"
-                className="mt-4 inline-block w-full text-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
+                className="mt-4 btn-secondary w-full"
               >
                 {labels.viewCart || "Посмотореть корзину"}
               </Link>
 
               <Link
                 href="/checkout"
-                className="mt-4 inline-block w-full text-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
+                className="mt-3 btn-primary w-full"
               >
                 {labels.proceedToCheckout || "Перейти к оформлению заказа"}
               </Link>

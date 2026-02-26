@@ -37,18 +37,19 @@ export default function Header() {
       transition={{ duration: 0.25 }}
       className="fixed top-0 left-0 w-full z-50"
     >
-      {/* MAIN HEADER */}
-      <header className="bg-white text-gray-900 py-4 px-4 flex justify-between items-center shadow-md">
-        <div>
-          <h1 className="text-2xl font-bold">
-            <Link href="/" className="text-gray-900 hover:text-gray-700">
-              {content.siteName}
-            </Link>
-          </h1>
-          <strong className="text-gray-700">{content.siteTagline}</strong>
-        </div>
+      <header className="border-b border-slate-200/80 bg-white/90 text-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
+        <div className="app-shell py-3.5 flex justify-between items-center gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold truncate">
+              <Link href="/" className="text-gray-900 hover:text-amber-700">
+                {content.siteName}
+              </Link>
+            </h1>
+            <strong className="text-sm text-slate-600">{content.siteTagline}</strong>
+          </div>
 
-        <MobileMenu menuItems={content.menu} />
+          <MobileMenu menuItems={content.menu} />
+        </div>
       </header>
     </motion.div>
   );

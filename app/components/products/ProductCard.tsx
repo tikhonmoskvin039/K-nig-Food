@@ -29,7 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden transition hover:scale-105 flex flex-col h-full">
+    <div className="surface-card overflow-hidden transition hover:-translate-y-0.5 flex flex-col h-full">
       {/* Product Image with Link to Product Page */}
       {/* Product Image with Overlay Portion Info */}
       <Link href={`/product/${product.Slug}`}>
@@ -43,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Portion + Unit Badge */}
           {product.PortionUnit && (
-            <div className="absolute bottom-2 right-2 bg-gray-700/40 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+            <div className="absolute bottom-2 right-2 bg-slate-900/60 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
               {product.PortionWeight} {product.PortionUnit}
             </div>
           )}
@@ -56,7 +56,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-xl font-semibold text-gray-900 truncate">
             <Link
               href={`/product/${product.Slug}`}
-              className="hover:text-gray-600"
+              className="hover:text-amber-700"
             >
               {product.Title}
             </Link>
@@ -77,7 +77,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   {product.SalePrice}
                   {currencySymbol}
                 </span>
-                <span className="text-gray-500 line-through">
+                <span className="text-slate-500 line-through">
                   {product.RegularPrice}
                   {currencySymbol}
                 </span>
@@ -95,14 +95,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Main action buttons row */}
           <div className="flex flex-col sm:flex-row gap-2">
             <Link href={`/product/${product.Slug}`} className="sm:w-1/2">
-              <span className="w-full h-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition">
+              <span className="btn-secondary w-full h-full">
                 {labels.viewProduct || "Узнать больше"}
               </span>
             </Link>
 
             <button
               onClick={handleAddToCart}
-              className="w-full sm:w-1/2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-semibold text-center transition"
+              className="w-full sm:w-1/2 btn-primary"
             >
               {labels.addToCart || "Добавить в корзину"}
             </button>

@@ -37,46 +37,59 @@ export default function BillingForm() {
   };
 
   return (
-    <div className="space-y-4 mt-8">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">
+    <div className="surface-card p-5 md:p-6 space-y-4">
+      <h3 className="section-title text-xl md:text-2xl">
         {labels.billingInformation || "Платежная информация"}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          name="firstName"
-          value={billingForm.firstName}
-          onChange={handleChange}
-          placeholder={labels.firstName || "Имя"}
-          className="input bg-white border border-gray-300 p-2 pl-3 rounded focus:border-blue-500 focus:outline-none"
-          required
-        />
-        <input
-          name="lastName"
-          value={billingForm.lastName}
-          onChange={handleChange}
-          placeholder={labels.lastName || "Фамилия"}
-          className="input bg-white border border-gray-300 p-2 pl-3 rounded focus:border-blue-500 focus:outline-none"
-          required
-        />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            {labels.firstName || "Имя"}
+          </span>
+          <input
+            name="firstName"
+            value={billingForm.firstName}
+            onChange={handleChange}
+            placeholder={labels.firstName || "Имя"}
+            className="form-control"
+            required
+          />
+        </label>
+
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            {labels.lastName || "Фамилия"}
+          </span>
+          <input
+            name="lastName"
+            value={billingForm.lastName}
+            onChange={handleChange}
+            placeholder={labels.lastName || "Фамилия"}
+            className="form-control"
+            required
+          />
+        </label>
       </div>
 
       <div className="space-y-2">
-        <input
-          name="email"
-          type="email"
-          value={billingForm.email}
-          onChange={handleChange}
-          onBlur={handleEmailBlur}
-          placeholder={labels.email || "Введите email"}
-          className={`input bg-white border p-2 pl-3 rounded w-full focus:outline-none ${
-            emailError
-              ? "border-red-500"
-              : "border-gray-300 focus:border-blue-500"
-          }`}
-          required
-        />
+        <label className="space-y-1 block">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            {labels.email || "Email"}
+          </span>
+          <input
+            name="email"
+            type="email"
+            value={billingForm.email}
+            onChange={handleChange}
+            onBlur={handleEmailBlur}
+            placeholder={labels.email || "Введите email"}
+            className={`form-control ${emailError ? "border-red-500" : ""}`}
+            required
+          />
+        </label>
         {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-slate-600 mt-2">
           {labels.downloadLinkEmailNotice ||
             "Подробности заказа будут отправлены на этот адрес электронной почты после подтверждения оплаты."}
         </p>

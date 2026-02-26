@@ -47,7 +47,7 @@ export default function ConfirmModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            className="surface-card w-full max-w-md overflow-hidden"
           >
             <div className="p-6 space-y-4">
               <h3 className="text-xl font-semibold text-gray-900">
@@ -64,14 +64,14 @@ export default function ConfirmModal({
             <div className="flex justify-end gap-3 px-6 pb-6 pt-2 flex-wrap">
               <button
                 onClick={onCancel}
-                className="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition text-sm font-medium"
+                className="btn-secondary"
               >
                 {cancelText}
               </button>
 
               <button
                 onClick={onConfirm}
-                className="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white transition text-sm font-semibold shadow-sm"
+                className="btn-danger"
               >
                 {confirmText}
               </button>

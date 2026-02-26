@@ -16,7 +16,7 @@ export default function GlobalLoader({
 
   return (
     <div className={`${containerClass} ${className}`.trim()}>
-      <div className="animate-spin rounded-full h-14 w-14 border-4 border-gray-300 border-t-gray-700" />
+      <div className="animate-spin rounded-full h-14 w-14 border-4 border-amber-200 border-t-amber-600" />
     </div>
   );
 }

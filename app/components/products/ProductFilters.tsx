@@ -27,38 +27,49 @@ export default function ProductFilters({
   };
 
   return (
-    <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Search Bar */}
-      <input
-        type="text"
-        value={searchInput} // Controlled state
-        onChange={handleSearchChange} // Update state on input change
-        placeholder={labels.searchPlaceholder}
-        className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 bg-white"
-      />
+    <div className="surface-card p-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            Поиск
+          </span>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={handleSearchChange}
+            placeholder={labels.searchPlaceholder}
+            className="form-control"
+          />
+        </label>
 
-      {/* Category Dropdown */}
-      <select
-        onChange={(e) => setCategoryFilter(e.target.value)}
-        className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 bg-white"
-      >
-        <option value="">{labels.allCategories}</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            Категория
+          </span>
+          <select
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="form-control"
+          >
+            <option value="">{labels.allCategories}</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      {/* Sorting Dropdown */}
-      <select
-        onChange={(e) => setSortBy(e.target.value)}
-        className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 bg-white"
-      >
-        <option value="name">{labels.sortByName}</option>
-        <option value="price">{labels.sortByPrice}</option>
-        <option value="newest">{labels.sortByNewest}</option>
-      </select>
+        <label className="space-y-1">
+          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+            Сортировка
+          </span>
+          <select onChange={(e) => setSortBy(e.target.value)} className="form-control">
+            <option value="name">{labels.sortByName}</option>
+            <option value="price">{labels.sortByPrice}</option>
+            <option value="newest">{labels.sortByNewest}</option>
+          </select>
+        </label>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,13 @@
 import Link from "next/link";
-import { SiFacebook, SiInstagram, SiLinkedin, SiX, SiYoutube, SiTelegram } from "react-icons/si";
-import ScrollToTopButton from "./ScrollToTopButton"; // Keep this as a client component
+import {
+  SiFacebook,
+  SiInstagram,
+  SiLinkedin,
+  SiTelegram,
+  SiX,
+  SiYoutube,
+} from "react-icons/si";
+import ScrollToTopButton from "./ScrollToTopButton";
 import { getLocalization } from "../utils/getLocalization";
 
 // Define TypeScript interfaces
@@ -16,24 +23,27 @@ const iconMap: Record<DTSocialIcon, React.ElementType> = {
   SiX: SiX,
   SiInstagram: SiInstagram,
   SiLinkedin: SiLinkedin,
-  SiYoutube: SiYoutube
+  SiYoutube: SiYoutube,
 };
 
 export default function Footer() {
-  const content = getLocalization(); // Load localization data
+  const content = getLocalization();
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 py-12 relative">
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-        
-        {/* Quick Links */}
+    <footer className="bg-slate-950 text-slate-200 pt-12 pb-10 relative">
+      <div className="app-shell grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.labels.quickLinks}</h3>
+          <h3 className="text-xl font-semibold mb-4 text-white">
+            {content.labels.quickLinks}
+          </h3>
           <ul className="space-y-2">
             {content.footerLinks.map((link: FooterLink) => (
               <li key={link.label}>
-                <Link href={link.href} className="text-gray-300 hover:text-gray-400 transition">
+                <Link
+                  href={link.href}
+                  className="text-slate-300 hover:text-amber-300 transition"
+                >
                   {link.label}
                 </Link>
               </li>
@@ -41,30 +51,46 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contact Info */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.contactForm.title}</h3>
+          <h3 className="text-xl font-semibold mb-4 text-white">
+            {content.contactForm.title}
+          </h3>
           <p>
-            <Link href="/contact" className="text-gray-300 hover:text-gray-400 transition">
+            <Link
+              href="/contact"
+              className="text-slate-300 hover:text-amber-300 transition"
+            >
               {content.contactForm.subtitle}
             </Link>
           </p>
           {content.phone && (
-            <p>{content.labels.phone}: <a href={`tel:${content.phone}`} className="text-gray-300 hover:text-gray-400 transition">{content.phone}</a></p>
+            <p>
+              {content.labels.phone}:{" "}
+              <a
+                href={`tel:${content.phone}`}
+                className="text-slate-300 hover:text-amber-300 transition"
+              >
+                {content.phone}
+              </a>
+            </p>
           )}
-          {content.address && (
-            <p>{content.labels.address}: {content.address}</p>
-          )}
+          {content.address && <p>{content.labels.address}: {content.address}</p>}
         </div>
 
-        {/* Social Media */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-gray-100">{content.labels.followUs}</h3>
+          <h3 className="text-xl font-semibold mb-4 text-white">
+            {content.labels.followUs}
+          </h3>
           <div className="flex justify-center md:justify-start space-x-4">
             {content.socialLinks.map((social) => {
-              const IconComponent = iconMap[social.icon as DTSocialIcon]; // Type assertion to ensure TS compliance
+              const IconComponent = iconMap[social.icon as DTSocialIcon];
               return (
-                <Link key={social.id} href={social.url} target="_blank" className="text-gray-300 hover:text-gray-400 transition">
+                <Link
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  className="text-slate-300 hover:text-amber-300 transition"
+                >
                   <IconComponent size={24} />
                 </Link>
               );
@@ -73,16 +99,18 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Copyright & Attribution */}
-      <div className="text-center text-sm mt-8">
-         © {currentYear} Все права защищены.
-        <span className="mx-1">|</span>  
-        <Link href="https://github.com/tikhonmoskvin039/K-nig-Food" target="_blank" className="text-gray-300 hover:text-gray-400 transition">
+      <div className="text-center text-sm mt-8 text-slate-400">
+        © {currentYear} Все права защищены.
+        <span className="mx-1">|</span>
+        <Link
+          href="https://github.com/tikhonmoskvin039/K-nig-Food"
+          target="_blank"
+          className="text-slate-300 hover:text-amber-300 transition"
+        >
           Powered by König Food
         </Link>
       </div>
 
-      {/* Scroll to Top Button (Client Component) */}
       <ScrollToTopButton />
     </footer>
   );

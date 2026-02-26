@@ -11,8 +11,7 @@ export default function ProductCreateControl({ className }: Props) {
     <Link
       href="/admin/products/new"
       className={
-        className ||
-        "w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-center"
+        className || "btn-primary w-full sm:w-auto"
       }
     >
       + Добавить товар

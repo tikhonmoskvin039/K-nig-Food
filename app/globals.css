@@ -4,8 +4,16 @@
   --font-heading: var(--font-main);
   --font-body: var(--font-body);
 
-  --color-background: #ffffff;
-  --color-foreground: #171717;
+  --color-background: #f6f4ef;
+  --color-foreground: #1f2937;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-muted: #64748b;
+  --color-primary: #d97706;
+  --color-primary-strong: #b45309;
+  --color-primary-soft: #fef3c7;
+  --shadow-soft: 0 10px 30px -18px rgba(15, 23, 42, 0.35);
 
   --header-height: 80px;
   --header-height-plus-top-section-height: 160px;
@@ -17,6 +25,7 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body), sans-serif;
+  line-height: 1.5;
 }
 
 h1,
@@ -28,4 +37,88 @@ h6 {
   font-family: var(--font-heading), sans-serif;
   margin: 0;
   padding: 0;
+}
+
+a {
+  transition: color 0.2s ease;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  h1 + p,
+  h2 + p,
+  h3 + p,
+  h4 + p,
+  h5 + p,
+  h6 + p {
+    margin-top: 0.625rem;
+  }
+
+  ::selection {
+    background: rgba(217, 119, 6, 0.18);
+    color: var(--color-foreground);
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply max-w-6xl mx-auto px-4 md:px-6;
+  }
+
+  .section-wrap {
+    @apply py-12 md:py-14;
+  }
+
+  .page-title {
+    @apply text-3xl md:text-4xl font-bold text-gray-900 tracking-tight;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold text-gray-900 tracking-tight;
+  }
+
+  .surface-card {
+    @apply rounded-2xl border bg-white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .surface-card-soft {
+    @apply rounded-2xl border bg-slate-50/80;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .form-control {
+    @apply w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition;
+    @apply focus:border-amber-400 focus:ring-2 focus:ring-amber-200;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-amber-600 hover:bg-amber-700;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed border border-slate-300 text-slate-700 bg-white hover:bg-slate-50;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-red-600 hover:bg-red-700;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 hover:bg-slate-100;
+  }
+
+  .table-shell {
+    @apply rounded-2xl border bg-white overflow-hidden;
+    box-shadow: var(--shadow-soft);
+  }
 }

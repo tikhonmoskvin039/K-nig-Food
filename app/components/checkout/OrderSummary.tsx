@@ -16,8 +16,8 @@ export default function OrderSummary() {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-lg font-semibold mb-4">
+    <div className="surface-card p-5 md:p-6">
+      <h2 className="text-xl font-semibold text-slate-900 mb-4">
         {labels.orderSummary || "Ваш заказ"}
       </h2>
 
@@ -34,16 +34,16 @@ export default function OrderSummary() {
             <div className="flex-1">
               <Link
                 href={`/product/${item.Slug}`}
-                className="text-sm font-medium text-gray-800 hover:text-gray-600"
+                className="text-sm font-medium text-slate-900 hover:text-amber-700"
               >
                 {item.Title}
               </Link>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-slate-600">
                 {labels.quantity || "Количество"}: {item.quantity} ×{" "}
                 {parseFloat(item.SalePrice || item.RegularPrice).toFixed(2)} ₽
               </p>
             </div>
-            <div className="text-sm font-medium text-gray-800">
+            <div className="text-sm font-medium text-slate-900">
               {(
                 item.quantity * parseFloat(item.SalePrice || item.RegularPrice)
               ).toFixed(2)}{" "}
@@ -52,9 +52,9 @@ export default function OrderSummary() {
           </div>
         ))}
 
-        <hr className="my-4" />
+        <hr className="my-4 border-slate-200" />
 
-        <div className="flex justify-between font-bold text-base">
+        <div className="flex justify-between font-bold text-base text-slate-900">
           <span>{labels.total || "Итого"}:</span>
           <span>{totalAmount.toFixed(2)} ₽</span>
         </div>
