@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
 interface ProductLightboxProps {
   images: string[];
 }
+
+const LIGHTBOX_WHEEL_ZOOM_DISTANCE_FACTOR = 260;
+const LIGHTBOX_ZOOM_IN_MULTIPLIER = 1.35;
 
 export default function ProductLightbox({ images }: ProductLightboxProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -65,6 +69,10 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
         ))}
       </div>
 
+      <p className="mt-2 text-xs text-slate-500">
+        В просмотре: используйте колесо мыши или жест pinch для увеличения.
+      </p>
+
       {/* LIGHTBOX MODAL */}
       {lightboxOpen && (
         <Lightbox
@@ -72,7 +80,21 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
           close={() => setLightboxOpen(false)}
           index={lightboxIndex}
           slides={images.map((src) => ({ src }))}
-          noScroll={{ disabled: true }}
+          plugins={[Zoom]}
+          animation={{
+            zoom: 260,
+          }}
+          zoom={{
+            scrollToZoom: true,
+            pinchZoomV4: true,
+            maxZoomPixelRatio: 4,
+            wheelZoomDistanceFactor: LIGHTBOX_WHEEL_ZOOM_DISTANCE_FACTOR,
+            zoomInMultiplier: LIGHTBOX_ZOOM_IN_MULTIPLIER,
+          }}
+          controller={{
+            closeOnPullDown: false,
+            closeOnPullUp: false,
+          }}
         />
       )}
     </div>

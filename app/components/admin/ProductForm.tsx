@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
+  IMAGE_ACCEPT_ATTRIBUTE,
+  IMAGE_SUPPORTED_FORMATS_LABEL,
   readFileAsDataUrl,
   sanitizeNumericString,
   slugifyProductTitle,
-  validateJpgFile,
+  validateImageFile,
 } from "../../services/admin/productForm";
 
 type Props = {
@@ -44,7 +46,7 @@ export default function ProductForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const error = validateJpgFile(file);
+    const error = validateImageFile(file);
     if (error) {
       setFileErrors((prev) => ({ ...prev, FeatureImageURL: error }));
       event.target.value = "";
@@ -68,7 +70,7 @@ export default function ProductForm({
     if (files.length === 0) return;
 
     for (const file of files) {
-      const error = validateJpgFile(file);
+      const error = validateImageFile(file);
       if (error) {
         setFileErrors((prev) => ({ ...prev, ProductImageGallery: error }));
         event.target.value = "";
@@ -431,13 +433,17 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        {renderFieldLabel("Главное изображение (.jpg до 5 МБ)")}
+        {renderFieldLabel("Главное изображение (до 5 МБ)")}
+        <p className="text-xs text-gray-500">
+          Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
+          качества: 1200x1200 px (квадрат 1:1).
+        </p>
 
         <label className="btn-secondary cursor-pointer">
           Загрузить главное изображение
           <input
             type="file"
-            accept=".jpg"
+            accept={IMAGE_ACCEPT_ATTRIBUTE}
             onChange={handleFeatureImage}
             className="hidden"
           />
@@ -455,13 +461,17 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        {renderFieldLabel("Галерея (.jpg до 5 МБ, максимум 5)")}
+        {renderFieldLabel("Галерея (до 5 МБ на файл, максимум 5)")}
+        <p className="text-xs text-gray-500">
+          Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
+          качества: 1600x900 px (16:9) или минимум 1200 px по длинной стороне.
+        </p>
 
         <label className="btn-secondary cursor-pointer">
           Загрузить изображения галереи
           <input
             type="file"
-            accept=".jpg"
+            accept={IMAGE_ACCEPT_ATTRIBUTE}
             multiple
             onChange={handleGalleryImages}
             className="hidden"

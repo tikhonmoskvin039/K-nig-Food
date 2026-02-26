@@ -49,14 +49,39 @@ export const slugifyProductTitle = (value: string) => {
 export const sanitizeNumericString = (value: string) =>
   value.replace(/[^\d]/g, "");
 
-export const validateJpgFile = (file: File): string | null => {
-  const isJpg = file.name.toLowerCase().endsWith(".jpg");
+export const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
-  if (!isJpg) {
-    return `Формат файла "${file.name}" должен быть .jpg`;
+export const IMAGE_ACCEPT_ATTRIBUTE = "image/*";
+
+export const IMAGE_SUPPORTED_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".avif",
+  ".gif",
+  ".bmp",
+  ".tif",
+  ".tiff",
+  ".heic",
+  ".heif",
+  ".svg",
+];
+
+export const IMAGE_SUPPORTED_FORMATS_LABEL = "JPG, JPEG, PNG, WEBP, AVIF, GIF, BMP, TIFF, HEIC, HEIF, SVG";
+
+export const validateImageFile = (file: File): string | null => {
+  const fileName = file.name.toLowerCase();
+  const hasSupportedExtension = IMAGE_SUPPORTED_EXTENSIONS.some((extension) =>
+    fileName.endsWith(extension),
+  );
+  const hasImageMimeType = file.type.toLowerCase().startsWith("image/");
+
+  if (!hasSupportedExtension && !hasImageMimeType) {
+    return `Файл "${file.name}" должен быть изображением. Поддерживаемые форматы: ${IMAGE_SUPPORTED_FORMATS_LABEL}.`;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > MAX_IMAGE_FILE_SIZE_BYTES) {
     return `Файл "${file.name}" больше 5 МБ`;
   }
 
