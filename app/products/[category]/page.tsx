@@ -10,8 +10,8 @@ import { ReduxProvider } from "../../providers";
 const localeData = getLocalization();
 
 // Generate static paths for all categories at build time
-export function generateStaticParams() {
-  const categories = getAllCategories();
+export async function generateStaticParams() {
+  const categories = await getAllCategories();
 
   return categories.map((category) => ({
     category: categoryToSlug(category),
@@ -23,7 +23,7 @@ export async function generateMetadata(props: {
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const categories = getAllCategories();
+  const categories = await getAllCategories();
   const categoryName = slugToCategory(params.category, categories);
 
   if (!categoryName) {
@@ -43,7 +43,7 @@ export default async function CategoryPage(props: {
 }) {
   const params = await props.params;
   const productsListingSettings = getProductsListingSettings();
-  const categories = getAllCategories();
+  const categories = await getAllCategories();
 
   // Convert slug back to actual category name
   const categoryName = slugToCategory(params.category, categories);

@@ -31,7 +31,7 @@ export async function generateMetadata({
   }
 
   // Local file read is now allowed, as we properly awaited the param
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) {
     return {
       title: "Product Not Found",
@@ -56,31 +56,34 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
   }
 
   // Now do local file read
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) {
     return notFound();
   }
 
-  // Check if there's a valid sale price different from regular price
+  const regularPrice = Number(product.RegularPrice);
+  const salePrice = Number(product.SalePrice);
   const hasSalePrice =
-    product.SalePrice !== null &&
-    product.SalePrice !== undefined &&
-    product.SalePrice !== product.RegularPrice;
+    Number.isFinite(regularPrice) &&
+    Number.isFinite(salePrice) &&
+    salePrice > 0 &&
+    salePrice < regularPrice;
+  const currencySymbol = getCurrencySymbol(product.Currency);
 
   // Build SSR UI
   const priceBlock = hasSalePrice ? (
     <p className="text-xl font-bold text-red-600">
-      {product.SalePrice}
-      {getCurrencySymbol(product.Currency)}
+      {salePrice}
+      {currencySymbol}
       <span className="ml-2 text-gray-500 line-through">
-        {product.RegularPrice}
-        {getCurrencySymbol(product.Currency)}
+        {regularPrice}
+        {currencySymbol}
       </span>
     </p>
   ) : (
     <p className="text-xl font-bold text-gray-900">
       {product.RegularPrice}
-      {getCurrencySymbol(product.Currency)}
+      {currencySymbol}
     </p>
   );
 

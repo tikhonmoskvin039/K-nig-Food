@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Octokit } from "octokit";
 import { getToken } from "next-auth/jwt";
+import { invalidateProductsCache } from "../../../lib/githubStorage";
+import { setRuntimeProducts } from "../../../lib/runtimeProductsStore";
 
 const repo = process.env.GITHUB_REPO!;
 const [owner, repoName] = repo.split("/");
@@ -50,9 +52,24 @@ export async function GET(req: NextRequest) {
     });
 
     // @ts-ignore
-    const content = Buffer.from(res.data.content, "base64").toString();
+    const content = res.data.content as string | undefined;
+    // @ts-ignore
+    const downloadUrl = res.data.download_url as string | undefined;
 
-    return NextResponse.json(JSON.parse(content));
+    const rawJson = content
+      ? Buffer.from(content, "base64").toString()
+      : downloadUrl
+        ? await fetch(downloadUrl).then((response) => response.text())
+        : "";
+
+    if (!rawJson) {
+      return NextResponse.json(
+        { error: "Update failed", message: "Empty products file" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(JSON.parse(rawJson));
   } catch (error: unknown) {
     console.error("GITHUB GET ERROR:", error);
 
@@ -91,7 +108,22 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const products = await req.json();
+    const bodyText = await req.text();
+
+    if (!bodyText.trim()) {
+      return NextResponse.json(
+        { error: "Update failed", message: "Empty request body" },
+        { status: 400 },
+      );
+    }
+
+    const products = JSON.parse(bodyText);
+    if (!Array.isArray(products)) {
+      return NextResponse.json(
+        { error: "Update failed", message: "Products payload must be an array" },
+        { status: 400 },
+      );
+    }
 
     const encoded = Buffer.from(JSON.stringify(products, null, 2)).toString(
       "base64",
@@ -108,6 +140,9 @@ export async function PUT(req: NextRequest) {
       branch: "main",
       sha,
     });
+
+    invalidateProductsCache();
+    setRuntimeProducts(products as DTProduct[]);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

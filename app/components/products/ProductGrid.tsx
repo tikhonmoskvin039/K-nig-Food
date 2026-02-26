@@ -5,6 +5,7 @@ import ProductCard from "./ProductCard";
 import ProductFilters from "./ProductFilters";
 import { useProductContext } from "../../context/ProductContext";
 import { useLocalization } from "../../context/LocalizationContext";
+import GlobalLoader from "../GlobalLoader";
 
 interface ProductGridProps {
   pageSize?: number;
@@ -13,14 +14,13 @@ interface ProductGridProps {
 export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
   const {
     filteredProducts,
+    isLoading,
     categories,
     setSearchQuery,
     setCategoryFilter,
     setSortBy,
   } = useProductContext();
   const { labels } = useLocalization();
-
-  console.log(filteredProducts, Array.isArray(filteredProducts));
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +46,9 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
 
       {/* Product Grid */}
       <div className="mt-6 min-h-[calc(100vh-var(--header-height-plus-top-section-height))]">
-        {displayedProducts.length > 0 ? (
+        {isLoading ? (
+          <GlobalLoader mode="inline" className="h-full min-h-[320px]" />
+        ) : displayedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
             {displayedProducts.map((product) => (
               <ProductCard key={product.ID} product={product} />

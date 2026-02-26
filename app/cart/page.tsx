@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -10,10 +11,38 @@ import { removeFromCart, updateQuantity } from "../store/slices/cartSlice";
 import { showMiniCart } from "../utils/MiniCartController";
 import { X, Plus, Minus } from "lucide-react";
 
+const CART_UPDATED_AT_KEY = "cart_updated_at";
+const CART_TTL_MS = 24 * 60 * 60 * 1000;
+
 function CartContent() {
   const { labels } = useLocalization();
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.cart.items);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setExpiresAt(null);
+      return;
+    }
+
+    const syncExpiry = () => {
+      const raw = localStorage.getItem(CART_UPDATED_AT_KEY);
+      let updatedAt = raw ? Number(raw) : Date.now();
+
+      if (!raw || !Number.isFinite(updatedAt)) {
+        updatedAt = Date.now();
+        localStorage.setItem(CART_UPDATED_AT_KEY, String(updatedAt));
+      }
+
+      setExpiresAt(updatedAt + CART_TTL_MS);
+    };
+
+    syncExpiry();
+    const intervalId = setInterval(syncExpiry, 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [items.length]);
 
   const total = items.reduce(
     (sum, item) =>
@@ -32,12 +61,30 @@ function CartContent() {
     }
   };
 
+  const formattedExpiry = expiresAt
+    ? new Date(expiresAt).toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
   return (
     <section className="py-12 bg-white min-h-[calc(100vh-var(--header-height))]">
       <div className="max-w-6xl mx-auto px-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
           {labels.yourCart || "Ваша корзина"}
         </h1>
+
+        {items.length > 0 && formattedExpiry && (
+          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Товары в корзине хранятся 24 часа после последнего изменения. Если
+            заказ не будет оформлен, корзина очистится автоматически{" "}
+            <strong>{formattedExpiry}</strong>.
+          </div>
+        )}
 
         {items.length === 0 ? (
           <p className="text-gray-600 mt-10 mb-30 text-center">

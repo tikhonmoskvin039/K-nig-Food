@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import MiniCart from "./MiniCart";
 import { ReduxProvider } from "../providers";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useAppDispatch } from "../store/hooks";
+import { reconcileCartWithCatalog } from "../store/slices/cartSlice";
+import { toast } from "sonner";
 
 interface MenuItem {
   label: string;
@@ -15,6 +18,48 @@ interface MenuItem {
 
 interface MobileMenuProps {
   menuItems: MenuItem[];
+}
+
+function CartBackgroundTasks() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncCart = async () => {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!isCancelled && Array.isArray(data)) {
+          dispatch(reconcileCartWithCatalog(data as DTProduct[]));
+        }
+      } catch (error) {
+        console.error("Cart sync failed:", error);
+      }
+    };
+
+    syncCart();
+    const intervalId = setInterval(syncCart, 5 * 60 * 1000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    const noticeKey = "cart_auto_cleared_notice_v1";
+    const rawNotice = localStorage.getItem(noticeKey);
+
+    if (!rawNotice) return;
+
+    localStorage.removeItem(noticeKey);
+    toast.warning("Корзина очищена автоматически (раз в 24 часа).");
+  }, []);
+
+  return null;
 }
 
 const MobileMenu = ({ menuItems }: MobileMenuProps) => {
@@ -27,6 +72,8 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
 
   return (
     <ReduxProvider>
+      <CartBackgroundTasks />
+
       <div className="flex items-center gap-4 md:hidden">
         <button
           className="text-gray-900 hover:text-gray-700"

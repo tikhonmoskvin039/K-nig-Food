@@ -6,6 +6,7 @@ declare type DTCartItem = {
   SalePrice: string;
   quantity: number;
   FeatureImageURL: string;
+  Currency: string;
 };
 
 declare type DTProduct = {
@@ -30,10 +31,9 @@ declare type DTProduct = {
   SalePrice: string;
 
   Currency: string;
-};
 
-declare type DTCartItem = DTProduct & {
-  quantity: number;
+  CreatedAt?: string;
+  UpdatedAt?: string;
 };
 
 declare type DTAddress = {

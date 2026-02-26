@@ -8,10 +8,47 @@ import {
   ReactNode,
 } from "react";
 
+const CLIENT_PRODUCTS_CACHE_TTL_MS = 30_000;
+let cachedProducts: DTProduct[] | null = null;
+let cacheExpiresAt = 0;
+let pendingProductsRequest: Promise<DTProduct[]> | null = null;
+
+async function loadProductsFromApi(): Promise<DTProduct[]> {
+  const now = Date.now();
+
+  if (cachedProducts && now < cacheExpiresAt) {
+    return cachedProducts;
+  }
+
+  if (pendingProductsRequest) {
+    return pendingProductsRequest;
+  }
+
+  pendingProductsRequest = fetch("/api/products")
+    .then(async (res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to load products (${res.status})`);
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? (data as DTProduct[]) : [];
+    })
+    .then((products) => {
+      cachedProducts = products;
+      cacheExpiresAt = Date.now() + CLIENT_PRODUCTS_CACHE_TTL_MS;
+      return products;
+    })
+    .finally(() => {
+      pendingProductsRequest = null;
+    });
+
+  return pendingProductsRequest;
+}
+
 // Define context type
 interface ProductContextType {
   products: DTProduct[];
   filteredProducts: DTProduct[];
+  isLoading: boolean;
   setFilteredProducts: (products: DTProduct[]) => void;
   categories: string[];
   setSearchQuery: (query: string) => void;
@@ -26,17 +63,18 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<DTProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<DTProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortBy, setSortBy] = useState<string>("name");
 
   useEffect(() => {
-    fetch("/api/products")
-      .then((res) => res.json())
-      .then((data: any) => {
-        // Убедимся, что data — массив
-        const productsArray: DTProduct[] = Array.isArray(data) ? data : [];
+    let isCancelled = false;
+
+    loadProductsFromApi()
+      .then((productsArray) => {
+        if (isCancelled) return;
 
         setProducts(productsArray);
         setFilteredProducts(productsArray);
@@ -50,8 +88,18 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         });
 
         setCategories([...categoriesSet].sort());
+        setIsLoading(false);
       })
-      .catch((err) => console.error("Failed to load products", err));
+      .catch((err) => {
+        if (!isCancelled) {
+          console.error("Failed to load products", err);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -84,6 +132,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       value={{
         products,
         filteredProducts,
+        isLoading,
         setFilteredProducts,
         categories,
         setSearchQuery,
