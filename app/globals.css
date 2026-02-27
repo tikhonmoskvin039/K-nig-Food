@@ -128,3 +128,22 @@ a {
     box-shadow: var(--shadow-soft);
   }
 }
+
+/* Prevent iOS Safari auto-zoom on focused form fields. */
+@supports (-webkit-touch-callout: none) {
+  @media (hover: none) and (pointer: coarse) {
+    .form-control,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    input[type="password"],
+    input[type="url"],
+    input[type="date"],
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+}
