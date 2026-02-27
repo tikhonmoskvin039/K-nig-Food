@@ -52,7 +52,7 @@
     "Title": "Бургер BBQ с говядиной",
     "Slug": "bbq-beef-burger",
     "Enabled": true,
-    "CatalogVisible": false,
+    "CatalogVisible": true,
     "PortionWeight": 300,
     "PortionUnit": "г",
     "ProductCategories": [
@@ -71,7 +71,7 @@
     "SalePrice": "300",
     "Currency": "RUR",
     "CreatedAt": "2026-02-26T15:04:37.089Z",
-    "UpdatedAt": "2026-02-27T06:22:04.176Z"
+    "UpdatedAt": "2026-02-27T06:23:07.146Z"
   },
   {
     "ID": "dish-004",
