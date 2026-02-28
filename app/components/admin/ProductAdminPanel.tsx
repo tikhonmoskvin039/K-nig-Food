@@ -39,6 +39,7 @@ import {
 } from "../../services/admin/productAdminTable";
 import { sanitizeNumericString } from "../../services/admin/productForm";
 import { readApiErrorMessage } from "../../services/shared/http";
+import ButtonSpinner from "../common/ButtonSpinner";
 
 export default function ProductAdminPanel() {
   const [products, setProducts] = useState<DTProduct[]>([]);
@@ -117,7 +118,8 @@ export default function ProductAdminPanel() {
       console.error(error);
       if (showErrorToast) {
         toast.error("Ошибка загрузки товаров", {
-          description: error instanceof Error ? error.message : "Попробуйте позже",
+          description:
+            error instanceof Error ? error.message : "Попробуйте позже",
         });
       }
       return false;
@@ -184,13 +186,15 @@ export default function ProductAdminPanel() {
 
       if (isReloaded) {
         toast.success(messages.success, {
-          description: "Изменения в меню могут появиться в течение нескольких минут.",
+          description:
+            "Изменения в меню могут появиться в течение нескольких минут.",
         });
       } else {
         toast.warning(
           `${messages.success}. Но не удалось обновить список автоматически.`,
           {
-            description: "Обновление меню на сайте также может занять несколько минут.",
+            description:
+              "Обновление меню на сайте также может занять несколько минут.",
           },
         );
       }
@@ -200,7 +204,8 @@ export default function ProductAdminPanel() {
       console.error(error);
       toast.dismiss(loadingToastId);
       toast.error(messages.error, {
-        description: error instanceof Error ? error.message : "Попробуйте еще раз",
+        description:
+          error instanceof Error ? error.message : "Попробуйте еще раз",
       });
       return false;
     } finally {
@@ -208,8 +213,14 @@ export default function ProductAdminPanel() {
     }
   };
 
-  const categoryOptions = useMemo(() => getCategoryOptions(products), [products]);
-  const currencyOptions = useMemo(() => getCurrencyOptions(products), [products]);
+  const categoryOptions = useMemo(
+    () => getCategoryOptions(products),
+    [products],
+  );
+  const currencyOptions = useMemo(
+    () => getCurrencyOptions(products),
+    [products],
+  );
   const portionUnitOptions = useMemo(
     () => getPortionUnitOptions(products),
     [products],
@@ -220,7 +231,10 @@ export default function ProductAdminPanel() {
     [products, tableState],
   );
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PAGE_SIZE),
+  );
   const currentPage = Math.min(Math.max(tableState.currentPage, 1), totalPages);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -237,7 +251,9 @@ export default function ProductAdminPanel() {
 
   const allVisibleSelected =
     currentPageProductIds.length > 0 &&
-    currentPageProductIds.every((id) => tableState.selectedProductIds.includes(id));
+    currentPageProductIds.every((id) =>
+      tableState.selectedProductIds.includes(id),
+    );
   const selectedProductsCount = tableState.selectedProductIds.length;
   const hasActiveFilters = hasActiveProductFilters(tableState);
 
@@ -289,7 +305,9 @@ export default function ProductAdminPanel() {
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
 
-    const nextProducts = products.filter((product) => product.ID !== deleteTarget.ID);
+    const nextProducts = products.filter(
+      (product) => product.ID !== deleteTarget.ID,
+    );
     const title = deleteTarget.Title;
 
     const ok = await saveProducts(nextProducts, {
@@ -311,7 +329,9 @@ export default function ProductAdminPanel() {
     if (tableState.selectedProductIds.length === 0) return;
 
     const selectedSet = new Set(tableState.selectedProductIds);
-    const nextProducts = products.filter((product) => !selectedSet.has(product.ID));
+    const nextProducts = products.filter(
+      (product) => !selectedSet.has(product.ID),
+    );
     const count = tableState.selectedProductIds.length;
 
     const ok = await saveProducts(nextProducts, {
@@ -348,8 +368,12 @@ export default function ProductAdminPanel() {
           onCategoryChange={(value) => setFilter("category", value)}
           onCurrencyChange={(value) => setFilter("currency", value)}
           onPortionUnitChange={(value) => setFilter("portionUnit", value)}
-          onEnabledChange={(value) => setFilter("enabled", value as EnabledFilter)}
-          onVisibleChange={(value) => setFilter("visible", value as VisibleFilter)}
+          onEnabledChange={(value) =>
+            setFilter("enabled", value as EnabledFilter)
+          }
+          onVisibleChange={(value) =>
+            setFilter("visible", value as VisibleFilter)
+          }
           onMinPriceChange={(value) =>
             setFilter("minPrice", sanitizeNumericString(value))
           }
@@ -411,7 +435,7 @@ export default function ProductAdminPanel() {
         open={!!deleteTarget}
         title="Удалить товар?"
         description={`Вы действительно хотите удалить "${deleteTarget?.Title}"? Это действие нельзя отменить.`}
-        confirmText="Удалить"
+        confirmText={isLoading ? <ButtonSpinner /> : "Удалить"}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -420,7 +444,7 @@ export default function ProductAdminPanel() {
         open={isBulkDeleteOpen}
         title="Удалить выбранные товары?"
         description={`Выбрано товаров: ${selectedProductsCount}. Это действие нельзя отменить.`}
-        confirmText="Удалить выбранные"
+        confirmText={isLoading ? <ButtonSpinner /> : "Удалить выбранные"}
         onConfirm={handleConfirmBulkDelete}
         onCancel={() => setIsBulkDeleteOpen(false)}
       />

@@ -18,8 +18,12 @@ import {
   SAFE_FUNCTION_BODY_LIMIT_BYTES,
   VERCEL_FUNCTION_BODY_LIMIT_BYTES,
 } from "../../lib/payloadSize";
-import { cloneProduct, createEmptyProduct } from "../../services/admin/productEditor";
+import {
+  cloneProduct,
+  createEmptyProduct,
+} from "../../services/admin/productEditor";
 import { readApiErrorMessage } from "../../services/shared/http";
+import ButtonSpinner from "../common/ButtonSpinner";
 
 type Props = {
   mode: "create" | "edit";
@@ -112,8 +116,8 @@ export default function ProductEditorPage({ mode, productId }: Props) {
       ? true
       : Boolean(
           product &&
-            initialProduct &&
-            JSON.stringify(product) !== JSON.stringify(initialProduct),
+          initialProduct &&
+          JSON.stringify(product) !== JSON.stringify(initialProduct),
         );
 
   const handleSave = async () => {
@@ -131,9 +135,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
       ...product,
       Currency: "RUR",
       CreatedAt:
-        mode === "create"
-          ? product.CreatedAt || now
-          : product.CreatedAt || now,
+        mode === "create" ? product.CreatedAt || now : product.CreatedAt || now,
       UpdatedAt: now,
     };
 
@@ -192,7 +194,8 @@ export default function ProductEditorPage({ mode, productId }: Props) {
           mode === "create"
             ? "Товар успешно добавлен"
             : "Изменения товара успешно сохранены",
-        description: "Изменения в меню могут появиться в течение нескольких минут.",
+        description:
+          "Изменения в меню могут появиться в течение нескольких минут.",
         delayMs: 500,
       });
 
@@ -258,7 +261,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         open={isExitConfirmOpen}
         title="Выйти без сохранения?"
         description="Несохраненные изменения будут потеряны."
-        confirmText="Выйти"
+        confirmText={isLoading ? <ButtonSpinner /> : "Выйти"}
         cancelText="Остаться"
         onConfirm={() => {
           setIsExitConfirmOpen(false);

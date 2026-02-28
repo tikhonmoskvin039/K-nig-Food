@@ -10,6 +10,7 @@ import {
   slugifyProductTitle,
   validateImageFile,
 } from "../../services/admin/productForm";
+import ButtonSpinner from "../common/ButtonSpinner";
 
 type Props = {
   product: DTProduct;
@@ -516,13 +517,7 @@ export default function ProductForm({
           className="btn-primary min-w-32"
           disabled={saveDisabled}
         >
-          {isSaving ? (
-            <span className="inline-block h-5 w-5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-          ) : isNew ? (
-            "Добавить"
-          ) : (
-            "Сохранить"
-          )}
+          {isSaving ? <ButtonSpinner /> : isNew ? "Добавить" : "Сохранить"}
         </button>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import ConfirmModal from "../common/ConfirmModal";
+import ButtonSpinner from "../common/ButtonSpinner";
 
 export function AdminLogoutButton() {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -23,10 +24,7 @@ export function AdminLogoutButton() {
 
   return (
     <>
-      <button
-        onClick={() => setConfirmOpen(true)}
-        className="btn-danger px-6"
-      >
+      <button onClick={() => setConfirmOpen(true)} className="btn-danger px-6">
         Выйти
       </button>
 
@@ -34,7 +32,7 @@ export function AdminLogoutButton() {
         open={confirmOpen}
         title="Выход из системы"
         description="Вы уверены, что хотите выйти? Все несохранённые данные будут потеряны."
-        confirmText={loading ? "Выход..." : "Выйти"}
+        confirmText={loading ? <ButtonSpinner /> : "Выйти"}
         cancelText="Отмена"
         onConfirm={handleLogout}
         onCancel={() => setConfirmOpen(false)}

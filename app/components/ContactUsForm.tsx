@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { useLocalization } from "@/app/context/LocalizationContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import ButtonSpinner from "./common/ButtonSpinner";
 
 export default function ContactUsForm() {
   const { contactForm } = useLocalization();
@@ -120,7 +121,7 @@ export default function ContactUsForm() {
             disabled={isSubmitting}
             className="btn-primary"
           >
-            {isSubmitting ? "Отправка..." : contactForm.buttonText}
+            {isSubmitting ? <ButtonSpinner /> : contactForm.buttonText}
           </button>
         </form>
       </div>
