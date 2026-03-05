@@ -1,5 +1,6 @@
 import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
+import "react-easy-crop/react-easy-crop.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";
@@ -7,6 +8,7 @@ import { Toaster } from "sonner";
 import AuthProvider from "./providers/SessionProvider";
 import { Suspense } from "react";
 import GlobalLoader from "./components/GlobalLoader";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // Load two fonts: one for headings, one for body
 const roboto = Roboto({
@@ -38,14 +40,16 @@ export default function RootLayout({
         `}
       >
         <AuthProvider>
-          <LocalizationProvider>
-            <Header />
-            <Suspense fallback={<GlobalLoader />}>
-              <div className="pt-(--header-height)">{children}</div>
-            </Suspense>
-            <Footer />
-            <Toaster position="top-right" richColors />
-          </LocalizationProvider>
+          <ThemeProvider>
+            <LocalizationProvider>
+              <Header />
+              <Suspense fallback={<GlobalLoader />}>
+                <div className="pt-(--header-height)">{children}</div>
+              </Suspense>
+              <Footer />
+              <Toaster position="top-right" richColors />
+            </LocalizationProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

@@ -62,6 +62,17 @@ export default function ProductDesktopTable({
                 <div className="truncate" title={product.Title}>
                   {product.Title}
                 </div>
+                {product.IsNewArrival && (
+                  <p className="text-xs text-amber-700 mt-1">
+                    Новинка
+                    {product.NewArrivalOrder && product.NewArrivalOrder > 0
+                      ? ` • Порядок: ${product.NewArrivalOrder}`
+                      : ""}
+                  </p>
+                )}
+                {!product.IsNewArrival && (
+                  <p className="text-xs text-slate-400 mt-1">Не в блоке новинок</p>
+                )}
               </td>
               <td className="p-3 text-center whitespace-nowrap">
                 {product.RegularPrice}

@@ -1,15 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
+import ImageCropperModal from "./ImageCropperModal";
 import {
   IMAGE_ACCEPT_ATTRIBUTE,
   IMAGE_SUPPORTED_FORMATS_LABEL,
-  readFileAsDataUrl,
+  MAX_GALLERY_IMAGES,
+  createUploadFileFromBlob,
   sanitizeNumericString,
   slugifyProductTitle,
+  uploadImageToAdmin,
   validateImageFile,
 } from "../../services/admin/productForm";
+import { cropImageFile } from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
 
 type Props = {
@@ -30,6 +34,16 @@ type FileErrorState = {
   ProductImageGallery?: string;
 };
 
+type CropTarget = "feature" | "gallery";
+
+type CropQueueState = {
+  target: CropTarget;
+  files: File[];
+  currentIndex: number;
+  previewUrl: string;
+  isSubmitting: boolean;
+};
+
 export default function ProductForm({
   product,
   isNew,
@@ -42,71 +56,165 @@ export default function ProductForm({
 }: Props) {
   const [fileErrors, setFileErrors] = useState<FileErrorState>({});
   const [categoryToAdd, setCategoryToAdd] = useState("");
+  const [cropQueue, setCropQueue] = useState<CropQueueState | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(
+    null,
+  );
 
-  const handleFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const previewUrl = cropQueue?.previewUrl;
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [cropQueue?.previewUrl]);
+
+  const startCropFlow = (target: CropTarget, files: File[]) => {
+    if (files.length === 0) return;
+
+    setCropQueue({
+      target,
+      files,
+      currentIndex: 0,
+      previewUrl: URL.createObjectURL(files[0]),
+      isSubmitting: false,
+    });
+  };
+
+  const moveToNextCropImage = () => {
+    setCropQueue((prev) => {
+      if (!prev) return prev;
+
+      const nextIndex = prev.currentIndex + 1;
+      if (nextIndex >= prev.files.length) {
+        return null;
+      }
+
+      return {
+        ...prev,
+        currentIndex: nextIndex,
+        previewUrl: URL.createObjectURL(prev.files[nextIndex]),
+        isSubmitting: false,
+      };
+    });
+  };
+
+  const handleFeatureImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = "";
+
     if (!file) return;
 
     const error = validateImageFile(file);
     if (error) {
       setFileErrors((prev) => ({ ...prev, FeatureImageURL: error }));
-      event.target.value = "";
       return;
     }
 
-    try {
-      const dataUrl = await readFileAsDataUrl(file);
-      onChange("FeatureImageURL", dataUrl);
-      setFileErrors((prev) => ({ ...prev, FeatureImageURL: undefined }));
-    } catch {
-      setFileErrors((prev) => ({
-        ...prev,
-        FeatureImageURL: "Не удалось прочитать файл",
-      }));
-    }
+    setFileErrors((prev) => ({ ...prev, FeatureImageURL: undefined }));
+    startCropFlow("feature", [file]);
   };
 
-  const handleGalleryImages = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryImages = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
+    event.target.value = "";
+
     if (files.length === 0) return;
 
     for (const file of files) {
       const error = validateImageFile(file);
       if (error) {
         setFileErrors((prev) => ({ ...prev, ProductImageGallery: error }));
-        event.target.value = "";
         return;
       }
     }
 
     const totalCount = product.ProductImageGallery.length + files.length;
-    if (totalCount > 5) {
+    if (totalCount > MAX_GALLERY_IMAGES) {
       setFileErrors((prev) => ({
         ...prev,
-        ProductImageGallery:
-          "В галерее может быть максимум 5 изображений (включая уже добавленные).",
+        ProductImageGallery: `В галерее может быть максимум ${MAX_GALLERY_IMAGES} изображений (включая уже добавленные).`,
       }));
-      event.target.value = "";
       return;
     }
 
+    setFileErrors((prev) => ({ ...prev, ProductImageGallery: undefined }));
+    startCropFlow("gallery", files);
+  };
+
+  const handleCropConfirm = async ({
+    croppedAreaPixels,
+  }: {
+    croppedAreaPixels: import("react-easy-crop").Area | null;
+  }) => {
+    if (!cropQueue) return;
+
+    const activeFile = cropQueue.files[cropQueue.currentIndex];
+    if (!activeFile) return;
+
+    const errorField =
+      cropQueue.target === "feature" ? "FeatureImageURL" : "ProductImageGallery";
+
+    setCropQueue((prev) => (prev ? { ...prev, isSubmitting: true } : prev));
+    setIsUploadingImage(true);
+
     try {
-      const dataUrls = await Promise.all(files.map(readFileAsDataUrl));
-      onChange("ProductImageGallery", [
-        ...product.ProductImageGallery,
-        ...dataUrls,
-      ]);
-      setFileErrors((prev) => ({ ...prev, ProductImageGallery: undefined }));
-    } catch {
+      const croppedBlob = await cropImageFile(activeFile, croppedAreaPixels);
+      const preparedFile = createUploadFileFromBlob(
+        croppedBlob,
+        activeFile,
+        `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
+      );
+      const uploadSlug =
+        product.Slug.trim() || slugifyProductTitle(product.Title) || "product";
+      const imageUrl = await uploadImageToAdmin({
+        file: preparedFile,
+        slug: uploadSlug,
+        type: cropQueue.target,
+      });
+
+      if (cropQueue.target === "feature") {
+        onChange("FeatureImageURL", imageUrl);
+      } else {
+        onChange("ProductImageGallery", [...product.ProductImageGallery, imageUrl]);
+      }
+
+      setFileErrors((prev) => ({ ...prev, [errorField]: undefined }));
+      moveToNextCropImage();
+    } catch (error) {
       setFileErrors((prev) => ({
         ...prev,
-        ProductImageGallery: "Не удалось прочитать файлы галереи",
+        [errorField]:
+          error instanceof Error
+            ? error.message
+            : "Не удалось обработать изображение",
       }));
+      setCropQueue((prev) => (prev ? { ...prev, isSubmitting: false } : prev));
+    } finally {
+      setIsUploadingImage(false);
     }
+  };
+
+  const cancelCropFlow = () => {
+    setCropQueue(null);
+    setIsUploadingImage(false);
   };
 
   const removeGalleryImage = (index: number) => {
     const updated = product.ProductImageGallery.filter((_, i) => i !== index);
+    onChange("ProductImageGallery", updated);
+  };
+
+  const reorderGalleryImages = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    const updated = [...product.ProductImageGallery];
+    const [moved] = updated.splice(fromIndex, 1);
+    if (!moved) return;
+    updated.splice(toIndex, 0, moved);
     onChange("ProductImageGallery", updated);
   };
 
@@ -134,6 +242,13 @@ export default function ProductForm({
     if (
       product.SalePrice.trim() &&
       product.RegularPrice.trim() &&
+      Number(product.SalePrice) === Number(product.RegularPrice)
+    ) {
+      errors.SalePrice =
+        "Акционная цена должна отличаться от стандартной цены.";
+    } else if (
+      product.SalePrice.trim() &&
+      product.RegularPrice.trim() &&
       Number(product.SalePrice) > Number(product.RegularPrice)
     ) {
       errors.SalePrice = "Акционная цена не может быть больше стандартной.";
@@ -158,12 +273,20 @@ export default function ProductForm({
     if (!product.FeatureImageURL.trim()) {
       errors.FeatureImageURL = "Главное изображение обязательно.";
     }
+    if (
+      product.IsNewArrival &&
+      (!product.NewArrivalOrder || product.NewArrivalOrder < 1)
+    ) {
+      errors.NewArrivalOrder = "Для новинки укажите порядок (от 1).";
+    }
 
     return errors;
   }, [
     product.Currency,
     product.FeatureImageURL,
+    product.IsNewArrival,
     product.LongDescription,
+    product.NewArrivalOrder,
     product.PortionUnit,
     product.PortionWeight,
     product.ProductCategories,
@@ -185,7 +308,8 @@ export default function ProductForm({
   };
 
   const hasErrors = Object.values(mergedErrors).some(Boolean);
-  const saveDisabled = hasErrors || isSaving || !canSave;
+  const isImageFlowActive = isUploadingImage || Boolean(cropQueue);
+  const saveDisabled = hasErrors || isSaving || !canSave || isImageFlowActive;
 
   const handleTitleChange = (value: string) => {
     const currentAutoSlug = slugifyProductTitle(product.Title);
@@ -204,6 +328,11 @@ export default function ProductForm({
 
   const portionWeightValue =
     product.PortionWeight > 0 ? String(product.PortionWeight) : "";
+
+  const newArrivalOrderValue =
+    product.NewArrivalOrder && product.NewArrivalOrder > 0
+      ? String(product.NewArrivalOrder)
+      : "";
 
   const renderFieldError = (message?: string) => (
     <p
@@ -232,7 +361,7 @@ export default function ProductForm({
           className="form-control"
           placeholder="Название, например: Борщ домашний"
           value={product.Title}
-          onChange={(e) => handleTitleChange(e.target.value)}
+          onChange={(event) => handleTitleChange(event.target.value)}
         />
         {renderFieldError(mergedErrors.Title)}
       </div>
@@ -243,19 +372,19 @@ export default function ProductForm({
           className="form-control"
           placeholder="Слаг, например: borsch-domashniy"
           value={product.Slug}
-          onChange={(e) => onChange("Slug", e.target.value.toLowerCase())}
+          onChange={(event) => onChange("Slug", event.target.value.toLowerCase())}
         />
         {renderFieldError(mergedErrors.Slug)}
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-2">
         {renderFieldLabel("Статус товара")}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={product.Enabled}
-              onChange={(e) => onChange("Enabled", e.target.checked)}
+              onChange={(event) => onChange("Enabled", event.target.checked)}
             />
             Активен
           </label>
@@ -264,11 +393,49 @@ export default function ProductForm({
             <input
               type="checkbox"
               checked={product.CatalogVisible}
-              onChange={(e) => onChange("CatalogVisible", e.target.checked)}
+              onChange={(event) =>
+                onChange("CatalogVisible", event.target.checked)
+              }
             />
             Показывать в каталоге
           </label>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={Boolean(product.IsNewArrival)}
+              onChange={(event) => {
+                const checked = event.target.checked;
+                onChange("IsNewArrival", checked);
+                if (!checked) {
+                  onChange("NewArrivalOrder", 0);
+                }
+              }}
+            />
+            Показывать в блоке "Новинки"
+          </label>
         </div>
+
+        {Boolean(product.IsNewArrival) && (
+          <div className="space-y-1 sm:max-w-sm">
+            {renderFieldLabel("Порядок в новинках (1, 2, 3...)")}
+            <input
+              className="form-control"
+              placeholder="Например: 1"
+              value={newArrivalOrderValue}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              onChange={(event) => {
+                const normalized = sanitizeNumericString(event.target.value);
+                onChange(
+                  "NewArrivalOrder",
+                  normalized ? Number(normalized) : 0,
+                );
+              }}
+            />
+            {renderFieldError(mergedErrors.NewArrivalOrder)}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -280,8 +447,8 @@ export default function ProductForm({
             value={product.RegularPrice}
             inputMode="numeric"
             pattern="[0-9]*"
-            onChange={(e) =>
-              onChange("RegularPrice", sanitizeNumericString(e.target.value))
+            onChange={(event) =>
+              onChange("RegularPrice", sanitizeNumericString(event.target.value))
             }
           />
           {renderFieldError(mergedErrors.RegularPrice)}
@@ -295,8 +462,8 @@ export default function ProductForm({
             value={product.SalePrice}
             inputMode="numeric"
             pattern="[0-9]*"
-            onChange={(e) =>
-              onChange("SalePrice", sanitizeNumericString(e.target.value))
+            onChange={(event) =>
+              onChange("SalePrice", sanitizeNumericString(event.target.value))
             }
           />
           {renderFieldError(mergedErrors.SalePrice)}
@@ -312,8 +479,8 @@ export default function ProductForm({
             value={portionWeightValue}
             inputMode="numeric"
             pattern="[0-9]*"
-            onChange={(e) => {
-              const normalized = sanitizeNumericString(e.target.value);
+            onChange={(event) => {
+              const normalized = sanitizeNumericString(event.target.value);
               onChange("PortionWeight", normalized ? Number(normalized) : 0);
             }}
           />
@@ -325,7 +492,7 @@ export default function ProductForm({
           <select
             className="form-control"
             value={product.PortionUnit}
-            onChange={(e) => onChange("PortionUnit", e.target.value)}
+            onChange={(event) => onChange("PortionUnit", event.target.value)}
           >
             <option value="" disabled>
               Ед. измерения
@@ -353,8 +520,8 @@ export default function ProductForm({
         <select
           className="form-control"
           value={categoryToAdd}
-          onChange={(e) => {
-            const nextCategory = e.target.value;
+          onChange={(event) => {
+            const nextCategory = event.target.value;
             setCategoryToAdd("");
 
             if (!nextCategory) return;
@@ -417,7 +584,7 @@ export default function ProductForm({
           className="form-control min-h-20"
           placeholder="Краткое описание, например: Насыщенный борщ со сметаной"
           value={product.ShortDescription}
-          onChange={(e) => onChange("ShortDescription", e.target.value)}
+          onChange={(event) => onChange("ShortDescription", event.target.value)}
         />
         {renderFieldError(mergedErrors.ShortDescription)}
       </div>
@@ -428,7 +595,7 @@ export default function ProductForm({
           className="form-control min-h-28"
           placeholder="Полное описание, например: Готовим на наваристом бульоне..."
           value={product.LongDescription}
-          onChange={(e) => onChange("LongDescription", e.target.value)}
+          onChange={(event) => onChange("LongDescription", event.target.value)}
         />
         {renderFieldError(mergedErrors.LongDescription)}
       </div>
@@ -439,9 +606,16 @@ export default function ProductForm({
           Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
           качества: 1200x1200 px (квадрат 1:1).
         </p>
+        <p className="text-xs text-gray-500">
+          {product.FeatureImageURL
+            ? "Главное изображение уже загружено. Вы можете заменить его новым."
+            : "Главное изображение пока не загружено."}
+        </p>
 
         <label className="btn-secondary cursor-pointer">
-          Загрузить главное изображение
+          {product.FeatureImageURL
+            ? "Заменить главное изображение"
+            : "Загрузить главное изображение"}
           <input
             type="file"
             accept={IMAGE_ACCEPT_ATTRIBUTE}
@@ -462,10 +636,18 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        {renderFieldLabel("Галерея (до 5 МБ на файл, максимум 5)")}
+        {renderFieldLabel(
+          `Галерея (до 5 МБ на файл, максимум ${MAX_GALLERY_IMAGES})`,
+        )}
         <p className="text-xs text-gray-500">
           Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
           качества: 1600x900 px (16:9) или минимум 1200 px по длинной стороне.
+        </p>
+        <p className="text-xs text-gray-500">
+          Загружено {product.ProductImageGallery.length} из {MAX_GALLERY_IMAGES}.
+          {product.ProductImageGallery.length > 1
+            ? " Перетащите карточки мышью, чтобы поменять порядок."
+            : ""}
         </p>
 
         <label className="btn-secondary cursor-pointer">
@@ -481,7 +663,20 @@ export default function ProductForm({
 
         <div className="flex flex-wrap gap-2">
           {product.ProductImageGallery.map((url, index) => (
-            <div key={`${url}-${index}`} className="relative">
+            <div
+              key={`${url}-${index}`}
+              className={`relative cursor-move transition ${draggedGalleryIndex === index ? "opacity-60" : ""}`}
+              draggable
+              onDragStart={() => setDraggedGalleryIndex(index)}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => {
+                if (draggedGalleryIndex !== null) {
+                  reorderGalleryImages(draggedGalleryIndex, index);
+                }
+                setDraggedGalleryIndex(null);
+              }}
+              onDragEnd={() => setDraggedGalleryIndex(null)}
+            >
               <img
                 src={url}
                 alt={`Галерея ${index + 1}`}
@@ -491,6 +686,7 @@ export default function ProductForm({
                 type="button"
                 onClick={() => removeGalleryImage(index)}
                 className="absolute -top-2 -right-2 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                title="Удалить изображение"
               >
                 x
               </button>
@@ -505,8 +701,8 @@ export default function ProductForm({
         <button
           type="button"
           onClick={onCancel}
-          className="btn-secondary"
-          disabled={isSaving}
+          className="btn-secondary min-w-28"
+          disabled={isSaving || isImageFlowActive}
         >
           Отмена
         </button>
@@ -517,9 +713,30 @@ export default function ProductForm({
           className="btn-primary min-w-32"
           disabled={saveDisabled}
         >
-          {isSaving ? <ButtonSpinner /> : isNew ? "Добавить" : "Сохранить"}
+          {isSaving || isImageFlowActive ? (
+            <ButtonSpinner />
+          ) : isNew ? (
+            "Добавить"
+          ) : (
+            "Сохранить"
+          )}
         </button>
       </div>
+
+      {cropQueue && (
+        <ImageCropperModal
+          open
+          imageUrl={cropQueue.previewUrl}
+          fileName={
+            cropQueue.files[cropQueue.currentIndex]
+              ? `${cropQueue.currentIndex + 1}/${cropQueue.files.length} - ${cropQueue.files[cropQueue.currentIndex].name}`
+              : ""
+          }
+          isSubmitting={cropQueue.isSubmitting}
+          onCancel={cancelCropFlow}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 }

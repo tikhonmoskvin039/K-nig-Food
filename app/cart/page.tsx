@@ -10,6 +10,7 @@ import Link from "next/link";
 import { removeFromCart, updateQuantity } from "../store/slices/cartSlice";
 import { showMiniCart } from "../utils/MiniCartController";
 import { X, Plus, Minus } from "lucide-react";
+import ProceedToCheckoutButton from "../components/cart/ProceedToCheckoutButton";
 
 const CART_UPDATED_AT_KEY = "cart_updated_at";
 const CART_TTL_MS = 24 * 60 * 60 * 1000;
@@ -156,13 +157,9 @@ function CartContent() {
                 {labels.total || "Всего"}: {total.toFixed(2)} ₽
               </p>
 
-              {/* Checkout Button Below */}
-              <Link
-                href="/checkout"
-                className="btn-primary"
-              >
-                {labels.proceedToCheckout || "Перейти к оформлению"}
-              </Link>
+              <ProceedToCheckoutButton
+                label={labels.proceedToCheckout || "Перейти к оформлению"}
+              />
             </div>
           </>
         )}

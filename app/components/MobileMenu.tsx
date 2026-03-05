@@ -76,7 +76,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
 
       <div className="flex items-center gap-4 md:hidden">
         <button
-          className="text-gray-900 hover:text-amber-700 transition"
+          className="text-[color:var(--color-foreground)] hover:text-amber-700 transition"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -86,9 +86,10 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
       </div>
 
       <nav
-        className={`absolute md:static top-[68px] left-0 w-full md:w-auto bg-white/95 md:bg-transparent border-b border-slate-200 md:border-0 md:flex flex-col md:flex-row items-start md:items-center p-4 md:p-0 transition-all shadow-sm md:shadow-none backdrop-blur ${
+        className={`absolute md:static top-[68px] left-0 w-full md:w-auto bg-[color:var(--color-surface)]/95 md:bg-transparent border-b md:border-0 md:flex flex-col md:flex-row items-start md:items-center p-4 md:p-0 transition-all shadow-sm md:shadow-none backdrop-blur ${
           isMenuOpen ? "block" : "hidden"
         }`}
+        style={{ borderColor: "var(--color-border)" }}
       >
         {menuItems.map(({ label, href }) => {
           let finalHref = href;
@@ -106,7 +107,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
               className={`px-3 py-2 block text-sm md:text-base rounded-md ${
                 session && label == "Администраторам"
                   ? "text-red-600 hover:text-red-700 hover:bg-red-50"
-                  : "text-gray-900 hover:text-amber-700 hover:bg-amber-50/70 md:hover:bg-transparent"
+                  : "text-[color:var(--color-foreground)] hover:text-amber-700 hover:bg-amber-50/70 md:hover:bg-transparent"
               }`}
               onClick={() => setIsMenuOpen(false)}
             >

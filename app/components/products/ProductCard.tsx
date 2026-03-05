@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
 import { showMiniCart } from "../../utils/MiniCartController";
+import { showAddedToCartToast } from "../../utils/cartToasts";
 
 interface ProductCardProps {
   product: DTProduct;
@@ -17,15 +19,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     parseFloat(product.SalePrice) < parseFloat(product.RegularPrice);
   const currencySymbol = getCurrencySymbol(product.Currency);
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { labels } = useLocalization();
+  const inCartQuantity = useAppSelector(
+    (state) => state.cart.items.find((item) => item.ID === product.ID)?.quantity || 0,
+  );
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
-
-    // Scroll to top smoothly
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
     showMiniCart();
+    showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 
   return (
@@ -45,6 +48,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.PortionUnit && (
             <div className="absolute bottom-2 right-2 bg-slate-900/60 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
               {product.PortionWeight} {product.PortionUnit}
+            </div>
+          )}
+
+          {inCartQuantity > 0 && (
+            <div className="absolute top-2 left-2 bg-emerald-600/90 text-white font-semibold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+              В корзине: {inCartQuantity}
             </div>
           )}
         </div>
@@ -105,8 +114,19 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="w-full sm:w-1/2 btn-primary"
             >
               {labels.addToCart || "Добавить в корзину"}
+              {inCartQuantity > 0 && (
+                <span className="rounded-full bg-white/25 px-2 py-0.5 text-xs font-semibold">
+                  {inCartQuantity}
+                </span>
+              )}
             </button>
           </div>
+
+          {inCartQuantity > 0 && (
+            <p className="text-xs text-emerald-700">
+              Уже добавлено в корзину: {inCartQuantity} шт.
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -42,6 +42,12 @@ export default function ProductMobileGrid({
             <p>
               Порция: {product.PortionWeight} {product.PortionUnit}
             </p>
+            <p>
+              Новинки:{" "}
+              {product.IsNewArrival
+                ? `Да${product.NewArrivalOrder && product.NewArrivalOrder > 0 ? ` (порядок ${product.NewArrivalOrder})` : ""}`
+                : "Нет"}
+            </p>
             <p>Создан: {formatProductDate(product.CreatedAt)}</p>
             <p>Изменен: {formatProductDate(product.UpdatedAt)}</p>
           </div>

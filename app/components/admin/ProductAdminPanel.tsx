@@ -435,7 +435,7 @@ export default function ProductAdminPanel() {
         open={!!deleteTarget}
         title="Удалить товар?"
         description={`Вы действительно хотите удалить "${deleteTarget?.Title}"? Это действие нельзя отменить.`}
-        confirmText={isLoading ? <ButtonSpinner /> : "Удалить"}
+        confirmText={isSaving ? <ButtonSpinner /> : "Удалить"}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -444,7 +444,7 @@ export default function ProductAdminPanel() {
         open={isBulkDeleteOpen}
         title="Удалить выбранные товары?"
         description={`Выбрано товаров: ${selectedProductsCount}. Это действие нельзя отменить.`}
-        confirmText={isLoading ? <ButtonSpinner /> : "Удалить выбранные"}
+        confirmText={isSaving ? <ButtonSpinner /> : "Удалить выбранные"}
         onConfirm={handleConfirmBulkDelete}
         onCancel={() => setIsBulkDeleteOpen(false)}
       />

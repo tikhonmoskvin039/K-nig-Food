@@ -60,11 +60,11 @@ export default function ConfirmModal({
             </div>
 
             <div className="flex justify-end gap-3 px-6 pb-6 pt-2 flex-wrap">
-              <button onClick={onCancel} className="btn-secondary">
+              <button onClick={onCancel} className="btn-secondary min-w-28 min-h-10">
                 {cancelText}
               </button>
 
-              <button onClick={onConfirm} className="btn-danger">
+              <button onClick={onConfirm} className="btn-danger min-w-28 min-h-10">
                 {confirmText}
               </button>
             </div>

@@ -13,6 +13,19 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_PAT,
 });
 
+function hasBase64Images(products: DTProduct[]) {
+  return products.some((product) => {
+    const featureImage = product.FeatureImageURL || "";
+    if (featureImage.startsWith("data:image/")) {
+      return true;
+    }
+
+    return (product.ProductImageGallery || []).some((url) =>
+      String(url || "").startsWith("data:image/"),
+    );
+  });
+}
+
 async function isAuthenticated(req: NextRequest) {
   const token = await getToken({
     req,
@@ -133,6 +146,17 @@ export async function PUT(req: NextRequest) {
     if (!Array.isArray(products)) {
       return NextResponse.json(
         { error: "Update failed", message: "Products payload must be an array" },
+        { status: 400 },
+      );
+    }
+
+    if (hasBase64Images(products as DTProduct[])) {
+      return NextResponse.json(
+        {
+          error: "Update failed",
+          message:
+            "Обнаружены изображения в формате base64. Сначала загрузите изображения как файлы.",
+        },
         { status: 400 },
       );
     }

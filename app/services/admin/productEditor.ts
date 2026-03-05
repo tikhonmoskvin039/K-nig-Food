@@ -10,6 +10,8 @@ export function createEmptyProduct(): DTProduct {
     ProductCategories: [],
     FeatureImageURL: "",
     ProductImageGallery: [],
+    IsNewArrival: false,
+    NewArrivalOrder: 0,
     ShortDescription: "",
     LongDescription: "",
     RegularPrice: "",
@@ -28,5 +30,8 @@ export function cloneProduct(product: DTProduct): DTProduct {
     UpdatedAt: product.UpdatedAt || "",
     ProductCategories: [...(product.ProductCategories || [])],
     ProductImageGallery: [...(product.ProductImageGallery || [])],
+    IsNewArrival: Boolean(product.IsNewArrival),
+    NewArrivalOrder:
+      typeof product.NewArrivalOrder === "number" ? product.NewArrivalOrder : 0,
   };
 }

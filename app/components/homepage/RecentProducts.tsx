@@ -11,7 +11,27 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
   const labels = localeData.labels;
 
   const allProducts = await getProducts();
-  const recentProducts = allProducts.slice(0, count);
+  const markedAsNew = allProducts.filter((product) => Boolean(product.IsNewArrival));
+  const source = markedAsNew.length > 0 ? markedAsNew : allProducts;
+
+  const recentProducts = source
+    .sort((a, b) => {
+      const orderA =
+        typeof a.NewArrivalOrder === "number" && a.NewArrivalOrder > 0
+          ? a.NewArrivalOrder
+          : Number.MAX_SAFE_INTEGER;
+      const orderB =
+        typeof b.NewArrivalOrder === "number" && b.NewArrivalOrder > 0
+          ? b.NewArrivalOrder
+          : Number.MAX_SAFE_INTEGER;
+
+      if (orderA !== orderB) return orderA - orderB;
+
+      const updatedA = a.UpdatedAt ? Date.parse(a.UpdatedAt) : 0;
+      const updatedB = b.UpdatedAt ? Date.parse(b.UpdatedAt) : 0;
+      return updatedB - updatedA;
+    })
+    .slice(0, count);
 
   if (recentProducts.length === 0) {
     return <p className="text-center text-gray-500">{labels.noProductsFound}</p>;

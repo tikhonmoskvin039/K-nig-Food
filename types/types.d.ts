@@ -24,6 +24,9 @@ declare type DTProduct = {
   FeatureImageURL: string;
   ProductImageGallery: string[];
 
+  IsNewArrival?: boolean;
+  NewArrivalOrder?: number;
+
   ShortDescription: string;
   LongDescription: string;
 

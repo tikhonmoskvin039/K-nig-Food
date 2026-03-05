@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import MobileMenu from "./MobileMenu";
 import { getLocalization } from "../utils/getLocalization";
+import ThemeToggleButton from "./ThemeToggleButton";
 
 export default function Header() {
   const content = getLocalization();
@@ -68,19 +69,28 @@ export default function Header() {
     >
       <header
         ref={headerRef}
-        className="border-b border-slate-200/80 bg-white/90 text-gray-900 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm"
+        className="border-b bg-[color:var(--color-surface)]/90 text-[color:var(--color-foreground)] backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85 shadow-sm"
+        style={{ borderColor: "var(--color-border)" }}
       >
         <div className="app-shell py-3.5 flex justify-between items-center gap-4">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold truncate">
-              <Link href="/" className="text-gray-900 hover:text-amber-700">
+              <Link
+                href="/"
+                className="text-[color:var(--color-foreground)] hover:text-amber-700"
+              >
                 {content.siteName}
               </Link>
             </h1>
-            <strong className="text-sm text-slate-600">{content.siteTagline}</strong>
+            <strong className="text-sm text-[color:var(--color-muted)]">
+              {content.siteTagline}
+            </strong>
           </div>
 
-          <MobileMenu menuItems={content.menu} />
+          <div className="flex items-center gap-2">
+            <ThemeToggleButton />
+            <MobileMenu menuItems={content.menu} />
+          </div>
         </div>
       </header>
     </motion.div>
