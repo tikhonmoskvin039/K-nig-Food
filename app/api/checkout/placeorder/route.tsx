@@ -82,8 +82,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Enrich cart items with download URLs for email
-    // We need to populate them from products.json before sending emails
+    // 4. Enrich cart items with additional fields before sending emails
     const enrichedCartItems = body.cartItems.map((item) => {
       return {
         ...item,

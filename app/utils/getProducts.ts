@@ -1,35 +1,7 @@
-import productsData from "../../configs/products.json";
-import { getProducts as getGithubProducts } from "../lib/githubStorage";
-import { getRuntimeProducts } from "../lib/runtimeProductsStore";
-
-function shouldUseGithubSource() {
-  const source = process.env.PRODUCTS_SOURCE?.toLowerCase();
-
-  if (source === "local") return false;
-  if (source === "github") return true;
-
-  return Boolean(process.env.GITHUB_REPO && process.env.GITHUB_PAT);
-}
+import { getAllProductsFromDatabase } from "../lib/productsRepository";
 
 async function getAllProductsFromSource(): Promise<DTProduct[]> {
-  if (!shouldUseGithubSource()) {
-    const runtime = getRuntimeProducts();
-    if (Array.isArray(runtime) && runtime.length > 0) {
-      return runtime;
-    }
-    return productsData as DTProduct[];
-  }
-
-  try {
-    const githubProducts = await getGithubProducts();
-    if (Array.isArray(githubProducts) && githubProducts.length > 0) {
-      return githubProducts as DTProduct[];
-    }
-    return productsData as DTProduct[];
-  } catch (error) {
-    console.error("Error loading products from GitHub:", error);
-    return productsData as DTProduct[];
-  }
+  return getAllProductsFromDatabase();
 }
 
 // Define function to get all visible products

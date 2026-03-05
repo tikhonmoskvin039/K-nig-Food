@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: knig-food-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: knig_food
+      POSTGRES_USER: knig_food_user
+      POSTGRES_PASSWORD: knig_food_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

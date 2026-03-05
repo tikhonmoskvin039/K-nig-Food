@@ -1,11 +1,11 @@
-# König Food - Database-Free eCommerce for Virtual Food Delivery Market
+# König Food - PostgreSQL eCommerce for Virtual Food Delivery Market
 
-**König Food** is a **database-free, self-hosted eCommerce solution for selling Virtual Food products** (digital downloads, WordPress themes, plugins, ebooks, software, etc.) built with **Next.js 16, TypeScript, Tailwind CSS, and Redux**. It's optimized for **small stores** with up to **200 products**, making it ideal for **independent developers and small business owners** who want to sell some products online **without monthly SaaS fees** like Shopify, Snipcart, or Medusa.
+**König Food** is a **self-hosted eCommerce solution for selling Virtual Food products** (digital downloads, WordPress themes, plugins, ebooks, software, etc.) built with **Next.js 16, TypeScript, Tailwind CSS, Redux, and PostgreSQL**. It's optimized for **small stores** with up to **200 products**, making it ideal for **independent developers and small business owners** who want to sell some products online **without monthly SaaS fees** like Shopify, Snipcart, or Medusa.
 
 
 ## Features
 - **Virtual Products Only** – Designed specifically for selling digital downloads (themes, plugins, ebooks, software, courses).
-- **No Database Required** – Products are stored in JSON files.
+- **PostgreSQL Storage** – Products are stored in a real database.
 - **Fast & Lightweight** – Built with Next.js and optimized for performance.
 - **Dynamic Category Pages** – Automatic category pages at `/products/{category-slug}` with SEO-friendly URLs (e.g., "WordPress Themes" → `/products/wordpress-themes`).
 - **Payment Methods**
@@ -13,7 +13,7 @@
 - **Product Demos** – Add demo URLs to let customers preview themes, plugins, or products before purchasing.
 - **Order Processing via Email (Gmail SMTP)** – Uses Gmail SMTP to send order notifications to admins and customers.
 - **SEO Optimized** – Fast, indexable product pages with automatic static generation.
-- **Deploy Anywhere** – Works on Vercel or any static hosting.  
+- **Deploy Anywhere** – Works on Vercel or any Node.js hosting with PostgreSQL.  
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## Tech Stack
 - **Frontend**: Next.js 16, TypeScript, Tailwind CSS, Redux
-- **Storage**: JSON-based file system (No DB required)
+- **Storage**: PostgreSQL + Prisma ORM
 - **Payment Methods**:
 
 ---
@@ -44,14 +44,26 @@ cd K-nig-Food
 pnpm install
 ```
 
+### Start PostgreSQL (Local)
+```sh
+docker compose up -d postgres
+```
+
+### Run DB Migration + Seed
+```sh
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
+```
+
 ### Configuration
 
-**/configs/products.json** - Contains all the product data for your store. Each product includes fields like:
+**/configs/products.json** - Initial seed data for products. Each product includes fields like:
 - ID, Title, Slug, ShortDescription, LongDescription
 - RegularPrice, SalePrice, Currency, FeatureImageURL
 - ProductImageGallery, Category
 
-This file is the source of truth for product listings shown on the site and is fully editable without a database. Perfect for managing WordPress themes, plugins, ebooks, digital assets, and other virtual products.
+This file is used as bootstrap data for PostgreSQL (and as local fallback if DB is empty).
 
 **/configs/locale.en.json** - Manages all localized content for your store’s interface including:
 - UI labels (buttons, messages)
@@ -132,26 +144,27 @@ Each information page includes:
 
 ---
 
-## Config-Only Customization Philosophy
+## Customization Philosophy
 
-**König Food is designed so you NEVER need to modify application code.** All customization happens through JSON configuration files in the `/configs` folder.
+**König Food combines admin-driven catalog management with JSON-driven content settings.**
 
-### Why Config-Only?
+### Why This Model?
 
-When you use König Food, the entire application codebase (components, pages, utilities, APIs) remains **unchanged**. You only edit JSON files to customize your store. This approach provides:
+The product catalog lives in PostgreSQL and is edited from `/admin`, while static content/settings stay in `/configs`. This approach provides:
 
-1. **Zero Coding Required** – Edit JSON files, no programming knowledge needed
-2. **Safe Updates** – Pull latest König Food updates without merge conflicts
-3. **Easy Backups** – Just backup the `/configs` folder to save all customizations
-4. **Version Control Friendly** – Track configuration changes without code noise
-5. **Fast Customization** – Change content, products, settings instantly
-6. **No Breaking Changes** – Application updates won't affect your custom content
+1. **Safe Product Editing** – Product CRUD through admin UI with server validation
+2. **Structured Persistence** – Catalog data stored in PostgreSQL
+3. **Easy Content Tweaks** – Locale, checkout, and homepage sections remain JSON-configurable
+4. **Safe Updates** – Pull latest app code without rewriting catalog manually
+5. **Version Control Friendly** – Track content/config changes cleanly
+6. **Fast Onboarding** – Seed catalog from `configs/products.json` on a new environment
 
 ### Configuration Files Overview
 
-All store customization happens in these files:
+Store customization is split across DB + config files:
 
-- **`configs/products.json`** – Your entire product catalog (add, edit, remove products)
+- **PostgreSQL (`products` table)** – Main product catalog used by storefront and admin panel
+- **`configs/products.json`** – Seed/fallback catalog for bootstrap and local fallback
 - **`configs/locale.(en/ru).json`** – All text content, labels, contact info, navigation, pages
 - **`configs/checkout.json`** – Payment method settings (enable/disable)
 - **`configs/homepage.json`** – Control which homepage sections appear and how many products to show
@@ -160,9 +173,9 @@ All store customization happens in these files:
 
 ### How It Works
 
-Instead of editing React components or TypeScript files, you simply:
+Typical workflow:
 
-1. **Add Products**: Edit `configs/products.json` → Products appear instantly
+1. **Add Products**: Use `/admin` panel (data is persisted in PostgreSQL)
 2. **Customize Text**: Edit `configs/locale.en.json` → All UI text updates
 3. **Toggle Features**: Edit `configs/homepage.json` → Sections show/hide
 4. **Create Docs**: Edit `configs/information-pages.json` → New pages available
@@ -177,7 +190,7 @@ Instead of editing React components or TypeScript files, you simply:
 }
 ```
 
-**That's it!** No code changes, no rebuilding, no complexity.
+This keeps day-to-day management simple without editing app code for normal operations.
 
 ### Benefits for Store Owners
 
@@ -192,9 +205,19 @@ This is what makes König Food perfect for small businesses and developers who w
 
 **/.env.local** – Stores sensitive environment variables and runtime configuration for your store:
 
+- **Database**
+  - `DATABASE_URL` – PostgreSQL connection string (required for product persistence)
+
 - **Email Notifications (Gmail SMTP)**
   - `GMAIL_USER` – Your Gmail address (used for sending all emails AND receiving admin notifications)
   - `GMAIL_APP_PASSWORD` – Gmail App Password (NOT your regular password - see setup guide below)
+
+- **Admin Auth (NextAuth + GitHub OAuth)**
+  - `GITHUB_CLIENT_ID`
+  - `GITHUB_CLIENT_SECRET`
+  - `ADMIN_EMAIL`
+  - `NEXTAUTH_URL`
+  - `NEXTAUTH_SECRET`
 
 Note: Never commit this file to Git or public repositories.
 
@@ -423,9 +446,9 @@ npm run build
 ---
 
 ### How It Works
-- **Product Listings** – All product data is stored in a flat products.json file. No database or backend is needed for product management.
+- **Product Listings** – Product data is stored in PostgreSQL (Prisma).
 - **Dynamic Category Pages** – Category pages are automatically generated at build time based on product categories:
-  - Each unique category in products.json gets its own page at `/products/{category-slug}`
+  - Each unique category in the product catalog gets its own page at `/products/{category-slug}`
   - Category names are converted to SEO-friendly slugs: "WordPress Themes" → `/products/wordpress-themes`
   - Uppercase letters converted to lowercase, spaces replaced with hyphens
   - All category pages are statically generated for maximum performance

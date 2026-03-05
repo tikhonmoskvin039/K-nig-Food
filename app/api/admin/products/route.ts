@@ -1,36 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Octokit } from "octokit";
 import { getToken } from "next-auth/jwt";
-import { invalidateProductsCache } from "../../../lib/githubStorage";
-import { setRuntimeProducts } from "../../../lib/runtimeProductsStore";
 import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "../../../lib/payloadSize";
-
-const repo = process.env.GITHUB_REPO!;
-const [owner, repoName] = repo.split("/");
-const path = "configs/products.json";
-
-const octokit = new Octokit({
-  auth: process.env.GITHUB_PAT,
-});
-
-type GithubProductsFileContent = {
-  sha?: string;
-  content?: string;
-  download_url?: string;
-};
-
-function hasBase64Images(products: DTProduct[]) {
-  return products.some((product) => {
-    const featureImage = product.FeatureImageURL || "";
-    if (featureImage.startsWith("data:image/")) {
-      return true;
-    }
-
-    return (product.ProductImageGallery || []).some((url) =>
-      String(url || "").startsWith("data:image/"),
-    );
-  });
-}
+import {
+  getAllProductsForAdmin,
+  hasBase64Images,
+  replaceAllProductsInDatabase,
+  validateProductsPayload,
+} from "../../../lib/productsRepository";
 
 async function isAuthenticated(req: NextRequest) {
   const token = await getToken({
@@ -39,22 +15,6 @@ async function isAuthenticated(req: NextRequest) {
   });
 
   return !!token;
-}
-
-async function getSHA() {
-  const res = await octokit.rest.repos.getContent({
-    owner,
-    repo: repoName,
-    path,
-    ref: "main",
-  });
-
-  const fileData = res.data as GithubProductsFileContent;
-  if (!fileData.sha) {
-    throw new Error("Products file SHA is missing");
-  }
-
-  return fileData.sha;
 }
 
 /*
@@ -68,50 +28,16 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await octokit.rest.repos.getContent({
-      owner,
-      repo: repoName,
-      path,
-      ref: "main",
-    });
-
-    const fileData = res.data as GithubProductsFileContent;
-    const content = fileData.content;
-    const downloadUrl = fileData.download_url;
-
-    const rawJson = content
-      ? Buffer.from(content, "base64").toString()
-      : downloadUrl
-        ? await fetch(downloadUrl).then((response) => response.text())
-        : "";
-
-    if (!rawJson) {
-      return NextResponse.json(
-        { error: "Update failed", message: "Empty products file" },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json(JSON.parse(rawJson));
+    const products = await getAllProductsForAdmin();
+    return NextResponse.json(products);
   } catch (error: unknown) {
-    console.error("GITHUB GET ERROR:", error);
-
-    let message = "Getting products failed";
-    let status = undefined;
-
-    if (error instanceof Error) {
-      message = error.message;
-    }
-
-    if (typeof error === "object" && error !== null && "status" in error) {
-      status = (error as { status?: number }).status;
-    }
+    console.error("PRODUCTS GET ERROR:", error);
 
     return NextResponse.json(
       {
-        error: "Update failed",
-        message,
-        status,
+        error: "Read failed",
+        message:
+          error instanceof Error ? error.message : "Getting products failed",
       },
       { status: 500 },
     );
@@ -150,7 +76,16 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const products = JSON.parse(bodyText);
+    let products: unknown;
+    try {
+      products = JSON.parse(bodyText);
+    } catch {
+      return NextResponse.json(
+        { error: "Update failed", message: "Invalid JSON payload" },
+        { status: 400 },
+      );
+    }
+
     if (!Array.isArray(products)) {
       return NextResponse.json(
         { error: "Update failed", message: "Products payload must be an array" },
@@ -169,45 +104,25 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const encoded = Buffer.from(JSON.stringify(products, null, 2)).toString(
-      "base64",
-    );
+    const normalizedProducts = products as DTProduct[];
+    const validationError = validateProductsPayload(normalizedProducts);
+    if (validationError) {
+      return NextResponse.json(
+        { error: "Update failed", message: validationError },
+        { status: 400 },
+      );
+    }
 
-    const sha = await getSHA();
-
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner,
-      repo: repoName,
-      path,
-      message: "Update products catalog",
-      content: encoded,
-      branch: "main",
-      sha,
-    });
-
-    invalidateProductsCache();
-    setRuntimeProducts(products as DTProduct[]);
+    await replaceAllProductsInDatabase(normalizedProducts);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("GITHUB UPDATE ERROR:", error);
-
-    let message = "Update failed";
-    let status = undefined;
-
-    if (error instanceof Error) {
-      message = error.message;
-    }
-
-    if (typeof error === "object" && error !== null && "status" in error) {
-      status = (error as { status?: number }).status;
-    }
+    console.error("PRODUCTS UPDATE ERROR:", error);
 
     return NextResponse.json(
       {
         error: "Update failed",
-        message,
-        status,
+        message: error instanceof Error ? error.message : "Update failed",
       },
       { status: 500 },
     );

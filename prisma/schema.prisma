@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                  String   @id
+  title               String
+  slug                String   @unique
+  enabled             Boolean  @default(true)
+  catalogVisible      Boolean  @default(true)
+  portionWeight       Int
+  portionUnit         String
+  productCategories   String[] @default([])
+  featureImageUrl     String
+  productImageGallery String[] @default([])
+  isNewArrival        Boolean  @default(false)
+  newArrivalOrder     Int      @default(0)
+  shortDescription    String
+  longDescription     String
+  regularPrice        String
+  salePrice           String   @default("")
+  currency            String   @default("RUR")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([catalogVisible])
+  @@index([enabled])
+  @@index([isNewArrival, newArrivalOrder])
+  @@map("products")
+}

@@ -8,16 +8,22 @@
     "build:vercel": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
     "@reduxjs/toolkit": "^2.11.2",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "next": "^16.1.1",
     "next-auth": "^4.24.13",
     "nodemailer": "^7.0.12",
-    "octokit": "^5.0.5",
+    "pg": "^8.20.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-icons": "^5.5.0",
@@ -37,6 +43,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "prisma": "^6.19.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
