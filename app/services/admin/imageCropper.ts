@@ -1,4 +1,9 @@
-import type { Area } from "react-easy-crop";
+export type CropPixels = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -15,7 +20,7 @@ function loadImage(src: string) {
 
 export async function cropImageFile(
   file: File,
-  croppedAreaPixels: Area | null,
+  croppedAreaPixels: CropPixels | null,
 ): Promise<Blob> {
   if (!croppedAreaPixels) {
     return file;

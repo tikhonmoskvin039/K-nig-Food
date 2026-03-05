@@ -1,6 +1,6 @@
 import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
-import "react-easy-crop/react-easy-crop.css";
+import "react-image-crop/dist/ReactCrop.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";

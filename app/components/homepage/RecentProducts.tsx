@@ -11,10 +11,12 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
   const labels = localeData.labels;
 
   const allProducts = await getProducts();
-  const markedAsNew = allProducts.filter((product) => Boolean(product.IsNewArrival));
-  const source = markedAsNew.length > 0 ? markedAsNew : allProducts;
-
-  const recentProducts = source
+  const recentProducts = allProducts
+    .filter(
+      (product) =>
+        Boolean(product.IsNewArrival) ||
+        (typeof product.NewArrivalOrder === "number" && product.NewArrivalOrder > 0),
+    )
     .sort((a, b) => {
       const orderA =
         typeof a.NewArrivalOrder === "number" && a.NewArrivalOrder > 0

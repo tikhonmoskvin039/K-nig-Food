@@ -14,8 +14,9 @@ import {
   uploadImageToAdmin,
   validateImageFile,
 } from "../../services/admin/productForm";
-import { cropImageFile } from "../../services/admin/imageCropper";
+import { cropImageFile, type CropPixels } from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
+import ConfirmModal from "../common/ConfirmModal";
 
 type Props = {
   product: DTProduct;
@@ -59,6 +60,7 @@ export default function ProductForm({
   const [categoryToAdd, setCategoryToAdd] = useState("");
   const [cropQueue, setCropQueue] = useState<CropQueueState | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isCancelCropConfirmOpen, setIsCancelCropConfirmOpen] = useState(false);
   const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(
     null,
   );
@@ -148,7 +150,7 @@ export default function ProductForm({
   const handleCropConfirm = async ({
     croppedAreaPixels,
   }: {
-    croppedAreaPixels: import("react-easy-crop").Area | null;
+    croppedAreaPixels: CropPixels | null;
   }) => {
     if (!cropQueue) return;
 
@@ -198,9 +200,14 @@ export default function ProductForm({
     }
   };
 
-  const cancelCropFlow = () => {
+  const closeCropFlow = () => {
     setCropQueue(null);
     setIsUploadingImage(false);
+  };
+
+  const requestCancelCropFlow = () => {
+    if (!cropQueue || cropQueue.isSubmitting) return;
+    setIsCancelCropConfirmOpen(true);
   };
 
   const removeGalleryImage = (index: number) => {
@@ -739,10 +746,23 @@ export default function ProductForm({
               : ""
           }
           isSubmitting={cropQueue.isSubmitting}
-          onCancel={cancelCropFlow}
+          onCancel={requestCancelCropFlow}
           onConfirm={handleCropConfirm}
         />
       )}
+
+      <ConfirmModal
+        open={isCancelCropConfirmOpen}
+        title="Выйти из кадрирования?"
+        description="Текущее изображение не будет сохранено. Продолжить?"
+        confirmText="Выйти"
+        cancelText="Остаться"
+        onConfirm={() => {
+          setIsCancelCropConfirmOpen(false);
+          closeCropFlow();
+        }}
+        onCancel={() => setIsCancelCropConfirmOpen(false)}
+      />
     </div>
   );
 }

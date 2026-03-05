@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Cropper from "react-easy-crop";
-import type { Area, MediaSize, Point } from "react-easy-crop";
+import { useEffect, useState } from "react";
+import ReactCrop, {
+  centerCrop,
+  makeAspectCrop,
+  type Crop,
+  type PixelCrop,
+} from "react-image-crop";
+import type { CropPixels } from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
 
 export type CropAspectPreset = "square" | "portrait" | "landscape" | "free";
@@ -24,10 +29,64 @@ type Props = {
   isSubmitting?: boolean;
   onCancel: () => void;
   onConfirm: (result: {
-    croppedAreaPixels: Area | null;
+    croppedAreaPixels: CropPixels | null;
     preset: CropAspectPreset;
   }) => void;
 };
+
+const PRESET_ASPECTS: Record<Exclude<CropAspectPreset, "free">, number> = {
+  square: 1,
+  portrait: 3 / 4,
+  landscape: 16 / 9,
+};
+
+function createCenteredAspectCrop(
+  mediaWidth: number,
+  mediaHeight: number,
+  aspect: number,
+) {
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: "%",
+        width: 84,
+      },
+      aspect,
+      mediaWidth,
+      mediaHeight,
+    ),
+    mediaWidth,
+    mediaHeight,
+  );
+}
+
+function createDefaultFreeCrop(mediaWidth: number, mediaHeight: number): Crop {
+  const width = 84;
+  const height = Math.max(
+    20,
+    Math.min(84, (mediaWidth / mediaHeight) * 44),
+  );
+
+  return {
+    unit: "%",
+    width,
+    height,
+    x: (100 - width) / 2,
+    y: (100 - height) / 2,
+  };
+}
+
+function toCropPixels(crop: PixelCrop | null): CropPixels | null {
+  if (!crop) return null;
+  if (crop.width <= 0 || crop.height <= 0) return null;
+
+  return {
+    x: crop.x,
+    y: crop.y,
+    width: crop.width,
+    height: crop.height,
+  };
+}
 
 export default function ImageCropperModal({
   open,
@@ -37,11 +96,31 @@ export default function ImageCropperModal({
   onCancel,
   onConfirm,
 }: Props) {
-  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
   const [preset, setPreset] = useState<CropAspectPreset>("square");
-  const [naturalAspect, setNaturalAspect] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
+
+  const activeAspect =
+    preset === "free" ? undefined : PRESET_ASPECTS[preset];
+
+  const applyCropForPreset = (
+    nextPreset: CropAspectPreset,
+    size: { width: number; height: number } | null,
+  ) => {
+    if (!size) return;
+
+    const nextAspect =
+      nextPreset === "free" ? undefined : PRESET_ASPECTS[nextPreset];
+
+    setCrop(
+      nextAspect
+        ? createCenteredAspectCrop(size.width, size.height, nextAspect)
+        : createDefaultFreeCrop(size.width, size.height),
+    );
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -53,13 +132,6 @@ export default function ImageCropperModal({
       document.body.style.overflow = previousOverflow;
     };
   }, [open]);
-
-  const activeAspect = useMemo(() => {
-    if (preset === "portrait") return 3 / 4;
-    if (preset === "landscape") return 16 / 9;
-    if (preset === "free") return naturalAspect || 1;
-    return 1;
-  }, [naturalAspect, preset]);
 
   if (!open) {
     return null;
@@ -94,7 +166,10 @@ export default function ImageCropperModal({
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setPreset(option.id)}
+                onClick={() => {
+                  setPreset(option.id);
+                  applyCropForPreset(option.id, imageSize);
+                }}
                 disabled={isSubmitting}
                 className={
                   preset === option.id
@@ -107,38 +182,40 @@ export default function ImageCropperModal({
             ))}
           </div>
 
-          <div className="relative h-[320px] sm:h-[420px] rounded-xl overflow-hidden border bg-slate-900/10">
-            <Cropper
-              image={imageUrl}
-              crop={crop}
-              zoom={zoom}
-              aspect={activeAspect}
-              showGrid
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={(_, nextPixels) => setCroppedAreaPixels(nextPixels)}
-              onMediaLoaded={(mediaSize: MediaSize) => {
-                const ratio =
-                  mediaSize.naturalWidth && mediaSize.naturalHeight
-                    ? mediaSize.naturalWidth / mediaSize.naturalHeight
-                    : 1;
-                setNaturalAspect(ratio || 1);
-              }}
-            />
-          </div>
+          <p className="text-xs text-slate-600">
+            {preset === "free"
+              ? "Свободный режим: тяните стороны/углы рамки для изменения пропорций."
+              : "Рамка фиксирует выбранные пропорции. Можно двигать и масштабировать её углами."}
+          </p>
 
-          <div className="space-y-2">
-            <p className="text-xs sm:text-sm text-slate-600">Масштаб</p>
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.01}
-              value={zoom}
-              onChange={(event) => setZoom(Number(event.target.value))}
-              className="w-full accent-amber-600"
-              disabled={isSubmitting}
-            />
+          <div className="relative rounded-xl overflow-auto border bg-slate-900/10 p-2">
+            <ReactCrop
+              crop={crop}
+              onChange={(nextCrop) => setCrop(nextCrop)}
+              onComplete={(pixelCrop) => setCompletedCrop(pixelCrop)}
+              aspect={activeAspect}
+              keepSelection
+              ruleOfThirds
+              minWidth={40}
+              minHeight={40}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageUrl}
+                alt="Кадрирование"
+                className="max-h-[70vh] w-auto max-w-full object-contain select-none touch-none"
+                onLoad={(event) => {
+                  const target = event.currentTarget;
+                  const size = {
+                    width: target.naturalWidth,
+                    height: target.naturalHeight,
+                  };
+                  setImageSize(size);
+                  applyCropForPreset(preset, size);
+                  setCompletedCrop(null);
+                }}
+              />
+            </ReactCrop>
           </div>
         </div>
 
@@ -154,7 +231,12 @@ export default function ImageCropperModal({
 
           <button
             type="button"
-            onClick={() => onConfirm({ croppedAreaPixels, preset })}
+            onClick={() =>
+              onConfirm({
+                croppedAreaPixels: toCropPixels(completedCrop),
+                preset,
+              })
+            }
             className="btn-primary min-w-36"
             disabled={isSubmitting}
           >

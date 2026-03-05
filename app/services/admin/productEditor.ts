@@ -30,7 +30,9 @@ export function cloneProduct(product: DTProduct): DTProduct {
     UpdatedAt: product.UpdatedAt || "",
     ProductCategories: [...(product.ProductCategories || [])],
     ProductImageGallery: [...(product.ProductImageGallery || [])],
-    IsNewArrival: Boolean(product.IsNewArrival),
+    IsNewArrival:
+      Boolean(product.IsNewArrival) ||
+      (typeof product.NewArrivalOrder === "number" && product.NewArrivalOrder > 0),
     NewArrivalOrder:
       typeof product.NewArrivalOrder === "number" ? product.NewArrivalOrder : 0,
   };

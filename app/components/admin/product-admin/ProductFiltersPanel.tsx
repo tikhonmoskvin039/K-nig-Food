@@ -49,11 +49,11 @@ export default function ProductFiltersPanel({
   onSortByChange,
   onResetFilters,
 }: Props) {
-  const filterControlClass = "form-control bg-white/90";
+  const filterControlClass = "form-control";
   const filterControlActiveClass =
     "border-rose-500 shadow-[0_0_0_1px_rgba(244,63,94,0.45)] animate-[pulse_2.8s_ease-in-out_infinite]";
   const filterLabelClass =
-    "text-xs font-semibold uppercase tracking-wide text-gray-600";
+    "text-xs font-semibold uppercase tracking-wide text-[color:var(--color-muted)]";
 
   const isSearchActive = tableState.search !== DEFAULT_TABLE_STATE.search;
   const isCategoryActive = tableState.category !== DEFAULT_TABLE_STATE.category;
@@ -70,12 +70,26 @@ export default function ProductFiltersPanel({
     `${filterControlClass} ${isActive ? filterControlActiveClass : ""}`;
 
   return (
-    <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-4 md:p-5 space-y-4">
+    <div
+      className="mb-5 rounded-2xl border p-4 md:p-5 space-y-4"
+      style={{
+        borderColor: "var(--color-border)",
+        background:
+          "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%), var(--color-surface))",
+      }}
+    >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm md:text-base font-semibold text-gray-800">
+        <h3 className="text-sm md:text-base font-semibold text-[color:var(--color-foreground)]">
           Фильтры и поиск
         </h3>
-        <span className="text-xs md:text-sm text-gray-600 bg-white/80 border border-gray-200 rounded-full px-3 py-1">
+        <span
+          className="text-xs md:text-sm rounded-full px-3 py-1"
+          style={{
+            color: "var(--color-muted)",
+            border: "1px solid var(--color-border)",
+            background: "color-mix(in srgb, var(--color-surface) 90%, transparent)",
+          }}
+        >
           Найдено: {filteredCount} • Страница {currentPage}/{totalPages}
         </span>
       </div>

@@ -41,6 +41,28 @@ import { sanitizeNumericString } from "../../services/admin/productForm";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 
+const isNewArrivalProduct = (product: DTProduct) =>
+  Boolean(product.IsNewArrival) ||
+  (typeof product.NewArrivalOrder === "number" && product.NewArrivalOrder > 0);
+
+const sortNewArrivals = (products: DTProduct[]) =>
+  [...products].sort((a, b) => {
+    const orderA =
+      typeof a.NewArrivalOrder === "number" && a.NewArrivalOrder > 0
+        ? a.NewArrivalOrder
+        : Number.MAX_SAFE_INTEGER;
+    const orderB =
+      typeof b.NewArrivalOrder === "number" && b.NewArrivalOrder > 0
+        ? b.NewArrivalOrder
+        : Number.MAX_SAFE_INTEGER;
+
+    if (orderA !== orderB) return orderA - orderB;
+
+    const updatedA = a.UpdatedAt ? Date.parse(a.UpdatedAt) : 0;
+    const updatedB = b.UpdatedAt ? Date.parse(b.UpdatedAt) : 0;
+    return updatedB - updatedA;
+  });
+
 export default function ProductAdminPanel() {
   const [products, setProducts] = useState<DTProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -230,6 +252,10 @@ export default function ProductAdminPanel() {
     () => filterAndSortProducts(products, tableState),
     [products, tableState],
   );
+  const newArrivalProducts = useMemo(
+    () => sortNewArrivals(products.filter(isNewArrivalProduct)),
+    [products],
+  );
 
   const totalPages = Math.max(
     1,
@@ -347,12 +373,149 @@ export default function ProductAdminPanel() {
     setIsBulkDeleteOpen(false);
   };
 
+  const applyNewArrivalOrder = (idsInOrder: string[]) => {
+    const orderMap = new Map(idsInOrder.map((id, index) => [id, index + 1]));
+
+    setProducts((prev) =>
+      prev.map((product) => {
+        const nextOrder = orderMap.get(product.ID);
+
+        if (!nextOrder) {
+          return {
+            ...product,
+            IsNewArrival: false,
+            NewArrivalOrder: 0,
+          };
+        }
+
+        return {
+          ...product,
+          IsNewArrival: true,
+          NewArrivalOrder: nextOrder,
+        };
+      }),
+    );
+  };
+
+  const handleMoveNewArrival = (productId: string, direction: "up" | "down") => {
+    const ids = newArrivalProducts.map((item) => item.ID);
+    const index = ids.indexOf(productId);
+    if (index < 0) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= ids.length) return;
+
+    const reorderedIds = [...ids];
+    [reorderedIds[index], reorderedIds[targetIndex]] = [
+      reorderedIds[targetIndex],
+      reorderedIds[index],
+    ];
+
+    applyNewArrivalOrder(reorderedIds);
+  };
+
+  const handleSaveNewArrivalOrder = async () => {
+    const ids = newArrivalProducts.map((item) => item.ID);
+    const orderMap = new Map(ids.map((id, index) => [id, index + 1]));
+    const normalizedProducts = products.map((product) => {
+      const nextOrder = orderMap.get(product.ID);
+
+      if (!nextOrder) {
+        return {
+          ...product,
+          IsNewArrival: false,
+          NewArrivalOrder: 0,
+        };
+      }
+
+      return {
+        ...product,
+        IsNewArrival: true,
+        NewArrivalOrder: nextOrder,
+      };
+    });
+
+    await saveProducts(normalizedProducts, {
+      success: "Порядок блока «Новинки» сохранен",
+      error: "Не удалось сохранить порядок блока «Новинки»",
+    });
+  };
+
   return (
     <div className="surface-card p-4 md:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-bold md:text-2xl">Каталог товаров</h2>
         <ProductCreateControl />
       </div>
+
+      {!isLoading && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-sm md:text-base font-semibold text-amber-900">
+                Управление блоком «Новинки»
+              </h3>
+              <p className="text-xs md:text-sm text-amber-800">
+                Отмечайте товар как новинку в форме товара, затем меняйте порядок
+                кнопками ↑ / ↓ и сохраняйте.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-primary min-w-52"
+              onClick={handleSaveNewArrivalOrder}
+              disabled={isSaving || newArrivalProducts.length === 0}
+            >
+              {isSaving ? <ButtonSpinner /> : "Сохранить порядок новинок"}
+            </button>
+          </div>
+
+          {newArrivalProducts.length === 0 ? (
+            <p className="mt-3 text-xs text-amber-800">
+              Пока нет отмеченных новинок.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {newArrivalProducts.map((product, index) => (
+                <div
+                  key={product.ID}
+                  className="rounded-lg border border-amber-200 bg-white/90 px-3 py-2 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">
+                      {index + 1}. {product.Title}
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      ID: {product.ID}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      className="btn-secondary px-3 py-1.5"
+                      onClick={() => handleMoveNewArrival(product.ID, "up")}
+                      disabled={isSaving || index === 0}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary px-3 py-1.5"
+                      onClick={() => handleMoveNewArrival(product.ID, "down")}
+                      disabled={
+                        isSaving || index === newArrivalProducts.length - 1
+                      }
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {!isLoading && products.length > 0 && (
         <ProductFiltersPanel
