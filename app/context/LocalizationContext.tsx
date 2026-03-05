@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import GlobalLoader from "../components/GlobalLoader";
+import { getLocalization } from "../utils/getLocalization";
 
 // Define Localization Structure
 interface LocalizationData {
@@ -58,20 +58,63 @@ interface LocalizationData {
 
 // Create Context
 const LocalizationContext = createContext<LocalizationData | null>(null);
+const LOCALIZATION_CACHE_KEY = "localization_cache_v1";
+const LOCALIZATION_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const FALLBACK_LOCALIZATION = getLocalization() as unknown as LocalizationData;
 
 export function LocalizationProvider({ children }: { children: React.ReactNode }) {
-  const [localization, setLocalization] = useState<LocalizationData | null>(null);
+  const [localization, setLocalization] = useState<LocalizationData | null>(
+    FALLBACK_LOCALIZATION,
+  );
 
   useEffect(() => {
-    fetch("/api/localization")
-      .then((res) => res.json())
-      .then((data) => setLocalization(data))
-      .catch(() => console.error("Failed to load localization"));
-  }, []);
+    const hydrateFromStorage = () => {
+      try {
+        const raw = sessionStorage.getItem(LOCALIZATION_CACHE_KEY);
+        if (!raw) return;
 
-  if (!localization) {
-    return <GlobalLoader />; // Show loading state while fetching
-  }
+        const parsed = JSON.parse(raw) as {
+          expiresAt?: number;
+          localization?: LocalizationData;
+        };
+
+        if (
+          parsed?.expiresAt &&
+          parsed.expiresAt > Date.now() &&
+          parsed.localization
+        ) {
+          setLocalization(parsed.localization);
+        }
+      } catch {
+        // ignore cache read errors
+      }
+    };
+
+    const fetchFreshLocalization = async () => {
+      try {
+        const response = await fetch("/api/localization", {
+          cache: "force-cache",
+        });
+        if (!response.ok) return;
+
+        const data = (await response.json()) as LocalizationData;
+        setLocalization(data);
+
+        sessionStorage.setItem(
+          LOCALIZATION_CACHE_KEY,
+          JSON.stringify({
+            expiresAt: Date.now() + LOCALIZATION_CACHE_TTL_MS,
+            localization: data,
+          }),
+        );
+      } catch {
+        // no-op
+      }
+    };
+
+    hydrateFromStorage();
+    fetchFreshLocalization();
+  }, []);
 
   return <LocalizationContext.Provider value={localization}>{children}</LocalizationContext.Provider>;
 }

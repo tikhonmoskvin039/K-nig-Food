@@ -28,7 +28,7 @@ function CartBackgroundTasks() {
 
     const syncCart = async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/products", { cache: "force-cache" });
         if (!res.ok) return;
 
         const data = await res.json();

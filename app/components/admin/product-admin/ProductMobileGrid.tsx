@@ -2,6 +2,11 @@
 
 import ProductEditControl from "../ProductEditControl";
 import { formatProductDate } from "../../../services/admin/productAdminTable";
+import {
+  hasDiscountPrice,
+  isNewArrivalProduct,
+  isWeeklyOfferProduct,
+} from "../../../utils/productShowcase";
 
 type Props = {
   products: DTProduct[];
@@ -44,8 +49,14 @@ export default function ProductMobileGrid({
             </p>
             <p>
               Новинки:{" "}
-              {product.IsNewArrival
+              {isNewArrivalProduct(product)
                 ? `Да${product.NewArrivalOrder && product.NewArrivalOrder > 0 ? ` (порядок ${product.NewArrivalOrder})` : ""}`
+                : "Нет"}
+            </p>
+            <p>
+              Акции:{" "}
+              {isWeeklyOfferProduct(product) || hasDiscountPrice(product)
+                ? `Да${product.WeeklyOfferOrder && product.WeeklyOfferOrder > 0 ? ` (порядок ${product.WeeklyOfferOrder})` : ""}`
                 : "Нет"}
             </p>
             <p>Создан: {formatProductDate(product.CreatedAt)}</p>

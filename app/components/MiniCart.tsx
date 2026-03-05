@@ -67,7 +67,12 @@ export default function MiniCart() {
         <div className="absolute right-0 mt-2 w-[22rem] surface-card z-50 p-4">
           {cartItems.length === 0 ? (
             <p className="text-slate-600 text-sm text-center">
-              {labels.cartEmpty || "Your cart is empty."}
+              <Link
+                href="/products"
+                className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+              >
+                {labels.cartEmpty || "Your cart is empty."}
+              </Link>
             </p>
           ) : (
             <div className="space-y-4 max-h-64 overflow-y-auto">

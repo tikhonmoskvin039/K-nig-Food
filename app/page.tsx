@@ -3,6 +3,7 @@ import { getLocalization } from "./utils/getLocalization";
 import { getHomepageSettings } from "./utils/getHomepage";
 import HomepageBanner from "./components/homepage/HomepageBanner";
 import RecentProducts from "./components/homepage/RecentProducts";
+import WeeklyOffers from "./components/homepage/WeeklyOffers";
 import BrandStory from "./components/homepage/BrandStory";
 import Testimonials from "./components/homepage/Testimonials";
 import Brands from "./components/homepage/Brands";
@@ -23,6 +24,9 @@ export default function Home() {
       {homepageSettings.banner.enabled && <HomepageBanner />}
       {homepageSettings.recentProducts.enabled && (
         <RecentProducts count={homepageSettings.recentProducts.count} />
+      )}
+      {homepageSettings.weeklyOffers.enabled && (
+        <WeeklyOffers count={homepageSettings.weeklyOffers.count} />
       )}
       {homepageSettings.brandStory.enabled && <BrandStory />}
       {homepageSettings.testimonials.enabled && <Testimonials />}

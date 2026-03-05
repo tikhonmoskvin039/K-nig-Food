@@ -19,9 +19,16 @@ interface LocalizationData {
     sortByNewest: string;
     loadingProducts: string;
     noProductsFound: string;
+    noProductsHint: string;
     productDetails: string;
     products: string;
     recentProducts: string;
+    weeklyOffers: string;
+    catalogSelection: string;
+    allProductsFilter: string;
+    newProductsFilter: string;
+    promoProductsFilter: string;
+    goToMenu: string;
     orderConfirmationTitle: string;
     orderConfirmationMessage: string;
   };

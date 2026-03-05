@@ -119,7 +119,7 @@ export default function ContactUsForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary"
+            className="btn-primary min-h-11 min-w-44"
           >
             {isSubmitting ? <ButtonSpinner /> : contactForm.buttonText}
           </button>

@@ -4,7 +4,11 @@
   },
   "recentProducts": {
     "enabled": true,
-    "count": 3
+    "count": 6
+  },
+  "weeklyOffers": {
+    "enabled": true,
+    "count": 6
   },
   "brandStory": {
     "enabled": true

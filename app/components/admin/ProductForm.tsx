@@ -281,20 +281,12 @@ export default function ProductForm({
     if (!product.FeatureImageURL.trim()) {
       errors.FeatureImageURL = "Главное изображение обязательно.";
     }
-    if (
-      product.IsNewArrival &&
-      (!product.NewArrivalOrder || product.NewArrivalOrder < 1)
-    ) {
-      errors.NewArrivalOrder = "Для новинки укажите порядок (от 1).";
-    }
 
     return errors;
   }, [
     product.Currency,
     product.FeatureImageURL,
-    product.IsNewArrival,
     product.LongDescription,
-    product.NewArrivalOrder,
     product.PortionUnit,
     product.PortionWeight,
     product.ProductCategories,
@@ -336,11 +328,6 @@ export default function ProductForm({
 
   const portionWeightValue =
     product.PortionWeight > 0 ? String(product.PortionWeight) : "";
-
-  const newArrivalOrderValue =
-    product.NewArrivalOrder && product.NewArrivalOrder > 0
-      ? String(product.NewArrivalOrder)
-      : "";
 
   const renderFieldError = (message?: string) => (
     <p
@@ -407,43 +394,14 @@ export default function ProductForm({
             />
             Показывать в каталоге
           </label>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={Boolean(product.IsNewArrival)}
-              onChange={(event) => {
-                const checked = event.target.checked;
-                onChange("IsNewArrival", checked);
-                if (!checked) {
-                  onChange("NewArrivalOrder", 0);
-                }
-              }}
-            />
-            Показывать в блоке &quot;Новинки&quot;
-          </label>
         </div>
-
-        {Boolean(product.IsNewArrival) && (
-          <div className="space-y-1 sm:max-w-sm">
-            {renderFieldLabel("Порядок в новинках (1, 2, 3...)")}
-            <input
-              className="form-control"
-              placeholder="Например: 1"
-              value={newArrivalOrderValue}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              onChange={(event) => {
-                const normalized = sanitizeNumericString(event.target.value);
-                onChange(
-                  "NewArrivalOrder",
-                  normalized ? Number(normalized) : 0,
-                );
-              }}
-            />
-            {renderFieldError(mergedErrors.NewArrivalOrder)}
-          </div>
-        )}
+        <p className="text-xs text-slate-600">
+          Новинки и предложения недели настраиваются в табе
+          {" "}
+          <strong>«Управление витриной»</strong>
+          {" "}
+          в админке.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

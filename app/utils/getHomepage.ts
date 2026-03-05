@@ -9,6 +9,10 @@ export interface HomepageSettings {
     enabled: boolean;
     count: number;
   };
+  weeklyOffers: {
+    enabled: boolean;
+    count: number;
+  };
   brandStory: {
     enabled: boolean;
   };

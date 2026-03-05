@@ -12,6 +12,8 @@ export function createEmptyProduct(): DTProduct {
     ProductImageGallery: [],
     IsNewArrival: false,
     NewArrivalOrder: 0,
+    IsWeeklyOffer: false,
+    WeeklyOfferOrder: 0,
     ShortDescription: "",
     LongDescription: "",
     RegularPrice: "",
@@ -35,5 +37,11 @@ export function cloneProduct(product: DTProduct): DTProduct {
       (typeof product.NewArrivalOrder === "number" && product.NewArrivalOrder > 0),
     NewArrivalOrder:
       typeof product.NewArrivalOrder === "number" ? product.NewArrivalOrder : 0,
+    IsWeeklyOffer:
+      Boolean(product.IsWeeklyOffer) ||
+      (typeof product.WeeklyOfferOrder === "number" &&
+        product.WeeklyOfferOrder > 0),
+    WeeklyOfferOrder:
+      typeof product.WeeklyOfferOrder === "number" ? product.WeeklyOfferOrder : 0,
   };
 }

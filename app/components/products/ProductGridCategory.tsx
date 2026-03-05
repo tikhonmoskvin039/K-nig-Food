@@ -22,7 +22,7 @@ export default function ProductGridCategory({ category, pageSize = 18 }: Product
 
     // Clean up: reset filter when component unmounts
     return () => {
-      setCategoryFilter("all");
+      setCategoryFilter("");
     };
   }, [category, setCategoryFilter]);
 

@@ -2,6 +2,11 @@
 
 import ProductEditControl from "../ProductEditControl";
 import { formatProductDate } from "../../../services/admin/productAdminTable";
+import {
+  hasDiscountPrice,
+  isNewArrivalProduct,
+  isWeeklyOfferProduct,
+} from "../../../utils/productShowcase";
 
 type Props = {
   products: DTProduct[];
@@ -62,7 +67,7 @@ export default function ProductDesktopTable({
                 <div className="truncate" title={product.Title}>
                   {product.Title}
                 </div>
-                {product.IsNewArrival && (
+                {isNewArrivalProduct(product) && (
                   <p className="text-xs text-amber-700 mt-1">
                     Новинка
                     {product.NewArrivalOrder && product.NewArrivalOrder > 0
@@ -70,9 +75,20 @@ export default function ProductDesktopTable({
                       : ""}
                   </p>
                 )}
-                {!product.IsNewArrival && (
+                {!isNewArrivalProduct(product) && (
                   <p className="text-xs text-slate-400 mt-1">Не в блоке новинок</p>
                 )}
+                <p
+                  className={`text-xs mt-1 ${
+                    isWeeklyOfferProduct(product) || hasDiscountPrice(product)
+                      ? "text-rose-700"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {isWeeklyOfferProduct(product) || hasDiscountPrice(product)
+                    ? `Акция${product.WeeklyOfferOrder && product.WeeklyOfferOrder > 0 ? ` • Порядок: ${product.WeeklyOfferOrder}` : ""}`
+                    : "Не в блоке акций"}
+                </p>
               </td>
               <td className="p-3 text-center whitespace-nowrap">
                 {product.RegularPrice}
