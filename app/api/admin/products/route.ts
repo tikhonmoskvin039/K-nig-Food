@@ -13,6 +13,12 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_PAT,
 });
 
+type GithubProductsFileContent = {
+  sha?: string;
+  content?: string;
+  download_url?: string;
+};
+
 function hasBase64Images(products: DTProduct[]) {
   return products.some((product) => {
     const featureImage = product.FeatureImageURL || "";
@@ -43,8 +49,12 @@ async function getSHA() {
     ref: "main",
   });
 
-  // @ts-ignore
-  return res.data.sha;
+  const fileData = res.data as GithubProductsFileContent;
+  if (!fileData.sha) {
+    throw new Error("Products file SHA is missing");
+  }
+
+  return fileData.sha;
 }
 
 /*
@@ -65,10 +75,9 @@ export async function GET(req: NextRequest) {
       ref: "main",
     });
 
-    // @ts-ignore
-    const content = res.data.content as string | undefined;
-    // @ts-ignore
-    const downloadUrl = res.data.download_url as string | undefined;
+    const fileData = res.data as GithubProductsFileContent;
+    const content = fileData.content;
+    const downloadUrl = fileData.download_url;
 
     const rawJson = content
       ? Buffer.from(content, "base64").toString()
@@ -95,7 +104,6 @@ export async function GET(req: NextRequest) {
     }
 
     if (typeof error === "object" && error !== null && "status" in error) {
-      // @ts-ignore — потому что GitHub SDK ошибки плохо типизированы
       status = (error as { status?: number }).status;
     }
 
@@ -192,7 +200,6 @@ export async function PUT(req: NextRequest) {
     }
 
     if (typeof error === "object" && error !== null && "status" in error) {
-      // @ts-ignore — потому что GitHub SDK ошибки плохо типизированы
       status = (error as { status?: number }).status;
     }
 

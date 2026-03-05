@@ -12,11 +12,6 @@ export interface CheckoutSettings {
   paymentMethods: PaymentMethod[];
 }
 
-// Default Fallback
-const defaultCheckoutSettings: CheckoutSettings = {
-  paymentMethods: [],
-};
-
 // Fetch Checkout Settings
 // Now using direct import for compatibility with Vercel
 export const getCheckoutSettings = (): CheckoutSettings => {

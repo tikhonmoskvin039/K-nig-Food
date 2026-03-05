@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 
@@ -49,7 +50,6 @@ interface ProductContextType {
   products: DTProduct[];
   filteredProducts: DTProduct[];
   isLoading: boolean;
-  setFilteredProducts: (products: DTProduct[]) => void;
   categories: string[];
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: string) => void;
@@ -62,9 +62,7 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 // Context provider component
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<DTProduct[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<DTProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortBy, setSortBy] = useState<string>("name");
@@ -77,17 +75,6 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         if (isCancelled) return;
 
         setProducts(productsArray);
-        setFilteredProducts(productsArray);
-
-        // Собираем категории только из массивов
-        const categoriesSet = new Set<string>();
-        productsArray.forEach((p) => {
-          if (Array.isArray(p.ProductCategories)) {
-            p.ProductCategories.forEach((cat) => categoriesSet.add(cat));
-          }
-        });
-
-        setCategories([...categoriesSet].sort());
         setIsLoading(false);
       })
       .catch((err) => {
@@ -102,7 +89,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
+  const filteredProducts = useMemo(() => {
     let updatedProducts = [...products];
 
     if (searchQuery) {
@@ -124,8 +111,21 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       return a.Title.localeCompare(b.Title);
     });
 
-    setFilteredProducts(updatedProducts);
+    return updatedProducts;
   }, [searchQuery, categoryFilter, sortBy, products]);
+
+  const categories = useMemo(() => {
+    const categoriesSet = new Set<string>();
+    products.forEach((product) => {
+      if (Array.isArray(product.ProductCategories)) {
+        product.ProductCategories.forEach((category) =>
+          categoriesSet.add(category),
+        );
+      }
+    });
+
+    return [...categoriesSet].sort();
+  }, [products]);
 
   return (
     <ProductContext.Provider
@@ -133,7 +133,6 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         products,
         filteredProducts,
         isLoading,
-        setFilteredProducts,
         categories,
         setSearchQuery,
         setCategoryFilter,

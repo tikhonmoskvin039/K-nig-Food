@@ -23,29 +23,6 @@ export interface HomepageSettings {
   };
 }
 
-// Default Fallback
-const defaultHomepageSettings: HomepageSettings = {
-  banner: {
-    enabled: true,
-  },
-  recentProducts: {
-    enabled: true,
-    count: 3,
-  },
-  brandStory: {
-    enabled: true,
-  },
-  testimonials: {
-    enabled: true,
-  },
-  newsletter: {
-    enabled: true,
-  },
-  brands: {
-    enabled: true,
-  },
-};
-
 // Fetch Homepage Settings
 // Now using direct import for compatibility with Vercel
 export const getHomepageSettings = (): HomepageSettings => {

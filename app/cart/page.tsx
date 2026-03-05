@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -19,30 +19,19 @@ function CartContent() {
   const { labels } = useLocalization();
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.cart.items);
-  const [expiresAt, setExpiresAt] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (items.length === 0) {
-      setExpiresAt(null);
-      return;
+  const expiresAt = useMemo(() => {
+    if (typeof window === "undefined" || items.length === 0) {
+      return null;
     }
 
-    const syncExpiry = () => {
-      const raw = localStorage.getItem(CART_UPDATED_AT_KEY);
-      let updatedAt = raw ? Number(raw) : Date.now();
+    const raw = localStorage.getItem(CART_UPDATED_AT_KEY);
+    const updatedAt = raw ? Number(raw) : NaN;
+    if (!Number.isFinite(updatedAt)) {
+      return null;
+    }
 
-      if (!raw || !Number.isFinite(updatedAt)) {
-        updatedAt = Date.now();
-        localStorage.setItem(CART_UPDATED_AT_KEY, String(updatedAt));
-      }
-
-      setExpiresAt(updatedAt + CART_TTL_MS);
-    };
-
-    syncExpiry();
-    const intervalId = setInterval(syncExpiry, 60 * 1000);
-
-    return () => clearInterval(intervalId);
+    return updatedAt + CART_TTL_MS;
   }, [items.length]);
 
   const total = items.reduce(

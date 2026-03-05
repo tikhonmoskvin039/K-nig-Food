@@ -30,24 +30,20 @@ function resolveInitialTheme(): ThemeMode {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<ThemeMode>(() => resolveInitialTheme());
 
   useEffect(() => {
-    const initial = resolveInitialTheme();
-    setTheme(initial);
-    applyTheme(initial);
-  }, []);
+    applyTheme(theme);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+  }, [theme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
       toggleTheme: () => {
-        setTheme((prev) => {
-          const next = prev === "light" ? "dark" : "light";
-          applyTheme(next);
-          window.localStorage.setItem(THEME_STORAGE_KEY, next);
-          return next;
-        });
+        setTheme((prev) => (prev === "light" ? "dark" : "light"));
       },
     }),
     [theme],

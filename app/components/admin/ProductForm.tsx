@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
+import Image from "next/image";
 import ImageCropperModal from "./ImageCropperModal";
 import {
   IMAGE_ACCEPT_ATTRIBUTE,
@@ -412,7 +413,7 @@ export default function ProductForm({
                 }
               }}
             />
-            Показывать в блоке "Новинки"
+            Показывать в блоке &quot;Новинки&quot;
           </label>
         </div>
 
@@ -625,9 +626,11 @@ export default function ProductForm({
         </label>
 
         {product.FeatureImageURL && (
-          <img
+          <Image
             src={product.FeatureImageURL}
             alt="Главное изображение"
+            width={160}
+            height={160}
             className="w-40 h-40 object-cover rounded border"
           />
         )}
@@ -677,9 +680,11 @@ export default function ProductForm({
               }}
               onDragEnd={() => setDraggedGalleryIndex(null)}
             >
-              <img
+              <Image
                 src={url}
                 alt={`Галерея ${index + 1}`}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-cover rounded border"
               />
               <button
@@ -725,6 +730,7 @@ export default function ProductForm({
 
       {cropQueue && (
         <ImageCropperModal
+          key={cropQueue.previewUrl}
           open
           imageUrl={cropQueue.previewUrl}
           fileName={

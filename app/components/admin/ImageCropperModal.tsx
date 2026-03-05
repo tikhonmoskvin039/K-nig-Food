@@ -45,14 +45,6 @@ export default function ImageCropperModal({
 
   useEffect(() => {
     if (!open) return;
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setPreset("square");
-    setCroppedAreaPixels(null);
-  }, [open, imageUrl]);
-
-  useEffect(() => {
-    if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";

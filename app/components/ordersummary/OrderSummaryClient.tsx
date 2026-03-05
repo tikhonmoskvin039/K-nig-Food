@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocalization } from "../../context/LocalizationContext";
 import { useProductContext } from "../../context/ProductContext";
@@ -8,32 +8,38 @@ import { useAppDispatch } from "../../store/hooks";
 import { clearCart } from "../../store/slices/cartSlice";
 import Image from "next/image";
 
+const readRecentOrder = (): DTOrderData | null => {
+  if (typeof window === "undefined") return null;
+
+  const recent = localStorage.getItem("recentOrder");
+  if (!recent) return null;
+
+  try {
+    return JSON.parse(recent) as DTOrderData;
+  } catch {
+    return null;
+  }
+};
+
 export default function OrderSummaryClient() {
-  const [order, setOrder] = useState<DTOrderData | null>(null);
+  const [order] = useState<DTOrderData | null>(() => readRecentOrder());
   const { labels } = useLocalization();
   const { products } = useProductContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-
   useEffect(() => {
-    const orderIdFromQuery = searchParams.get("orderId");
-    const recent = localStorage.getItem("recentOrder");
-
-    if (recent) {
-      const parsed = JSON.parse(recent) as DTOrderData;
-
-      setOrder(parsed);
-
-      // Clear cart ONCE if we're redirected with orderId in query,
-      if (orderIdFromQuery && parsed.orderId === orderIdFromQuery) {
-        dispatch(clearCart());
-      }
-    } else {
+    if (!order) {
       router.push("/cart");
+      return;
     }
-  }, [searchParams, router, dispatch]);
+
+    const orderIdFromQuery = searchParams.get("orderId");
+    if (orderIdFromQuery && order.orderId === orderIdFromQuery) {
+      dispatch(clearCart());
+    }
+  }, [dispatch, order, router, searchParams]);
 
   if (!order) return null;
 

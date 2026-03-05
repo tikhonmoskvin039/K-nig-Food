@@ -10,6 +10,11 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_PAT,
 });
 
+type GithubProductsFileContent = {
+  content?: string;
+  download_url?: string;
+};
+
 let cachedProducts: DTProduct[] | null = null;
 let cacheExpiresAt = 0;
 let pendingRequest: Promise<DTProduct[]> | null = null;
@@ -21,10 +26,9 @@ async function fetchProductsFromGithub(): Promise<DTProduct[]> {
     path,
   });
 
-  // @ts-ignore
-  const content = res.data.content as string | undefined;
-  // @ts-ignore
-  const downloadUrl = res.data.download_url as string | undefined;
+  const fileData = res.data as GithubProductsFileContent;
+  const content = fileData.content;
+  const downloadUrl = fileData.download_url;
 
   const rawJson = content
     ? Buffer.from(content, "base64").toString()
