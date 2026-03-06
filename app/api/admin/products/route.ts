@@ -70,7 +70,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Payload too large",
-          message: `Request body is too large for Vercel Functions limit (${Math.round(VERCEL_FUNCTION_BODY_LIMIT_BYTES / 1024 / 1024 * 10) / 10} MB).`,
+          message: `Request body is too large for Vercel Functions limit (${Math.round((VERCEL_FUNCTION_BODY_LIMIT_BYTES / 1024 / 1024) * 10) / 10} MB).`,
         },
         { status: 413 },
       );
@@ -81,14 +81,17 @@ export async function PUT(req: NextRequest) {
       products = JSON.parse(bodyText);
     } catch {
       return NextResponse.json(
-        { error: "Update failed", message: "Invalid JSON payload" },
+        { error: "", message: "Invalid JSON payload" },
         { status: 400 },
       );
     }
 
     if (!Array.isArray(products)) {
       return NextResponse.json(
-        { error: "Update failed", message: "Products payload must be an array" },
+        {
+          error: "Update failed",
+          message: "Products payload must be an array",
+        },
         { status: 400 },
       );
     }

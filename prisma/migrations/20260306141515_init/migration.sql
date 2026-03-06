@@ -1,3 +1,4 @@
+-- CreateTable
 CREATE TABLE "products" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -17,12 +18,19 @@ CREATE TABLE "products" (
     "salePrice" TEXT NOT NULL DEFAULT '',
     "currency" TEXT NOT NULL DEFAULT 'RUR',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
 CREATE UNIQUE INDEX "products_slug_key" ON "products"("slug");
+
+-- CreateIndex
 CREATE INDEX "products_catalogVisible_idx" ON "products"("catalogVisible");
+
+-- CreateIndex
 CREATE INDEX "products_enabled_idx" ON "products"("enabled");
+
+-- CreateIndex
 CREATE INDEX "products_isNewArrival_newArrivalOrder_idx" ON "products"("isNewArrival", "newArrivalOrder");
