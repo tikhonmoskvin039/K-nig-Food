@@ -2,6 +2,7 @@
 
 import type {
   EnabledFilter,
+  ShowcaseFilter,
   SortBy,
   TableState,
   VisibleFilter,
@@ -23,6 +24,7 @@ type Props = {
   onPortionUnitChange: (value: string) => void;
   onEnabledChange: (value: EnabledFilter) => void;
   onVisibleChange: (value: VisibleFilter) => void;
+  onShowcaseChange: (value: ShowcaseFilter) => void;
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
   onSortByChange: (value: SortBy) => void;
@@ -44,6 +46,7 @@ export default function ProductFiltersPanel({
   onPortionUnitChange,
   onEnabledChange,
   onVisibleChange,
+  onShowcaseChange,
   onMinPriceChange,
   onMaxPriceChange,
   onSortByChange,
@@ -62,6 +65,7 @@ export default function ProductFiltersPanel({
     tableState.portionUnit !== DEFAULT_TABLE_STATE.portionUnit;
   const isEnabledActive = tableState.enabled !== DEFAULT_TABLE_STATE.enabled;
   const isVisibleActive = tableState.visible !== DEFAULT_TABLE_STATE.visible;
+  const isShowcaseActive = tableState.showcase !== DEFAULT_TABLE_STATE.showcase;
   const isMinPriceActive = tableState.minPrice !== DEFAULT_TABLE_STATE.minPrice;
   const isMaxPriceActive = tableState.maxPrice !== DEFAULT_TABLE_STATE.maxPrice;
   const isSortByActive = tableState.sortBy !== DEFAULT_TABLE_STATE.sortBy;
@@ -189,6 +193,20 @@ export default function ProductFiltersPanel({
             placeholder="От"
             className={getFilterClass(isMinPriceActive)}
           />
+        </div>
+
+        <div className="space-y-1">
+          <p className={filterLabelClass}>Витрина</p>
+          <select
+            value={tableState.showcase}
+            onChange={(e) => onShowcaseChange(e.target.value as ShowcaseFilter)}
+            className={getFilterClass(isShowcaseActive)}
+          >
+            <option value="all">Все товары</option>
+            <option value="new">Только новинки</option>
+            <option value="weekly_offer">Только предложения недели</option>
+            <option value="discounted">Только со скидкой</option>
+          </select>
         </div>
 
         <div className="space-y-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useLocalization } from "../context/LocalizationContext";
 import { ShoppingCart, X } from "lucide-react";
@@ -10,6 +11,10 @@ import { removeFromCart } from "../store/slices/cartSlice";
 import { registerMiniCartTrigger } from "../utils/MiniCartController";
 
 export default function MiniCart() {
+  const pathname = usePathname();
+  const isCartPage = pathname === "/cart";
+  const isPreviewEnabled = !isCartPage;
+
   const cartItems = useAppSelector((state) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = cartItems.reduce(
@@ -27,17 +32,20 @@ export default function MiniCart() {
 
   useEffect(() => {
     registerMiniCartTrigger(() => {
+      if (!isPreviewEnabled) return;
       setIsVisible(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     });
-  }, []);
+  }, [isPreviewEnabled]);
 
   const handleMouseEnter = () => {
+    if (!isPreviewEnabled) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsVisible(true);
   };
 
   const handleMouseLeave = () => {
+    if (!isPreviewEnabled) return;
     timeoutRef.current = setTimeout(() => {
       setIsVisible(false);
     }, 300);
@@ -57,17 +65,25 @@ export default function MiniCart() {
         aria-label={labels.viewCart || "View cart"}
       >
         <ShoppingCart size={24} />
-        <span className="absolute -top-2 -right-2.5 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">
+        <span
+          suppressHydrationWarning
+          className="absolute -top-2 -right-2.5 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none"
+        >
           {totalQuantity}
         </span>
       </Link>
 
       {/* Mini Cart Dropdown */}
-      {isVisible && (
-        <div className="absolute right-0 mt-2 w-[22rem] surface-card z-50 p-4">
+      {isPreviewEnabled && isVisible && (
+        <div className="absolute right-0 mt-2 w-88 surface-card z-50 p-4">
           {cartItems.length === 0 ? (
             <p className="text-slate-600 text-sm text-center">
-              {labels.cartEmpty || "Your cart is empty."}
+              <Link
+                href="/products"
+                className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+              >
+                {labels.cartEmpty || "Добавьте товары, чтобы продолжить."}
+              </Link>
             </p>
           ) : (
             <div className="space-y-4 max-h-64 overflow-y-auto">

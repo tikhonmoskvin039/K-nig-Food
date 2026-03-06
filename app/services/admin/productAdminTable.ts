@@ -1,5 +1,12 @@
+import {
+  hasDiscountPrice,
+  isNewArrivalProduct,
+  isWeeklyOfferProduct,
+} from "../../utils/productShowcase";
+
 export type EnabledFilter = "all" | "enabled" | "disabled";
 export type VisibleFilter = "all" | "visible" | "hidden";
+export type ShowcaseFilter = "all" | "new" | "weekly_offer" | "discounted";
 export type SortBy =
   | "updated_desc"
   | "updated_asc"
@@ -17,6 +24,7 @@ export type TableState = {
   portionUnit: string;
   enabled: EnabledFilter;
   visible: VisibleFilter;
+  showcase: ShowcaseFilter;
   minPrice: string;
   maxPrice: string;
   sortBy: SortBy;
@@ -34,6 +42,7 @@ export const DEFAULT_TABLE_STATE: TableState = {
   portionUnit: "all",
   enabled: "all",
   visible: "all",
+  showcase: "all",
   minPrice: "",
   maxPrice: "",
   sortBy: "updated_desc",
@@ -145,6 +154,18 @@ export const filterAndSortProducts = (
     result = result.filter((product) => !product.CatalogVisible);
   }
 
+  if (tableState.showcase === "new") {
+    result = result.filter(isNewArrivalProduct);
+  }
+
+  if (tableState.showcase === "weekly_offer") {
+    result = result.filter(isWeeklyOfferProduct);
+  }
+
+  if (tableState.showcase === "discounted") {
+    result = result.filter(hasDiscountPrice);
+  }
+
   if (minPrice !== null && Number.isFinite(minPrice)) {
     result = result.filter((product) => Number(product.RegularPrice) >= minPrice);
   }
@@ -197,6 +218,7 @@ export const hasActiveProductFilters = (tableState: TableState) =>
   tableState.portionUnit !== DEFAULT_TABLE_STATE.portionUnit ||
   tableState.enabled !== DEFAULT_TABLE_STATE.enabled ||
   tableState.visible !== DEFAULT_TABLE_STATE.visible ||
+  tableState.showcase !== DEFAULT_TABLE_STATE.showcase ||
   tableState.minPrice !== DEFAULT_TABLE_STATE.minPrice ||
   tableState.maxPrice !== DEFAULT_TABLE_STATE.maxPrice ||
   tableState.sortBy !== DEFAULT_TABLE_STATE.sortBy;

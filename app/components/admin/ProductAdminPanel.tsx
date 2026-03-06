@@ -10,6 +10,7 @@ import ProductDesktopTable from "./product-admin/ProductDesktopTable";
 import ProductFiltersPanel from "./product-admin/ProductFiltersPanel";
 import ProductMobileGrid from "./product-admin/ProductMobileGrid";
 import ProductPagination from "./product-admin/ProductPagination";
+import ProductShowcaseManager from "./product-admin/ProductShowcaseManager";
 import {
   ADMIN_PROPAGATION_WARNING_DESCRIPTION,
   ADMIN_PROPAGATION_WARNING_TITLE,
@@ -41,29 +42,8 @@ import { sanitizeNumericString } from "../../services/admin/productForm";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 
-const isNewArrivalProduct = (product: DTProduct) =>
-  Boolean(product.IsNewArrival) ||
-  (typeof product.NewArrivalOrder === "number" && product.NewArrivalOrder > 0);
-
-const sortNewArrivals = (products: DTProduct[]) =>
-  [...products].sort((a, b) => {
-    const orderA =
-      typeof a.NewArrivalOrder === "number" && a.NewArrivalOrder > 0
-        ? a.NewArrivalOrder
-        : Number.MAX_SAFE_INTEGER;
-    const orderB =
-      typeof b.NewArrivalOrder === "number" && b.NewArrivalOrder > 0
-        ? b.NewArrivalOrder
-        : Number.MAX_SAFE_INTEGER;
-
-    if (orderA !== orderB) return orderA - orderB;
-
-    const updatedA = a.UpdatedAt ? Date.parse(a.UpdatedAt) : 0;
-    const updatedB = b.UpdatedAt ? Date.parse(b.UpdatedAt) : 0;
-    return updatedB - updatedA;
-  });
-
 export default function ProductAdminPanel() {
+  const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
   const [products, setProducts] = useState<DTProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -252,10 +232,6 @@ export default function ProductAdminPanel() {
     () => filterAndSortProducts(products, tableState),
     [products, tableState],
   );
-  const newArrivalProducts = useMemo(
-    () => sortNewArrivals(products.filter(isNewArrivalProduct)),
-    [products],
-  );
 
   const totalPages = Math.max(
     1,
@@ -373,74 +349,6 @@ export default function ProductAdminPanel() {
     setIsBulkDeleteOpen(false);
   };
 
-  const applyNewArrivalOrder = (idsInOrder: string[]) => {
-    const orderMap = new Map(idsInOrder.map((id, index) => [id, index + 1]));
-
-    setProducts((prev) =>
-      prev.map((product) => {
-        const nextOrder = orderMap.get(product.ID);
-
-        if (!nextOrder) {
-          return {
-            ...product,
-            IsNewArrival: false,
-            NewArrivalOrder: 0,
-          };
-        }
-
-        return {
-          ...product,
-          IsNewArrival: true,
-          NewArrivalOrder: nextOrder,
-        };
-      }),
-    );
-  };
-
-  const handleMoveNewArrival = (productId: string, direction: "up" | "down") => {
-    const ids = newArrivalProducts.map((item) => item.ID);
-    const index = ids.indexOf(productId);
-    if (index < 0) return;
-
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= ids.length) return;
-
-    const reorderedIds = [...ids];
-    [reorderedIds[index], reorderedIds[targetIndex]] = [
-      reorderedIds[targetIndex],
-      reorderedIds[index],
-    ];
-
-    applyNewArrivalOrder(reorderedIds);
-  };
-
-  const handleSaveNewArrivalOrder = async () => {
-    const ids = newArrivalProducts.map((item) => item.ID);
-    const orderMap = new Map(ids.map((id, index) => [id, index + 1]));
-    const normalizedProducts = products.map((product) => {
-      const nextOrder = orderMap.get(product.ID);
-
-      if (!nextOrder) {
-        return {
-          ...product,
-          IsNewArrival: false,
-          NewArrivalOrder: 0,
-        };
-      }
-
-      return {
-        ...product,
-        IsNewArrival: true,
-        NewArrivalOrder: nextOrder,
-      };
-    });
-
-    await saveProducts(normalizedProducts, {
-      success: "Порядок блока «Новинки» сохранен",
-      error: "Не удалось сохранить порядок блока «Новинки»",
-    });
-  };
-
   return (
     <div className="surface-card p-4 md:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -448,149 +356,146 @@ export default function ProductAdminPanel() {
         <ProductCreateControl />
       </div>
 
-      {!isLoading && (
-        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-sm md:text-base font-semibold text-amber-900">
-                Управление блоком «Новинки»
-              </h3>
-              <p className="text-xs md:text-sm text-amber-800">
-                Отмечайте товар как новинку в форме товара, затем меняйте порядок
-                кнопками ↑ / ↓ и сохраняйте.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="btn-primary min-w-52"
-              onClick={handleSaveNewArrivalOrder}
-              disabled={isSaving || newArrivalProducts.length === 0}
-            >
-              {isSaving ? <ButtonSpinner /> : "Сохранить порядок новинок"}
-            </button>
-          </div>
-
-          {newArrivalProducts.length === 0 ? (
-            <p className="mt-3 text-xs text-amber-800">
-              Пока нет отмеченных новинок.
-            </p>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {newArrivalProducts.map((product, index) => (
-                <div
-                  key={product.ID}
-                  className="rounded-lg border border-amber-200 bg-white/90 px-3 py-2 flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">
-                      {index + 1}. {product.Title}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      ID: {product.ID}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      className="btn-secondary px-3 py-1.5"
-                      onClick={() => handleMoveNewArrival(product.ID, "up")}
-                      disabled={isSaving || index === 0}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-secondary px-3 py-1.5"
-                      onClick={() => handleMoveNewArrival(product.ID, "down")}
-                      disabled={
-                        isSaving || index === newArrivalProducts.length - 1
-                      }
-                    >
-                      ↓
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {!isLoading && products.length > 0 && (
-        <ProductFiltersPanel
-          tableState={tableState}
-          categoryOptions={categoryOptions}
-          currencyOptions={currencyOptions}
-          portionUnitOptions={portionUnitOptions}
-          filteredCount={filteredProducts.length}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          hasActiveFilters={hasActiveFilters}
-          onSearchChange={(value) => setFilter("search", value)}
-          onCategoryChange={(value) => setFilter("category", value)}
-          onCurrencyChange={(value) => setFilter("currency", value)}
-          onPortionUnitChange={(value) => setFilter("portionUnit", value)}
-          onEnabledChange={(value) =>
-            setFilter("enabled", value as EnabledFilter)
+      <div
+        className="mb-6 inline-flex rounded-xl border p-1 gap-1"
+        style={{
+          borderColor: "var(--color-border)",
+          background:
+            "color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-surface) 18%)",
+        }}
+      >
+        <button
+          type="button"
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            activeTab === "catalog"
+              ? "shadow-sm"
+              : "hover:opacity-100 opacity-90"
+          }`}
+          style={
+            activeTab === "catalog"
+              ? {
+                  background:
+                    "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
+                  color: "var(--color-foreground)",
+                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                }
+              : { color: "var(--color-muted)" }
           }
-          onVisibleChange={(value) =>
-            setFilter("visible", value as VisibleFilter)
+          onClick={() => setActiveTab("catalog")}
+          aria-pressed={activeTab === "catalog"}
+        >
+          Таблица и фильтры
+        </button>
+        <button
+          type="button"
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            activeTab === "showcase"
+              ? "shadow-sm"
+              : "hover:opacity-100 opacity-90"
+          }`}
+          style={
+            activeTab === "showcase"
+              ? {
+                  background:
+                    "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
+                  color: "var(--color-foreground)",
+                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                }
+              : { color: "var(--color-muted)" }
           }
-          onMinPriceChange={(value) =>
-            setFilter("minPrice", sanitizeNumericString(value))
-          }
-          onMaxPriceChange={(value) =>
-            setFilter("maxPrice", sanitizeNumericString(value))
-          }
-          onSortByChange={(value) => setFilter("sortBy", value as SortBy)}
-          onResetFilters={resetFilters}
-        />
-      )}
-
-      {!isLoading && filteredProducts.length > 0 && (
-        <ProductBulkActions
-          allVisibleSelected={allVisibleSelected}
-          selectedProductsCount={selectedProductsCount}
-          isSaving={isSaving}
-          onToggleSelectAllVisible={handleToggleSelectAllVisible}
-          onOpenBulkDelete={() => setIsBulkDeleteOpen(true)}
-        />
-      )}
+          onClick={() => setActiveTab("showcase")}
+          aria-pressed={activeTab === "showcase"}
+        >
+          Управление витриной
+        </button>
+      </div>
 
       {isLoading ? (
         <GlobalLoader mode="inline" className="min-h-[50vh]" />
-      ) : filteredProducts.length === 0 ? (
-        <div className="py-16 text-center text-gray-500">
-          По текущим фильтрам товары не найдены
-        </div>
+      ) : activeTab === "showcase" ? (
+        <ProductShowcaseManager
+          products={products}
+          isSaving={isSaving}
+          onProductsChange={setProducts}
+          onSaveProducts={saveProducts}
+        />
       ) : (
         <>
-          <ProductMobileGrid
-            products={paginatedProducts}
-            selectedProductIds={tableState.selectedProductIds}
-            isSaving={isSaving}
-            emptyRowsCount={emptyRowsCount}
-            onToggleProductSelection={handleToggleProductSelection}
-            onDeleteRequest={setDeleteTarget}
-          />
+          {products.length > 0 && (
+            <ProductFiltersPanel
+              tableState={tableState}
+              categoryOptions={categoryOptions}
+              currencyOptions={currencyOptions}
+              portionUnitOptions={portionUnitOptions}
+              filteredCount={filteredProducts.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              hasActiveFilters={hasActiveFilters}
+              onSearchChange={(value) => setFilter("search", value)}
+              onCategoryChange={(value) => setFilter("category", value)}
+              onCurrencyChange={(value) => setFilter("currency", value)}
+              onPortionUnitChange={(value) => setFilter("portionUnit", value)}
+              onEnabledChange={(value) =>
+                setFilter("enabled", value as EnabledFilter)
+              }
+              onVisibleChange={(value) =>
+                setFilter("visible", value as VisibleFilter)
+              }
+              onShowcaseChange={(value) => setFilter("showcase", value)}
+              onMinPriceChange={(value) =>
+                setFilter("minPrice", sanitizeNumericString(value))
+              }
+              onMaxPriceChange={(value) =>
+                setFilter("maxPrice", sanitizeNumericString(value))
+              }
+              onSortByChange={(value) => setFilter("sortBy", value as SortBy)}
+              onResetFilters={resetFilters}
+            />
+          )}
 
-          <ProductDesktopTable
-            products={paginatedProducts}
-            selectedProductIds={tableState.selectedProductIds}
-            isSaving={isSaving}
-            allVisibleSelected={allVisibleSelected}
-            emptyRowsCount={emptyRowsCount}
-            onToggleSelectAllVisible={handleToggleSelectAllVisible}
-            onToggleProductSelection={handleToggleProductSelection}
-            onDeleteRequest={setDeleteTarget}
-          />
+          {filteredProducts.length > 0 && (
+            <ProductBulkActions
+              allVisibleSelected={allVisibleSelected}
+              selectedProductsCount={selectedProductsCount}
+              isSaving={isSaving}
+              onToggleSelectAllVisible={handleToggleSelectAllVisible}
+              onOpenBulkDelete={() => setIsBulkDeleteOpen(true)}
+            />
+          )}
 
-          <ProductPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onSetPage={setCurrentPage}
-          />
+          {filteredProducts.length === 0 ? (
+            <div className="py-16 text-center text-gray-500">
+              По текущим фильтрам товары не найдены
+            </div>
+          ) : (
+            <>
+              <ProductMobileGrid
+                products={paginatedProducts}
+                selectedProductIds={tableState.selectedProductIds}
+                isSaving={isSaving}
+                emptyRowsCount={emptyRowsCount}
+                onToggleProductSelection={handleToggleProductSelection}
+                onDeleteRequest={setDeleteTarget}
+              />
+
+              <ProductDesktopTable
+                products={paginatedProducts}
+                selectedProductIds={tableState.selectedProductIds}
+                isSaving={isSaving}
+                allVisibleSelected={allVisibleSelected}
+                emptyRowsCount={emptyRowsCount}
+                onToggleSelectAllVisible={handleToggleSelectAllVisible}
+                onToggleProductSelection={handleToggleProductSelection}
+                onDeleteRequest={setDeleteTarget}
+              />
+
+              <ProductPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onSetPage={setCurrentPage}
+              />
+            </>
+          )}
         </>
       )}
 

@@ -26,6 +26,8 @@ declare type DTProduct = {
 
   IsNewArrival?: boolean;
   NewArrivalOrder?: number;
+  IsWeeklyOffer?: boolean;
+  WeeklyOfferOrder?: number;
 
   ShortDescription: string;
   LongDescription: string;

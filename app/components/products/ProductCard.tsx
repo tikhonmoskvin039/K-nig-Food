@@ -7,16 +7,32 @@ import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
-import { showMiniCart } from "../../utils/MiniCartController";
 import { showAddedToCartToast } from "../../utils/cartToasts";
+import {
+  hasDiscountPrice,
+  isNewArrivalProduct,
+  isPromoProduct,
+} from "../../utils/productShowcase";
 
 interface ProductCardProps {
   product: DTProduct;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount =
-    parseFloat(product.SalePrice) < parseFloat(product.RegularPrice);
+  const hasDiscount = hasDiscountPrice(product);
+  const isNew = isNewArrivalProduct(product);
+  const isPromo = isPromoProduct(product);
+  const regularPriceValue = Number(product.RegularPrice);
+  const salePriceValue = Number(product.SalePrice);
+  const discountPercent =
+    hasDiscount &&
+    Number.isFinite(regularPriceValue) &&
+    Number.isFinite(salePriceValue) &&
+    regularPriceValue > 0 &&
+    salePriceValue >= 0 &&
+    salePriceValue < regularPriceValue
+      ? Math.round(((regularPriceValue - salePriceValue) / regularPriceValue) * 100)
+      : null;
   const currencySymbol = getCurrencySymbol(product.Currency);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -27,7 +43,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
-    showMiniCart();
     showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 
@@ -51,11 +66,26 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {inCartQuantity > 0 && (
-            <div className="absolute top-2 left-2 bg-emerald-600/90 text-white font-semibold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-              В корзине: {inCartQuantity}
-            </div>
-          )}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {isNew && (
+              <span className="bg-amber-500/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
+                Новинка
+              </span>
+            )}
+
+            {isPromo && (
+              <span className="inline-flex min-w-20 items-center justify-center text-center bg-rose-600/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
+                {discountPercent ? `Скидка ${discountPercent}%` : "Спеццена"}
+              </span>
+            )}
+
+            {inCartQuantity > 0 && (
+              <span className="bg-emerald-600/90 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full backdrop-blur-sm">
+                В корзине: {inCartQuantity}
+              </span>
+            )}
+          </div>
+
         </div>
       </Link>
 
@@ -102,31 +132,34 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-auto flex flex-col gap-2 pt-4">
           {/* Main action buttons row */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Link href={`/product/${product.Slug}`} className="sm:w-1/2">
-              <span className="btn-secondary w-full h-full">
-                {labels.viewProduct || "Узнать больше"}
-              </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+            <Link
+              href={`/product/${product.Slug}`}
+              className="btn-secondary w-full h-full min-h-11 justify-center text-center px-3 whitespace-normal leading-tight"
+            >
+              {labels.viewProduct || "Узнать больше"}
             </Link>
 
             <button
               onClick={handleAddToCart}
-              className="w-full sm:w-1/2 btn-primary"
+              className="w-full h-full min-h-11 btn-primary justify-center text-center px-3 whitespace-normal leading-tight"
             >
               {labels.addToCart || "Добавить в корзину"}
-              {inCartQuantity > 0 && (
-                <span className="rounded-full bg-white/25 px-2 py-0.5 text-xs font-semibold">
-                  {inCartQuantity}
-                </span>
-              )}
             </button>
           </div>
 
-          {inCartQuantity > 0 && (
-            <p className="text-xs text-emerald-700">
-              Уже добавлено в корзину: {inCartQuantity} шт.
-            </p>
-          )}
+          <p
+            className={`min-h-4 text-xs leading-4 transition-opacity ${
+              inCartQuantity > 0
+                ? "text-emerald-700 opacity-100"
+                : "text-transparent opacity-0 pointer-events-none select-none"
+            }`}
+            aria-live="polite"
+          >
+            {inCartQuantity > 0
+              ? `Уже добавлено в корзину: ${inCartQuantity} шт.`
+              : "\u00A0"}
+          </p>
         </div>
       </div>
     </div>

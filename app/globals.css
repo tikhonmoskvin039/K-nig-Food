@@ -91,7 +91,7 @@ a {
 
 @layer components {
   .app-shell {
-    @apply max-w-6xl mx-auto px-4 md:px-6;
+    @apply mx-auto w-full max-w-[1720px] px-4 md:px-6 xl:px-8;
   }
 
   .section-wrap {
@@ -131,15 +131,15 @@ a {
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-11 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-amber-600 hover:bg-amber-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-11 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-amber-600 hover:bg-amber-700;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed border;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-11 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed border;
     border-color: var(--color-border);
     color: var(--color-foreground);
     background: var(--color-surface);
@@ -150,11 +150,11 @@ a {
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-red-600 hover:bg-red-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-11 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed text-white bg-red-600 hover:bg-red-700;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-11 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
     color: var(--color-foreground);
   }
 
@@ -167,6 +167,41 @@ a {
     background: var(--color-surface);
     border-color: var(--color-border);
     box-shadow: var(--shadow-soft);
+  }
+
+  .admin-table-row {
+    transition: background-color 0.18s ease;
+  }
+
+  .admin-table-row:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-primary-soft) 28%,
+      var(--color-surface) 72%
+    );
+  }
+
+  .checkbox-card {
+    @apply rounded-xl border px-3 py-2.5 text-sm flex items-center gap-2 transition;
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-soft) 12%);
+    color: var(--color-foreground);
+    cursor: pointer;
+  }
+
+  .checkbox-card:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  }
+
+  .checkbox-card[data-checked="true"] {
+    border-color: color-mix(in srgb, var(--color-primary) 65%, var(--color-border));
+    background: color-mix(in srgb, var(--color-primary-soft) 42%, var(--color-surface) 58%);
+  }
+
+  .cart-expiry-notice {
+    border-color: color-mix(in srgb, var(--color-primary) 42%, var(--color-border));
+    background: color-mix(in srgb, var(--color-primary-soft) 56%, var(--color-surface) 44%);
+    color: color-mix(in srgb, var(--color-foreground) 86%, #78350f 14%);
   }
 }
 
@@ -204,6 +239,39 @@ html[data-theme="dark"] .border-gray-200,
 html[data-theme="dark"] .border-slate-200,
 html[data-theme="dark"] .border-slate-300 {
   border-color: var(--color-border) !important;
+}
+
+html[data-theme="dark"] .admin-table-row:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-surface-soft) 78%,
+    var(--color-surface) 22%
+  ) !important;
+}
+
+html[data-theme="dark"] .admin-table-row .bg-amber-100 {
+  background-color: color-mix(in srgb, #78350f 64%, transparent) !important;
+  color: #fcd34d !important;
+}
+
+html[data-theme="dark"] .admin-table-row .bg-rose-100 {
+  background-color: color-mix(in srgb, #881337 56%, transparent) !important;
+  color: #fda4af !important;
+}
+
+html[data-theme="dark"] .admin-table-row .bg-emerald-100 {
+  background-color: color-mix(in srgb, #064e3b 56%, transparent) !important;
+  color: #a7f3d0 !important;
+}
+
+html[data-theme="dark"] .cart-expiry-notice {
+  border-color: color-mix(in srgb, #f59e0b 46%, var(--color-border)) !important;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #451a03 62%, var(--color-surface) 38%),
+    color-mix(in srgb, #78350f 48%, var(--color-surface-soft) 52%)
+  ) !important;
+  color: #fde68a !important;
 }
 
 /* Prevent iOS Safari auto-zoom on focused form fields. */

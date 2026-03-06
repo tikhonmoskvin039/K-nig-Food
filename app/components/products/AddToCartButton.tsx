@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
-import { showMiniCart } from "../../utils/MiniCartController";
 import { showAddedToCartToast } from "../../utils/cartToasts";
 
 interface IAddToCartButtonProps {
@@ -21,7 +20,6 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
-    showMiniCart();
     showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 
@@ -29,20 +27,22 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
     <div className="mt-4 flex flex-col gap-2">
       <button
         onClick={handleAddToCart}
-        className="w-full sm:w-auto btn-primary"
+        className="w-full sm:w-auto btn-primary min-h-11 min-w-44 justify-center"
       >
         {labels.addToCart || "Add to Cart"}
-        {inCartQuantity > 0 && (
-          <span className="rounded-full bg-white/25 px-2 py-0.5 text-xs font-semibold">
-            {inCartQuantity}
-          </span>
-        )}
       </button>
-      {inCartQuantity > 0 && (
-        <p className="text-xs text-emerald-700">
-          Уже добавлено в корзину: {inCartQuantity} шт.
-        </p>
-      )}
+      <p
+        className={`min-h-4 text-xs leading-4 transition-opacity ${
+          inCartQuantity > 0
+            ? "text-emerald-700 opacity-100"
+            : "text-transparent opacity-0 pointer-events-none select-none"
+        }`}
+        aria-live="polite"
+      >
+        {inCartQuantity > 0
+          ? `Уже добавлено в корзину: ${inCartQuantity} шт.`
+          : "\u00A0"}
+      </p>
     </div>
   );
 }

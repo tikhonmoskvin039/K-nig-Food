@@ -22,9 +22,19 @@ export async function GET(request: NextRequest) {
           { status: 404 },
         );
       }
-      return NextResponse.json(product); // возвращаем полностью
+      const response = NextResponse.json(product);
+      response.headers.set(
+        "Cache-Control",
+        "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
+      );
+      return response; // возвращаем полностью
     } else {
-      return NextResponse.json(products); // возвращаем все товары полностью
+      const response = NextResponse.json(products);
+      response.headers.set(
+        "Cache-Control",
+        "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
+      );
+      return response; // возвращаем все товары полностью
     }
   } catch (error) {
     console.error("Error fetching products:", error);
