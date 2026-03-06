@@ -7,7 +7,6 @@ import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
-import { showMiniCart } from "../../utils/MiniCartController";
 import { showAddedToCartToast } from "../../utils/cartToasts";
 import {
   hasDiscountPrice,
@@ -44,7 +43,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
-    showMiniCart();
     showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 

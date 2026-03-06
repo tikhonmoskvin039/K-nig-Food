@@ -68,7 +68,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const isCartOrCheckoutPage = pathname === "/cart" || pathname === "/checkout";
+  const isCheckoutPage = pathname === "/checkout";
 
   return (
     <ReduxProvider>
@@ -82,7 +82,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {!isCartOrCheckoutPage && <MiniCart />}
+        {!isCheckoutPage && <MiniCart />}
       </div>
 
       <nav
@@ -104,7 +104,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
             <Link
               key={label}
               href={finalHref}
-              className={`px-3 py-2 block text-sm md:text-base rounded-md ${
+              className={`px-3 py-2 block text-sm md:text-base rounded-md whitespace-nowrap ${
                 session && label == "Администраторам"
                   ? "text-red-600 hover:text-red-700 hover:bg-red-50"
                   : "text-[color:var(--color-foreground)] hover:text-amber-700 hover:bg-amber-50/70 md:hover:bg-transparent"
@@ -116,7 +116,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           );
         })}
 
-        {!isCartOrCheckoutPage && (
+        {!isCheckoutPage && (
           <div className="hidden md:flex md:ml-4">
             <MiniCart />
           </div>

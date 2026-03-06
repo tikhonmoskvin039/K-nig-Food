@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { useLocalization } from "../../context/LocalizationContext";
-import { showMiniCart } from "../../utils/MiniCartController";
 import { showAddedToCartToast } from "../../utils/cartToasts";
 
 interface IAddToCartButtonProps {
@@ -21,7 +20,6 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
-    showMiniCart();
     showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 
