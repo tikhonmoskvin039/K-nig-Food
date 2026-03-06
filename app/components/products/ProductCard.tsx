@@ -23,6 +23,17 @@ export default function ProductCard({ product }: ProductCardProps) {
   const hasDiscount = hasDiscountPrice(product);
   const isNew = isNewArrivalProduct(product);
   const isPromo = isPromoProduct(product);
+  const regularPriceValue = Number(product.RegularPrice);
+  const salePriceValue = Number(product.SalePrice);
+  const discountPercent =
+    hasDiscount &&
+    Number.isFinite(regularPriceValue) &&
+    Number.isFinite(salePriceValue) &&
+    regularPriceValue > 0 &&
+    salePriceValue >= 0 &&
+    salePriceValue < regularPriceValue
+      ? Math.round(((regularPriceValue - salePriceValue) / regularPriceValue) * 100)
+      : null;
   const currencySymbol = getCurrencySymbol(product.Currency);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -65,8 +76,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
 
             {isPromo && (
-              <span className="bg-rose-600/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
-                Акция
+              <span className="inline-flex min-w-20 items-center justify-center text-center bg-rose-600/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
+                {discountPercent ? `Скидка ${discountPercent}%` : "Спеццена"}
               </span>
             )}
 
@@ -124,17 +135,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="mt-auto flex flex-col gap-2 pt-4">
           {/* Main action buttons row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
-            <Link href={`/product/${product.Slug}`} className="w-full">
-              <span className="btn-secondary w-full h-11 justify-center text-center">
-                {labels.viewProduct || "Узнать больше"}
-              </span>
+            <Link
+              href={`/product/${product.Slug}`}
+              className="btn-secondary w-full h-full min-h-11 justify-center text-center px-3 whitespace-normal leading-tight"
+            >
+              {labels.viewProduct || "Узнать больше"}
             </Link>
 
             <button
               onClick={handleAddToCart}
-              className="w-full h-11 btn-primary justify-center text-center"
+              className="w-full h-full min-h-11 btn-primary justify-center text-center px-3 whitespace-normal leading-tight"
             >
-              <span className="truncate">{labels.addToCart || "Добавить в корзину"}</span>
+              {labels.addToCart || "Добавить в корзину"}
             </button>
           </div>
 

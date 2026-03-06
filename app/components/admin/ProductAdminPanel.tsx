@@ -356,15 +356,33 @@ export default function ProductAdminPanel() {
         <ProductCreateControl />
       </div>
 
-      <div className="mb-6 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+      <div
+        className="mb-6 inline-flex rounded-xl border p-1 gap-1"
+        style={{
+          borderColor: "var(--color-border)",
+          background:
+            "color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-surface) 18%)",
+        }}
+      >
         <button
           type="button"
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
             activeTab === "catalog"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
+              ? "shadow-sm"
+              : "hover:opacity-100 opacity-90"
           }`}
+          style={
+            activeTab === "catalog"
+              ? {
+                  background:
+                    "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
+                  color: "var(--color-foreground)",
+                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                }
+              : { color: "var(--color-muted)" }
+          }
           onClick={() => setActiveTab("catalog")}
+          aria-pressed={activeTab === "catalog"}
         >
           Таблица и фильтры
         </button>
@@ -372,10 +390,21 @@ export default function ProductAdminPanel() {
           type="button"
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
             activeTab === "showcase"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
+              ? "shadow-sm"
+              : "hover:opacity-100 opacity-90"
           }`}
+          style={
+            activeTab === "showcase"
+              ? {
+                  background:
+                    "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
+                  color: "var(--color-foreground)",
+                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                }
+              : { color: "var(--color-muted)" }
+          }
           onClick={() => setActiveTab("showcase")}
+          aria-pressed={activeTab === "showcase"}
         >
           Управление витриной
         </button>

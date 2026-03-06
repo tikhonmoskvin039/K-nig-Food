@@ -46,6 +46,10 @@ type CropQueueState = {
   isSubmitting: boolean;
 };
 
+type ImageDeleteTarget =
+  | { kind: "feature" }
+  | { kind: "gallery"; index: number };
+
 export default function ProductForm({
   product,
   isNew,
@@ -58,9 +62,12 @@ export default function ProductForm({
 }: Props) {
   const [fileErrors, setFileErrors] = useState<FileErrorState>({});
   const [categoryToAdd, setCategoryToAdd] = useState("");
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
   const [cropQueue, setCropQueue] = useState<CropQueueState | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isCancelCropConfirmOpen, setIsCancelCropConfirmOpen] = useState(false);
+  const [pendingImageDelete, setPendingImageDelete] =
+    useState<ImageDeleteTarget | null>(null);
   const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(
     null,
   );
@@ -213,6 +220,40 @@ export default function ProductForm({
   const removeGalleryImage = (index: number) => {
     const updated = product.ProductImageGallery.filter((_, i) => i !== index);
     onChange("ProductImageGallery", updated);
+  };
+
+  const normalizeCategory = (raw: string) =>
+    raw
+      .replace(/\s+/g, " ")
+      .replace(/[|]/g, "")
+      .trim();
+
+  const addCategory = (rawCategory: string) => {
+    const nextCategory = normalizeCategory(rawCategory);
+    if (!nextCategory) return;
+
+    const alreadyAdded = product.ProductCategories.some(
+      (item) => item.toLowerCase() === nextCategory.toLowerCase(),
+    );
+
+    if (alreadyAdded) return;
+
+    onChange("ProductCategories", [...product.ProductCategories, nextCategory]);
+  };
+
+  const handleConfirmImageDelete = () => {
+    if (!pendingImageDelete) return;
+
+    if (pendingImageDelete.kind === "feature") {
+      onChange("FeatureImageURL", "");
+      setFileErrors((prev) => ({ ...prev, FeatureImageURL: undefined }));
+      setPendingImageDelete(null);
+      return;
+    }
+
+    removeGalleryImage(pendingImageDelete.index);
+    setFileErrors((prev) => ({ ...prev, ProductImageGallery: undefined }));
+    setPendingImageDelete(null);
   };
 
   const reorderGalleryImages = (fromIndex: number, toIndex: number) => {
@@ -375,24 +416,26 @@ export default function ProductForm({
       <div className="space-y-2">
         {renderFieldLabel("Статус товара")}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className="flex items-center gap-2 text-sm">
+          <label className="checkbox-card" data-checked={product.Enabled}>
             <input
               type="checkbox"
               checked={product.Enabled}
               onChange={(event) => onChange("Enabled", event.target.checked)}
+              className="h-4 w-4 accent-amber-600 cursor-pointer"
             />
-            Активен
+            <span className="font-medium select-none">Активен</span>
           </label>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="checkbox-card" data-checked={product.CatalogVisible}>
             <input
               type="checkbox"
               checked={product.CatalogVisible}
               onChange={(event) =>
                 onChange("CatalogVisible", event.target.checked)
               }
+              className="h-4 w-4 accent-amber-600 cursor-pointer"
             />
-            Показывать в каталоге
+            <span className="font-medium select-none">Показывать в каталоге</span>
           </label>
         </div>
         <p className="text-xs text-slate-600">
@@ -491,12 +534,7 @@ export default function ProductForm({
             setCategoryToAdd("");
 
             if (!nextCategory) return;
-            if (product.ProductCategories.includes(nextCategory)) return;
-
-            onChange("ProductCategories", [
-              ...product.ProductCategories,
-              nextCategory,
-            ]);
+            addCategory(nextCategory);
           }}
         >
           <option value="">
@@ -523,6 +561,31 @@ export default function ProductForm({
             );
           })}
         </select>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+          <input
+            type="text"
+            className="form-control"
+            value={customCategoryInput}
+            placeholder="Добавить свою категорию вручную"
+            onChange={(event) => setCustomCategoryInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter") return;
+              event.preventDefault();
+              addCategory(customCategoryInput);
+              setCustomCategoryInput("");
+            }}
+          />
+          <button
+            type="button"
+            className="btn-secondary min-w-44"
+            onClick={() => {
+              addCategory(customCategoryInput);
+              setCustomCategoryInput("");
+            }}
+          >
+            Добавить категорию
+          </button>
+        </div>
         <div className="flex flex-wrap gap-2 min-h-8">
           {product.ProductCategories.map((category) => (
             <button
@@ -591,13 +654,24 @@ export default function ProductForm({
         </label>
 
         {product.FeatureImageURL && (
-          <Image
-            src={product.FeatureImageURL}
-            alt="Главное изображение"
-            width={160}
-            height={160}
-            className="w-40 h-40 object-cover rounded border"
-          />
+          <div className="relative inline-block">
+            <Image
+              src={product.FeatureImageURL}
+              alt="Главное изображение"
+              width={160}
+              height={160}
+              className="w-40 h-40 object-cover rounded border"
+            />
+            <button
+              type="button"
+              onClick={() => setPendingImageDelete({ kind: "feature" })}
+              className="absolute -top-2 -right-2 bg-black/75 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center hover:bg-black"
+              title="Удалить главное изображение"
+              aria-label="Удалить главное изображение"
+            >
+              x
+            </button>
+          </div>
         )}
 
         {renderFieldError(mergedErrors.FeatureImageURL)}
@@ -654,7 +728,7 @@ export default function ProductForm({
               />
               <button
                 type="button"
-                onClick={() => removeGalleryImage(index)}
+                onClick={() => setPendingImageDelete({ kind: "gallery", index })}
                 className="absolute -top-2 -right-2 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
                 title="Удалить изображение"
               >
@@ -692,6 +766,25 @@ export default function ProductForm({
           )}
         </button>
       </div>
+
+      <ConfirmModal
+        open={!!pendingImageDelete}
+        title={
+          pendingImageDelete?.kind === "feature"
+            ? "Удалить главное изображение?"
+            : "Удалить изображение из галереи?"
+        }
+        description={
+          pendingImageDelete?.kind === "feature"
+            ? "Главное изображение будет удалено. Вы сможете загрузить новое позже."
+            : pendingImageDelete
+              ? `Изображение №${pendingImageDelete.index + 1} будет удалено из галереи.`
+              : undefined
+        }
+        confirmText="Удалить"
+        onConfirm={handleConfirmImageDelete}
+        onCancel={() => setPendingImageDelete(null)}
+      />
 
       {cropQueue && (
         <ImageCropperModal

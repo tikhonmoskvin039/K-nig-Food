@@ -11,6 +11,7 @@ import {
   sortByShowcaseOrder,
 } from "../../../utils/productShowcase";
 import ButtonSpinner from "../../common/ButtonSpinner";
+import ConfirmModal from "../../common/ConfirmModal";
 
 type SaveProducts = (
   updatedProducts: DTProduct[],
@@ -96,9 +97,11 @@ type BlockEditorProps = {
   subtitle: string;
   products: DTProduct[];
   categoryFilter: string;
+  searchQuery: string;
   selectedProductId: string;
   isSaving: boolean;
   onCategoryFilterChange: (value: string) => void;
+  onSearchQueryChange: (value: string) => void;
   onSelectedProductIdChange: (value: string) => void;
   onProductsChange: (nextProducts: DTProduct[]) => void;
 };
@@ -109,12 +112,16 @@ function BlockEditor({
   subtitle,
   products,
   categoryFilter,
+  searchQuery,
   selectedProductId,
   isSaving,
   onCategoryFilterChange,
+  onSearchQueryChange,
   onSelectedProductIdChange,
   onProductsChange,
 }: BlockEditorProps) {
+  const [removeCandidate, setRemoveCandidate] = useState<DTProduct | null>(null);
+
   const categories = useMemo(
     () =>
       Array.from(
@@ -161,9 +168,21 @@ function BlockEditor({
   const addDisabledByLimit = allSlotsTaken || maxItemsReached;
 
   const assignedIds = new Set(assignedProducts.map((product) => product.ID));
-  const addableProducts = eligibleProducts.filter(
-    (product) => !assignedIds.has(product.ID),
-  );
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const addableProducts = eligibleProducts
+    .filter((product) => !assignedIds.has(product.ID))
+    .filter((product) => {
+      if (!normalizedSearch) return true;
+
+      return [
+        product.Title,
+        product.Slug,
+        ...(product.ProductCategories || []),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+    });
 
   const updateOrder = (productId: string, rawValue: string) => {
     const normalized = sanitizeNumericString(rawValue);
@@ -209,6 +228,12 @@ function BlockEditor({
     onProductsChange(nextProducts);
   };
 
+  const handleConfirmRemove = () => {
+    if (!removeCandidate) return;
+    removeFromBlock(removeCandidate.ID);
+    setRemoveCandidate(null);
+  };
+
   const addToBlock = () => {
     if (!selectedProductId) return;
 
@@ -247,16 +272,25 @@ function BlockEditor({
   };
 
   return (
-    <section className="rounded-2xl border p-4 md:p-5 space-y-4 bg-white/70">
+    <section
+      className="rounded-2xl border p-4 md:p-5 space-y-4"
+      style={{
+        borderColor: "var(--color-border)",
+        background:
+          "color-mix(in srgb, var(--color-surface) 90%, var(--color-primary-soft) 10%)",
+      }}
+    >
       <div className="flex flex-col gap-1">
         <h3 className="text-base md:text-lg font-semibold">{title}</h3>
-        <p className="text-sm text-slate-600">{subtitle}</p>
+        <p className="text-sm" style={{ color: "var(--color-muted)" }}>
+          {subtitle}
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-slate-600">Занятые позиции:</span>
+        <span style={{ color: "var(--color-muted)" }}>Занятые позиции:</span>
         {occupiedSlots.length === 0 ? (
-          <span className="text-slate-500">нет</span>
+          <span style={{ color: "var(--color-muted)" }}>нет</span>
         ) : (
           occupiedSlots.map((slot) => (
             <span
@@ -269,7 +303,16 @@ function BlockEditor({
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_auto] gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(180px,1fr)_minmax(180px,1fr)_minmax(220px,2fr)_auto] gap-3">
+        <input
+          type="text"
+          className="form-control"
+          value={searchQuery}
+          onChange={(event) => onSearchQueryChange(event.target.value)}
+          placeholder="Живой поиск: название, slug, категория..."
+          disabled={isSaving}
+        />
+
         <select
           className="form-control"
           value={categoryFilter}
@@ -293,7 +336,9 @@ function BlockEditor({
           <option value="">
             {addableProducts.length > 0
               ? "Выберите товар"
-              : "Нет доступных товаров для добавления"}
+              : normalizedSearch
+                ? "По запросу ничего не найдено"
+                : "Нет доступных товаров для добавления"}
           </option>
           {addableProducts.map((product) => (
             <option key={`${block}-product-${product.ID}`} value={product.ID}>
@@ -326,7 +371,7 @@ function BlockEditor({
       )}
 
       {assignedProducts.length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm" style={{ color: "var(--color-muted)" }}>
           Пока в блоке нет товаров. Добавьте позиции и назначьте им места 1-6.
         </p>
       ) : (
@@ -334,11 +379,16 @@ function BlockEditor({
           {assignedProducts.map((product) => (
             <div
               key={`${block}-assigned-${product.ID}`}
-              className="rounded-xl border px-3 py-2 md:px-4 md:py-3 bg-white flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              className="rounded-xl border px-3 py-2 md:px-4 md:py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              style={{
+                borderColor: "var(--color-border)",
+                background:
+                  "color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-soft) 8%)",
+              }}
             >
               <div className="min-w-0">
-                <p className="font-medium text-slate-900 truncate">{product.Title}</p>
-                <p className="text-xs text-slate-500 truncate">
+                <p className="font-medium truncate">{product.Title}</p>
+                <p className="text-xs truncate" style={{ color: "var(--color-muted)" }}>
                   {(product.ProductCategories || []).join(" • ")}
                 </p>
               </div>
@@ -359,7 +409,7 @@ function BlockEditor({
                 <button
                   type="button"
                   className="btn-danger min-w-28"
-                  onClick={() => removeFromBlock(product.ID)}
+                  onClick={() => setRemoveCandidate(product)}
                   disabled={isSaving}
                 >
                   Убрать
@@ -369,6 +419,19 @@ function BlockEditor({
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!removeCandidate}
+        title="Убрать товар из блока?"
+        description={
+          removeCandidate
+            ? `Товар "${removeCandidate.Title}" будет удален из блока "${title}".`
+            : undefined
+        }
+        confirmText={isSaving ? <ButtonSpinner /> : "Убрать"}
+        onConfirm={handleConfirmRemove}
+        onCancel={() => setRemoveCandidate(null)}
+      />
     </section>
   );
 }
@@ -381,6 +444,8 @@ export default function ProductShowcaseManager({
 }: Props) {
   const [newCategoryFilter, setNewCategoryFilter] = useState("all");
   const [weeklyCategoryFilter, setWeeklyCategoryFilter] = useState("all");
+  const [newSearchQuery, setNewSearchQuery] = useState("");
+  const [weeklySearchQuery, setWeeklySearchQuery] = useState("");
   const [newProductToAdd, setNewProductToAdd] = useState("");
   const [weeklyProductToAdd, setWeeklyProductToAdd] = useState("");
 
@@ -397,11 +462,18 @@ export default function ProductShowcaseManager({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border p-4 md:p-5 bg-amber-50/60">
+      <div
+        className="rounded-2xl border p-4 md:p-5"
+        style={{
+          borderColor: "var(--color-border)",
+          background:
+            "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-soft) 40%, var(--color-surface) 60%), var(--color-surface))",
+        }}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg md:text-xl font-semibold">Управление витриной</h2>
-            <p className="text-sm text-slate-600 mt-1">
+            <p className="text-sm mt-1" style={{ color: "var(--color-muted)" }}>
               Для каждого блока доступны позиции 1-6 без дублей. Если слоты заняты,
               добавить новый товар нельзя, пока не освободите место.
             </p>
@@ -424,9 +496,11 @@ export default function ProductShowcaseManager({
         subtitle="Назначайте товары в позиции 1-6 для главной страницы."
         products={products}
         categoryFilter={newCategoryFilter}
+        searchQuery={newSearchQuery}
         selectedProductId={newProductToAdd}
         isSaving={isSaving}
         onCategoryFilterChange={setNewCategoryFilter}
+        onSearchQueryChange={setNewSearchQuery}
         onSelectedProductIdChange={setNewProductToAdd}
         onProductsChange={onProductsChange}
       />
@@ -437,9 +511,11 @@ export default function ProductShowcaseManager({
         subtitle="В этот блок можно добавить только товары с акционной ценой."
         products={products}
         categoryFilter={weeklyCategoryFilter}
+        searchQuery={weeklySearchQuery}
         selectedProductId={weeklyProductToAdd}
         isSaving={isSaving}
         onCategoryFilterChange={setWeeklyCategoryFilter}
+        onSearchQueryChange={setWeeklySearchQuery}
         onSelectedProductIdChange={setWeeklyProductToAdd}
         onProductsChange={onProductsChange}
       />

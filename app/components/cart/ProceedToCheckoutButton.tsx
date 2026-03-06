@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import ButtonSpinner from "../common/ButtonSpinner";
 
 type Props = {
@@ -22,7 +23,14 @@ export default function ProceedToCheckoutButton({ label }: Props) {
         router.push("/checkout");
       }}
     >
-      {isNavigating ? <ButtonSpinner /> : label}
+      {isNavigating ? (
+        <ButtonSpinner />
+      ) : (
+        <>
+          {label}
+          <ArrowRight size={16} />
+        </>
+      )}
     </button>
   );
 }

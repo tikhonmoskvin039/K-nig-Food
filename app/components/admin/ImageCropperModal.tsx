@@ -76,15 +76,33 @@ function createDefaultFreeCrop(mediaWidth: number, mediaHeight: number): Crop {
   };
 }
 
-function toCropPixels(crop: PixelCrop | null): CropPixels | null {
+function toCropPixels(
+  crop: PixelCrop | null,
+  imageSize: {
+    naturalWidth: number;
+    naturalHeight: number;
+    width: number;
+    height: number;
+  } | null,
+): CropPixels | null {
   if (!crop) return null;
   if (crop.width <= 0 || crop.height <= 0) return null;
+  if (!imageSize || imageSize.width <= 0 || imageSize.height <= 0) return null;
+
+  const scaleX = imageSize.naturalWidth / imageSize.width;
+  const scaleY = imageSize.naturalHeight / imageSize.height;
+  const x = Math.max(0, Math.round(crop.x * scaleX));
+  const y = Math.max(0, Math.round(crop.y * scaleY));
+  const width = Math.max(1, Math.round(crop.width * scaleX));
+  const height = Math.max(1, Math.round(crop.height * scaleY));
+  const clampedX = Math.min(x, Math.max(imageSize.naturalWidth - 1, 0));
+  const clampedY = Math.min(y, Math.max(imageSize.naturalHeight - 1, 0));
 
   return {
-    x: crop.x,
-    y: crop.y,
-    width: crop.width,
-    height: crop.height,
+    x: clampedX,
+    y: clampedY,
+    width: Math.min(width, imageSize.naturalWidth - clampedX),
+    height: Math.min(height, imageSize.naturalHeight - clampedY),
   };
 }
 
@@ -99,16 +117,24 @@ export default function ImageCropperModal({
   const [preset, setPreset] = useState<CropAspectPreset>("square");
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
-  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(
-    null,
-  );
+  const [imageSize, setImageSize] = useState<{
+    naturalWidth: number;
+    naturalHeight: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   const activeAspect =
     preset === "free" ? undefined : PRESET_ASPECTS[preset];
 
   const applyCropForPreset = (
     nextPreset: CropAspectPreset,
-    size: { width: number; height: number } | null,
+    size: {
+      naturalWidth: number;
+      naturalHeight: number;
+      width: number;
+      height: number;
+    } | null,
   ) => {
     if (!size) return;
 
@@ -207,8 +233,10 @@ export default function ImageCropperModal({
                 onLoad={(event) => {
                   const target = event.currentTarget;
                   const size = {
-                    width: target.naturalWidth,
-                    height: target.naturalHeight,
+                    naturalWidth: target.naturalWidth,
+                    naturalHeight: target.naturalHeight,
+                    width: target.width,
+                    height: target.height,
                   };
                   setImageSize(size);
                   applyCropForPreset(preset, size);
@@ -233,7 +261,7 @@ export default function ImageCropperModal({
             type="button"
             onClick={() =>
               onConfirm({
-                croppedAreaPixels: toCropPixels(completedCrop),
+                croppedAreaPixels: toCropPixels(completedCrop, imageSize),
                 preset,
               })
             }
