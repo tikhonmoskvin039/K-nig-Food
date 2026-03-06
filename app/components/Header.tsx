@@ -69,7 +69,7 @@ export default function Header() {
     >
       <header
         ref={headerRef}
-        className="border-b bg-[color:var(--color-surface)]/90 text-[color:var(--color-foreground)] backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85 shadow-sm"
+        className="border-b bg-(--color-surface)/90 text-(--color-foreground) backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85 shadow-sm"
         style={{ borderColor: "var(--color-border)" }}
       >
         <div className="app-shell py-3.5 flex justify-between items-center gap-4">
@@ -77,12 +77,12 @@ export default function Header() {
             <h1 className="text-2xl font-bold truncate">
               <Link
                 href="/"
-                className="text-[color:var(--color-foreground)] hover:text-amber-700"
+                className="text-(--color-foreground) hover:text-amber-700"
               >
                 {content.siteName}
               </Link>
             </h1>
-            <strong className="text-sm text-[color:var(--color-muted)]">
+            <strong className="text-sm text-(--color-muted)">
               {content.siteTagline}
             </strong>
           </div>
