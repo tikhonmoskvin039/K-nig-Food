@@ -111,8 +111,16 @@ function CartContent() {
 
         {items.length === 0 ? (
           <div className="mt-10 mb-30 text-center flex flex-col items-center gap-2">
-            <ShoppingCart size={28} className="text-[color:var(--color-muted)]" />
-            <p className="text-gray-600">{labels.cartEmpty || "Корзина пуста."}</p>
+            <ShoppingCart
+              size={28}
+              className="text-[color:var(--color-muted)]"
+            />
+            <Link
+              href="/products"
+              className="text-gray-600 hover:text-amber-700 hover:underline font-medium"
+            >
+              {labels.cartEmpty || "Добавьте товары, чтобы продолжить."}
+            </Link>
           </div>
         ) : (
           <>

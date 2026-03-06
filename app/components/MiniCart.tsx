@@ -71,7 +71,7 @@ export default function MiniCart() {
                 href="/products"
                 className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
               >
-                {labels.cartEmpty || "Your cart is empty."}
+                {labels.cartEmpty || "Добавьте товары, чтобы продолжить."}
               </Link>
             </p>
           ) : (
