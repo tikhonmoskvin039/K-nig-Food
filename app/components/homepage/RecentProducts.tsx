@@ -25,7 +25,7 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
 
   if (recentProducts.length === 0) {
     return (
-      <section className="section-wrap">
+      <section id="recent-products" className="section-wrap">
         <div className="app-shell text-center">
           <h2 className="section-title">{labels.recentProducts}</h2>
           <p className="mt-4 text-slate-600">
@@ -38,7 +38,7 @@ export default async function RecentProducts({ count = 3 }: RecentProductsProps)
   }
 
   return (
-    <section className="section-wrap">
+    <section id="recent-products" className="section-wrap">
       <div className="app-shell">
         <h2 className="section-title text-center mb-8">
           {labels.recentProducts}

@@ -15,6 +15,19 @@ export default function ContactUsForm() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const infoTitle =
+    contactForm.infoTitle || "По каким вопросам можно написать";
+  const infoDescription =
+    contactForm.infoDescription ||
+    "Мы отвечаем на обращения вручную и помогаем с заказами, меню и организационными вопросами.";
+  const reasons = Array.isArray(contactForm.reasons) && contactForm.reasons.length > 0
+    ? contactForm.reasons
+    : [
+        "Уточнить состав блюд, аллергены и рекомендации по хранению.",
+        "Обсудить индивидуальный заказ под мероприятие или корпоратив.",
+        "Получить помощь по заказу, оплате, доставке и работе сайта.",
+      ];
+
   const validate = () => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
@@ -87,6 +100,16 @@ export default function ContactUsForm() {
         <h2 className="page-title text-center">
           {contactForm.subtitle}
         </h2>
+
+        <div className="surface-card-soft p-5 md:p-6 mt-4">
+          <h3 className="text-xl font-semibold">{infoTitle}</h3>
+          <p className="text-sm text-slate-600 mt-2">{infoDescription}</p>
+          <ul className="mt-4 space-y-2 text-sm text-slate-700 list-disc pl-5">
+            {reasons.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        </div>
 
         <form
           onSubmit={handleSubmit}

@@ -203,6 +203,25 @@ a {
     color: color-mix(in srgb, var(--color-foreground) 86%, #78350f 14%);
   }
 
+  #recent-products,
+  #weekly-offers {
+    scroll-margin-top: calc(var(--header-height) + 10px);
+  }
+
+  .cart-empty-cta-mobile {
+    @apply inline-flex items-center justify-center;
+    transform: scale(1);
+    transition:
+      transform 0.24s ease,
+      color 0.2s ease;
+    will-change: transform;
+  }
+
+  .cart-empty-cta-mobile.cart-empty-cta-pop {
+    transform: scale(1.06);
+    animation: none !important;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .btn-secondary:hover {
       background: color-mix(in srgb, var(--color-surface-soft) 92%, transparent);
@@ -223,6 +242,25 @@ a {
     .checkbox-card:hover {
       border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
     }
+  }
+}
+
+@media (max-width: 767px) and (hover: none) and (pointer: coarse) {
+  .cart-empty-cta-mobile {
+    animation: cart-empty-cta-breathe 3.1s ease-in-out infinite;
+  }
+}
+
+@keyframes cart-empty-cta-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.03);
+  }
+  55% {
+    transform: scale(0.995);
   }
 }
 

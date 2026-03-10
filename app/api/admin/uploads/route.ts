@@ -1,17 +1,9 @@
 import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { getPrismaClient } from "../../../lib/prisma";
 
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-const LOCAL_UPLOADS_DIR = path.join(
-  process.cwd(),
-  "public",
-  "products",
-  "uploads",
-);
-const PUBLIC_UPLOADS_PREFIX = "/products/uploads";
 
 async function isAuthenticated(req: NextRequest) {
   const token = await getToken({
@@ -79,14 +71,34 @@ export async function POST(req: NextRequest) {
     const slug = sanitizeFilePart(slugValue);
     const type = sanitizeFilePart(typeValue);
     const extension = getImageExtension(file.name, file.type);
-    const uniqueId = randomUUID().slice(0, 8);
-    const fileName = `${slug}-${type}-${Date.now()}-${uniqueId}.${extension}`;
-    const localPublicUrl = `${PUBLIC_UPLOADS_PREFIX}/${fileName}`;
+    const imageId = randomUUID();
+    const fileName = `${slug}-${type}-${Date.now()}.${extension}`;
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    await mkdir(LOCAL_UPLOADS_DIR, { recursive: true });
-    await writeFile(path.join(LOCAL_UPLOADS_DIR, fileName), buffer);
+    if (!process.env.DATABASE_URL?.trim()) {
+      return NextResponse.json(
+        {
+          error: "Upload failed",
+          message:
+            "DATABASE_URL не настроен. Для загрузки изображений в БД подключите PostgreSQL.",
+        },
+        { status: 500 },
+      );
+    }
+
+    const prisma = getPrismaClient();
+    await prisma.uploadedImage.create({
+      data: {
+        id: imageId,
+        originalName: fileName,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        bytes: buffer,
+      },
+    });
+
+    const localPublicUrl = `/api/media/${encodeURIComponent(imageId)}`;
 
     return NextResponse.json({ success: true, url: localPublicUrl });
   } catch (error: unknown) {

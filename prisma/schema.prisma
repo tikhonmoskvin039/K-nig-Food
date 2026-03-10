@@ -33,3 +33,25 @@ model Product {
   @@index([isNewArrival, newArrivalOrder])
   @@map("products")
 }
+
+model UploadedImage {
+  id           String   @id
+  originalName String
+  mimeType     String
+  size         Int
+  bytes        Bytes
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("uploaded_images")
+}
+
+model HomepageSettings {
+  id                    String   @id
+  recentProductsEnabled Boolean  @default(true)
+  weeklyOffersEnabled   Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("homepage_settings")
+}

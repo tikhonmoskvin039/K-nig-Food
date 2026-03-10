@@ -48,6 +48,7 @@ interface LocalizationData {
       description: string;
       buttonText: string;
       ctaLink: string;
+      imagePath?: string;
     };
     testimonialsTitle: string;
     testimonials: {
@@ -68,7 +69,10 @@ interface LocalizationData {
   copyright: string;
   contactForm: {
     title: string,
-    subtitle: string
+    subtitle: string,
+    infoTitle?: string;
+    infoDescription?: string;
+    reasons?: string[];
   }
 }
 

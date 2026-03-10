@@ -47,6 +47,9 @@ interface LocalizationData {
     buttonText: string;
     successMessage: string;
     errorMessage: string;
+    infoTitle?: string;
+    infoDescription?: string;
+    reasons?: string[];
   };
   email: string;
   phone: string;

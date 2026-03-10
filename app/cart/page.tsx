@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import ProceedToCheckoutButton from "../components/cart/ProceedToCheckoutButton";
 import ConfirmModal from "../components/common/ConfirmModal";
+import { isTouchLikeDevice, triggerHapticFeedback } from "../utils/haptics";
 
 const CART_UPDATED_AT_KEY = "cart_updated_at";
 const CART_TTL_MS = 24 * 60 * 60 * 1000;
@@ -143,6 +144,7 @@ function CartContent() {
   const [isCheckoutCtaInView, setIsCheckoutCtaInView] = useState(true);
   const [catalogProducts, setCatalogProducts] = useState<DTProduct[]>([]);
   const checkoutCtaRef = useRef<HTMLDivElement | null>(null);
+  const emptyCartCtaRef = useRef<HTMLAnchorElement | null>(null);
 
   const expiresAt = useMemo(() => {
     if (typeof window === "undefined" || items.length === 0) {
@@ -212,6 +214,35 @@ function CartContent() {
       isCancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (items.length > 0) return;
+    if (typeof window === "undefined") return;
+    if (!isTouchLikeDevice()) return;
+
+    const ctaNode = emptyCartCtaRef.current;
+
+    const runAttentionPulse = () => {
+      if (document.hidden) return;
+
+      triggerHapticFeedback("light");
+      if (!ctaNode) return;
+
+      ctaNode.classList.add("cart-empty-cta-pop");
+      window.setTimeout(() => {
+        ctaNode.classList.remove("cart-empty-cta-pop");
+      }, 280);
+    };
+
+    const initialTimeout = window.setTimeout(runAttentionPulse, 750);
+    const intervalId = window.setInterval(runAttentionPulse, 4200);
+
+    return () => {
+      window.clearTimeout(initialTimeout);
+      window.clearInterval(intervalId);
+      ctaNode?.classList.remove("cart-empty-cta-pop");
+    };
+  }, [items.length]);
 
   const handleQtyChange = (id: string, delta: number) => {
     const item = items.find((i) => i.ID === id);
@@ -296,7 +327,8 @@ function CartContent() {
             />
             <Link
               href="/products"
-              className="text-gray-600 hover:text-amber-700 hover:underline font-medium"
+              ref={emptyCartCtaRef}
+              className="cart-empty-cta-mobile text-gray-600 hover:text-amber-700 hover:underline font-medium"
             >
               {labels.cartEmpty || "Добавьте товары, чтобы продолжить."}
             </Link>

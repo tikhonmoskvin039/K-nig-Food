@@ -46,8 +46,16 @@ import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache
 export default function ProductAdminPanel() {
   const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
   const [products, setProducts] = useState<DTProduct[]>([]);
+  const [homepageVisibility, setHomepageVisibility] = useState<{
+    recentProductsEnabled: boolean;
+    weeklyOffersEnabled: boolean;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isHomepageVisibilityLoading, setIsHomepageVisibilityLoading] =
+    useState(false);
+  const [isHomepageVisibilitySaving, setIsHomepageVisibilitySaving] =
+    useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DTProduct | null>(null);
   const [tableState, setTableState] = useState<TableState>(readTableState);
@@ -134,6 +142,95 @@ export default function ProductAdminPanel() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  const loadHomepageVisibility = async ({ silent = false } = {}) => {
+    if (!silent) {
+      setIsHomepageVisibilityLoading(true);
+    }
+
+    try {
+      const response = await fetch("/api/admin/homepage-settings", {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const message = await readApiErrorMessage(
+          response,
+          "Не удалось загрузить настройки главной",
+        );
+        throw new Error(message);
+      }
+
+      const data = (await response.json()) as {
+        recentProductsEnabled?: boolean;
+        weeklyOffersEnabled?: boolean;
+      };
+
+      setHomepageVisibility({
+        recentProductsEnabled: Boolean(data.recentProductsEnabled),
+        weeklyOffersEnabled: Boolean(data.weeklyOffersEnabled),
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      if (!silent) {
+        toast.error("Ошибка загрузки настроек главной", {
+          description:
+            error instanceof Error ? error.message : "Попробуйте позже",
+        });
+      }
+      return false;
+    } finally {
+      if (!silent) {
+        setIsHomepageVisibilityLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab !== "showcase") return;
+    if (homepageVisibility) return;
+    loadHomepageVisibility();
+  }, [activeTab, homepageVisibility]);
+
+  const saveHomepageVisibility = async () => {
+    if (!homepageVisibility || isHomepageVisibilitySaving) return;
+
+    setIsHomepageVisibilitySaving(true);
+    const loadingToastId = toast.loading("Сохраняем настройки главной...");
+
+    try {
+      const response = await fetch("/api/admin/homepage-settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(homepageVisibility),
+      });
+
+      if (!response.ok) {
+        const message = await readApiErrorMessage(
+          response,
+          "Не удалось сохранить настройки главной",
+        );
+        throw new Error(message);
+      }
+
+      toast.dismiss(loadingToastId);
+      toast.success("Настройки главной сохранены");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.dismiss(loadingToastId);
+      toast.error("Не удалось сохранить настройки главной", {
+        description:
+          error instanceof Error ? error.message : "Попробуйте еще раз",
+      });
+      return false;
+    } finally {
+      setIsHomepageVisibilitySaving(false);
+    }
+  };
 
   const saveProducts = async (
     updatedProducts: DTProduct[],
@@ -415,12 +512,99 @@ export default function ProductAdminPanel() {
       {isLoading ? (
         <GlobalLoader mode="inline" className="min-h-[50vh]" />
       ) : activeTab === "showcase" ? (
-        <ProductShowcaseManager
-          products={products}
-          isSaving={isSaving}
-          onProductsChange={setProducts}
-          onSaveProducts={saveProducts}
-        />
+        <div className="space-y-5">
+          <div className="surface-card-soft p-4 md:p-5">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  Видимость секций на главной
+                </h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Эти настройки определяют, видят ли пользователи блоки
+                  «Новинки» и «Предложения недели» на главной странице.
+                </p>
+              </div>
+
+              {isHomepageVisibilityLoading || !homepageVisibility ? (
+                <p className="text-sm text-slate-500">
+                  Загружаем настройки...
+                </p>
+              ) : (
+                <>
+                  <label className="checkbox-card" data-checked={homepageVisibility.recentProductsEnabled}>
+                    <input
+                      type="checkbox"
+                      checked={homepageVisibility.recentProductsEnabled}
+                      onChange={(event) =>
+                        setHomepageVisibility((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                recentProductsEnabled: event.target.checked,
+                              }
+                            : prev,
+                        )
+                      }
+                    />
+                    <span className="font-medium select-none">
+                      Показывать секцию «Новинки»
+                    </span>
+                  </label>
+
+                  <label className="checkbox-card" data-checked={homepageVisibility.weeklyOffersEnabled}>
+                    <input
+                      type="checkbox"
+                      checked={homepageVisibility.weeklyOffersEnabled}
+                      onChange={(event) =>
+                        setHomepageVisibility((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                weeklyOffersEnabled: event.target.checked,
+                              }
+                            : prev,
+                        )
+                      }
+                    />
+                    <span className="font-medium select-none">
+                      Показывать секцию «Предложения недели»
+                    </span>
+                  </label>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      className="btn-primary min-w-56"
+                      onClick={saveHomepageVisibility}
+                      disabled={isHomepageVisibilitySaving}
+                    >
+                      {isHomepageVisibilitySaving ? (
+                        <ButtonSpinner />
+                      ) : (
+                        "Сохранить настройки секций"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => loadHomepageVisibility()}
+                      disabled={isHomepageVisibilitySaving || isHomepageVisibilityLoading}
+                    >
+                      Обновить из БД
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <ProductShowcaseManager
+            products={products}
+            isSaving={isSaving}
+            onProductsChange={setProducts}
+            onSaveProducts={saveProducts}
+          />
+        </div>
       ) : (
         <>
           {products.length > 0 && (

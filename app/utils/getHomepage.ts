@@ -1,4 +1,5 @@
 import homepageData from "../../configs/homepage.json";
+import { getHomepageVisibilityState } from "../lib/homepageSettingsRepository";
 
 // Define Homepage Settings Structure
 export interface HomepageSettings {
@@ -29,6 +30,19 @@ export interface HomepageSettings {
 
 // Fetch Homepage Settings
 // Now using direct import for compatibility with Vercel
-export const getHomepageSettings = (): HomepageSettings => {
-  return homepageData as HomepageSettings;
+export const getHomepageSettings = async (): Promise<HomepageSettings> => {
+  const baseSettings = homepageData as HomepageSettings;
+  const visibilityState = await getHomepageVisibilityState();
+
+  return {
+    ...baseSettings,
+    recentProducts: {
+      ...baseSettings.recentProducts,
+      enabled: visibilityState.recentProductsEnabled,
+    },
+    weeklyOffers: {
+      ...baseSettings.weeklyOffers,
+      enabled: visibilityState.weeklyOffersEnabled,
+    },
+  };
 };

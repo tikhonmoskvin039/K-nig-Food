@@ -62,6 +62,8 @@
   "menu": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
+    { "label": "New Arrivals", "href": "/#recent-products" },
+    { "label": "Weekly Offers", "href": "/#weekly-offers" },
     { "label": "Docs", "href": "/information" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }
@@ -93,7 +95,8 @@
       "title": "Our Story",
       "description": "Founded by three generations of passionate book lovers, our family-run store is built on a love for storytelling and community. We take pride in offering handpicked titles, personalized service, and a warm, welcoming experience for every reader.",
       "buttonText": "Read More",
-      "ctaLink": "/about"
+      "ctaLink": "/about",
+      "imagePath": "/about-us.jpg"
     },
     "testimonialsTitle": "What Our Customers Say",
     "testimonials": [
@@ -141,6 +144,14 @@
   },
   "contactForm": {
     "title": "Contact Us",
+    "subtitle": "Write to us",
+    "infoTitle": "Why you may want to contact us",
+    "infoDescription": "We review every message manually and reply as quickly as possible with practical guidance.",
+    "reasons": [
+      "Questions about ingredients, allergens, and storage recommendations.",
+      "Custom requests for events, family dinners, or corporate orders.",
+      "Help with placing orders, payments, delivery, or website issues."
+    ],
     "nameLabel": "Name",
     "emailLabel": "Email",
     "messageLabel": "Message",

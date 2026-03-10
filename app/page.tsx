@@ -9,6 +9,7 @@ import Testimonials from "./components/homepage/Testimonials";
 import Brands from "./components/homepage/Brands";
 
 const localeData = getLocalization();
+export const dynamic = "force-dynamic";
 
 // Set page metadata
 export const metadata: Metadata = {
@@ -16,8 +17,8 @@ export const metadata: Metadata = {
   description: localeData.siteTagline,
 };
 
-export default function Home() {
-  const homepageSettings = getHomepageSettings();
+export default async function Home() {
+  const homepageSettings = await getHomepageSettings();
 
   return (
     <main>

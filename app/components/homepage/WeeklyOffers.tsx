@@ -45,7 +45,7 @@ export default async function WeeklyOffers({ count = 6 }: WeeklyOffersProps) {
 
   if (weeklyOffers.length === 0) {
     return (
-      <section className="section-wrap">
+      <section id="weekly-offers" className="section-wrap">
         <div className="app-shell text-center">
           <h2 className="section-title">{labels.weeklyOffers || "Акции"}</h2>
           <p className="mt-4 text-slate-600">
@@ -58,7 +58,7 @@ export default async function WeeklyOffers({ count = 6 }: WeeklyOffersProps) {
   }
 
   return (
-    <section className="section-wrap">
+    <section id="weekly-offers" className="section-wrap">
       <div className="app-shell">
         <h2 className="section-title text-center mb-8">
           {labels.weeklyOffers || "Предложения недели"}

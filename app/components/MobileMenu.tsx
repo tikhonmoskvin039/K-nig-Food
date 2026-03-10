@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import MiniCart from "./MiniCart";
 import { ReduxProvider } from "../providers";
-import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAppDispatch } from "../store/hooks";
 import { reconcileCartWithCatalog } from "../store/slices/cartSlice";
@@ -64,11 +63,55 @@ function CartBackgroundTasks() {
 
 const MobileMenu = ({ menuItems }: MobileMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const pathname = usePathname();
+  const [homepageVisibility, setHomepageVisibility] = useState({
+    recentProductsEnabled: true,
+    weeklyOffersEnabled: true,
+  });
   const { data: session } = useSession();
 
-  const isCheckoutPage = pathname === "/checkout";
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadHomepageVisibility = async () => {
+      try {
+        const response = await fetch("/api/homepage-settings", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+
+        const data = (await response.json()) as {
+          recentProductsEnabled?: boolean;
+          weeklyOffersEnabled?: boolean;
+        };
+
+        if (isCancelled) return;
+        setHomepageVisibility({
+          recentProductsEnabled: Boolean(data.recentProductsEnabled),
+          weeklyOffersEnabled: Boolean(data.weeklyOffersEnabled),
+        });
+      } catch (error) {
+        console.error("Failed to load homepage visibility settings:", error);
+      }
+    };
+
+    loadHomepageVisibility();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.href === "/#recent-products") {
+      return homepageVisibility.recentProductsEnabled;
+    }
+
+    if (item.href === "/#weekly-offers") {
+      return homepageVisibility.weeklyOffersEnabled;
+    }
+
+    return true;
+  });
 
   return (
     <ReduxProvider>
@@ -82,7 +125,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {!isCheckoutPage && <MiniCart />}
+        <MiniCart />
       </div>
 
       <nav
@@ -91,7 +134,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
         }`}
         style={{ borderColor: "var(--color-border)" }}
       >
-        {menuItems.map(({ label, href }) => {
+        {visibleMenuItems.map(({ label, href }) => {
           let finalHref = href;
 
           // если это пункт "Сотрудникам"
@@ -116,11 +159,9 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           );
         })}
 
-        {!isCheckoutPage && (
-          <div className="hidden md:flex md:ml-4">
-            <MiniCart />
-          </div>
-        )}
+        <div className="hidden md:flex md:ml-4">
+          <MiniCart />
+        </div>
       </nav>
     </ReduxProvider>
   );
