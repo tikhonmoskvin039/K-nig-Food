@@ -27,25 +27,98 @@ export default function MiniCart() {
   const dispatch = useAppDispatch();
 
   const [isVisible, setIsVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [canUseHoverPreview, setCanUseHoverPreview] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const clearHideTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const updateHoverSupport = () => {
+      setCanUseHoverPreview(mediaQuery.matches);
+      if (!mediaQuery.matches) {
+        setIsVisible(false);
+        clearHideTimeout();
+      }
+    };
+
+    updateHoverSupport();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", updateHoverSupport);
+      return () => mediaQuery.removeEventListener("change", updateHoverSupport);
+    }
+
+    mediaQuery.addListener(updateHoverSupport);
+    return () => mediaQuery.removeListener(updateHoverSupport);
+  }, []);
 
   useEffect(() => {
     registerMiniCartTrigger(() => {
-      if (!isPreviewEnabled) return;
+      if (!isPreviewEnabled || !canUseHoverPreview) return;
       setIsVisible(true);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      clearHideTimeout();
     });
-  }, [isPreviewEnabled]);
+  }, [isPreviewEnabled, canUseHoverPreview]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const closePreview = (target?: EventTarget | null) => {
+      const node = target instanceof Node ? target : null;
+      if (node && containerRef.current?.contains(node)) {
+        return;
+      }
+
+      setIsVisible(false);
+      clearHideTimeout();
+    };
+
+    const handleTouchPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      closePreview(event.target);
+    };
+
+    const handleViewportChange = () => closePreview(null);
+
+    window.addEventListener("pointerdown", handleTouchPointerDown, {
+      passive: true,
+    });
+    window.addEventListener("scroll", handleViewportChange, { passive: true });
+    window.addEventListener("touchmove", handleViewportChange, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("pointerdown", handleTouchPointerDown);
+      window.removeEventListener("scroll", handleViewportChange);
+      window.removeEventListener("touchmove", handleViewportChange);
+    };
+  }, [isVisible]);
+
+  useEffect(
+    () => () => {
+      clearHideTimeout();
+    },
+    [],
+  );
 
   const handleMouseEnter = () => {
-    if (!isPreviewEnabled) return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (!isPreviewEnabled || !canUseHoverPreview) return;
+    clearHideTimeout();
     setIsVisible(true);
   };
 
   const handleMouseLeave = () => {
-    if (!isPreviewEnabled) return;
+    if (!isPreviewEnabled || !canUseHoverPreview) return;
     timeoutRef.current = setTimeout(() => {
       setIsVisible(false);
     }, 300);
@@ -63,6 +136,10 @@ export default function MiniCart() {
         href="/cart"
         className="relative flex items-center justify-center ml-2 mr-4"
         aria-label={labels.viewCart || "View cart"}
+        onClick={() => {
+          setIsVisible(false);
+          clearHideTimeout();
+        }}
       >
         <ShoppingCart size={24} />
         <span
@@ -104,6 +181,7 @@ export default function MiniCart() {
                       <Link
                         href={`/product/${item.Slug}`}
                         className="text-sm font-semibold text-slate-900 hover:text-amber-700"
+                        onClick={() => setIsVisible(false)}
                       >
                         {item.Title}
                       </Link>
@@ -139,6 +217,7 @@ export default function MiniCart() {
               <Link
                 href="/cart"
                 className="mt-4 btn-secondary w-full"
+                onClick={() => setIsVisible(false)}
               >
                 {labels.viewCart || "Посмотореть корзину"}
               </Link>
@@ -146,6 +225,7 @@ export default function MiniCart() {
               <Link
                 href="/checkout"
                 className="mt-3 btn-primary w-full"
+                onClick={() => setIsVisible(false)}
               >
                 {labels.proceedToCheckout || "Перейти к оформлению заказа"}
               </Link>

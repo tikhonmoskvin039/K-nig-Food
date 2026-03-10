@@ -41,6 +41,7 @@ import {
 import { sanitizeNumericString } from "../../services/admin/productForm";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
+import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
 
 export default function ProductAdminPanel() {
   const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
@@ -183,6 +184,7 @@ export default function ProductAdminPanel() {
         throw new Error(message);
       }
 
+      invalidateCatalogProductsCache();
       const isReloaded = await loadProducts({ showErrorToast: false });
       toast.dismiss(loadingToastId);
 

@@ -24,6 +24,7 @@ import {
 } from "../../services/admin/productEditor";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
+import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
 
 type Props = {
   mode: "create" | "edit";
@@ -188,6 +189,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
       }
 
       toast.dismiss(loadingToastId);
+      invalidateCatalogProductsCache();
       queueAdminProductToast({
         type: "success",
         message:

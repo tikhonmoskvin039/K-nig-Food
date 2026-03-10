@@ -9,6 +9,7 @@ import AuthProvider from "./providers/SessionProvider";
 import { Suspense } from "react";
 import GlobalLoader from "./components/GlobalLoader";
 import { ThemeProvider } from "./context/ThemeContext";
+import HapticTapProvider from "./components/HapticTapProvider";
 
 // Load two fonts: one for headings, one for body
 const roboto = Roboto({
@@ -42,6 +43,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <LocalizationProvider>
+              <HapticTapProvider />
               <Header />
               <Suspense fallback={<GlobalLoader />}>
                 <div className="pt-(--header-height)">{children}</div>

@@ -7,7 +7,9 @@ async function getAllProductsFromSource(): Promise<DTProduct[]> {
 // Define function to get all visible products
 export default async function getProducts(): Promise<DTProduct[]> {
   const products = await getAllProductsFromSource();
-  return products.filter((product) => product.CatalogVisible);
+  return products.filter(
+    (product) => product.Enabled && product.CatalogVisible,
+  );
 }
 
 // Function to get a product by slug
@@ -15,7 +17,7 @@ export async function getProductBySlug(
   slug: string,
 ): Promise<DTProduct | undefined> {
   try {
-    const products = await getAllProductsFromSource();
+    const products = await getProducts();
     return products.find((product) => product.Slug === slug);
   } catch (error) {
     console.error(`Error fetching product with slug "${slug}":`, error);
@@ -30,7 +32,7 @@ export async function getAllCategories(): Promise<string[]> {
 
     // Extract all categories from all products
     const allCategories = products
-      .filter((product) => product.CatalogVisible)
+      .filter((product) => product.Enabled && product.CatalogVisible)
       .flatMap((product) => product.ProductCategories || []);
 
     // Return unique categories

@@ -12,12 +12,38 @@ import {
   isNewArrivalProduct,
   isPromoProduct,
 } from "../utils/productShowcase";
+import {
+  getCatalogProductsCacheKey,
+  getCatalogProductsRevision,
+} from "../utils/catalogProductsCache";
 
 const CLIENT_PRODUCTS_CACHE_TTL_MS = 5 * 60_000;
-const CLIENT_PRODUCTS_CACHE_KEY = "catalog_products_cache_v2";
+const CLIENT_PRODUCTS_CACHE_KEY = getCatalogProductsCacheKey();
 let cachedProducts: DTProduct[] | null = null;
 let cacheExpiresAt = 0;
 let pendingProductsRequest: Promise<DTProduct[]> | null = null;
+let knownCatalogRevision = 0;
+
+function resetInMemoryProductsCache() {
+  cachedProducts = null;
+  cacheExpiresAt = 0;
+}
+
+function syncWithCatalogRevision() {
+  if (typeof window === "undefined") return;
+
+  const revision = getCatalogProductsRevision();
+  if (revision <= knownCatalogRevision) return;
+
+  knownCatalogRevision = revision;
+  resetInMemoryProductsCache();
+
+  try {
+    window.sessionStorage.removeItem(CLIENT_PRODUCTS_CACHE_KEY);
+  } catch {
+    // ignore storage errors
+  }
+}
 
 function readProductsFromSessionCache(): DTProduct[] | null {
   if (typeof window === "undefined") return null;
@@ -67,6 +93,8 @@ function writeProductsToSessionCache(products: DTProduct[], expiresAt: number) {
 }
 
 async function loadProductsFromApi(): Promise<DTProduct[]> {
+  syncWithCatalogRevision();
+
   const now = Date.now();
 
   if (cachedProducts && now < cacheExpiresAt) {
@@ -84,7 +112,7 @@ async function loadProductsFromApi(): Promise<DTProduct[]> {
     return pendingProductsRequest;
   }
 
-  pendingProductsRequest = fetch("/api/products", { cache: "force-cache" })
+  pendingProductsRequest = fetch("/api/products", { cache: "no-store" })
     .then(async (res) => {
       if (!res.ok) {
         throw new Error(`Failed to load products (${res.status})`);
@@ -96,6 +124,10 @@ async function loadProductsFromApi(): Promise<DTProduct[]> {
       const expiresAt = Date.now() + CLIENT_PRODUCTS_CACHE_TTL_MS;
       cachedProducts = products;
       cacheExpiresAt = expiresAt;
+      knownCatalogRevision = Math.max(
+        knownCatalogRevision,
+        getCatalogProductsRevision(),
+      );
       writeProductsToSessionCache(products, expiresAt);
       return products;
     })
@@ -203,9 +235,11 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     const categoriesSet = new Set<string>();
     products.forEach((product) => {
       if (Array.isArray(product.ProductCategories)) {
-        product.ProductCategories.forEach((category) =>
-          categoriesSet.add(category),
-        );
+        product.ProductCategories.forEach((category) => {
+          const normalized = String(category || "").trim();
+          if (!normalized) return;
+          categoriesSet.add(normalized);
+        });
       }
     });
 

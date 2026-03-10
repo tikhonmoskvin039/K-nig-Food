@@ -1,8 +1,11 @@
 import productsData from "../../configs/products.json";
 import type { Product as DbProduct } from "@prisma/client";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { getPrismaClient } from "./prisma";
 
 const FALLBACK_PRODUCTS = productsData as DTProduct[];
+const PRODUCTS_CONFIG_PATH = path.join(process.cwd(), "configs", "products.json");
 
 const SORT_BY_UPDATED_DESC = [
   { updatedAt: "desc" as const },
@@ -79,6 +82,34 @@ function cloneFallbackProducts() {
   return normalizeProducts(FALLBACK_PRODUCTS);
 }
 
+async function persistProductsConfig(products: DTProduct[]) {
+  const payload = `${JSON.stringify(products, null, 2)}\n`;
+
+  try {
+    await writeFile(PRODUCTS_CONFIG_PATH, payload, "utf8");
+  } catch (error) {
+    console.warn("Failed to sync configs/products.json with database:", error);
+  }
+}
+
+async function hydrateDatabaseFromFallback(prisma: ReturnType<typeof getPrismaClient>) {
+  const fallbackProducts = cloneFallbackProducts();
+  if (fallbackProducts.length === 0) {
+    return fallbackProducts;
+  }
+
+  try {
+    await prisma.product.createMany({
+      data: fallbackProducts.map(mapDtoToDbProduct),
+      skipDuplicates: true,
+    });
+  } catch (error) {
+    console.warn("Failed to hydrate database from configs/products.json:", error);
+  }
+
+  return fallbackProducts;
+}
+
 export function isDatabaseConfigured() {
   return Boolean(process.env.DATABASE_URL?.trim());
 }
@@ -146,7 +177,7 @@ export async function getAllProductsForAdmin(): Promise<DTProduct[]> {
     });
 
     if (products.length === 0) {
-      return cloneFallbackProducts();
+      return hydrateDatabaseFromFallback(prisma);
     }
 
     return products.map(mapDbProductToDto);
@@ -168,7 +199,7 @@ export async function getAllProductsFromDatabase(): Promise<DTProduct[]> {
     });
 
     if (products.length === 0) {
-      return cloneFallbackProducts();
+      return hydrateDatabaseFromFallback(prisma);
     }
 
     return products.map(mapDbProductToDto);
@@ -198,6 +229,8 @@ export async function replaceAllProductsInDatabase(products: DTProduct[]) {
       });
     }
   });
+
+  await persistProductsConfig(normalized);
 }
 
 export function hasBase64Images(products: DTProduct[]) {
