@@ -1,7 +1,6 @@
 "use client";
 
-import { Provider } from "react-redux";
-import { store } from "../../store/store";
+import { ReduxProvider } from "../../providers";
 import AddToCartButton from "./AddToCartButton";
 
 interface WrapperProps {
@@ -10,8 +9,8 @@ interface WrapperProps {
 
 export default function AddToCartButtonWrapper({ product }: WrapperProps) {
   return (
-    <Provider store={store}>
+    <ReduxProvider>
       <AddToCartButton product={product} />
-    </Provider>
+    </ReduxProvider>
   );
 }

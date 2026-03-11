@@ -62,8 +62,8 @@
   "menu": [
     { "label": "Home", "href": "/" },
     { "label": "Products", "href": "/products" },
-    { "label": "New Arrivals", "href": "/#recent-products" },
-    { "label": "Weekly Offers", "href": "/#weekly-offers" },
+    { "label": "New Arrivals", "href": "/products/new" },
+    { "label": "Weekly Offers", "href": "/products/weekly-offers" },
     { "label": "Docs", "href": "/information" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" }

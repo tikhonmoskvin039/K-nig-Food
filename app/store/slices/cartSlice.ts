@@ -42,7 +42,7 @@ const hasExpiredCart = () => {
   }
 };
 
-const loadFromLocalStorage = (): DTCartItem[] => {
+export const loadCartItemsFromStorage = (): DTCartItem[] => {
   try {
     if (hasExpiredCart()) {
       localStorage.removeItem("cart");
@@ -85,7 +85,7 @@ const saveToLocalStorage = (items: DTCartItem[]) => {
 };
 
 const initialState: CartState = {
-  items: typeof window !== "undefined" ? loadFromLocalStorage() : [],
+  items: [],
 };
 
 const cartSlice = createSlice({

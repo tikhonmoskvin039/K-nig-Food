@@ -1,13 +1,12 @@
 "use client";
 
-import { Provider } from "react-redux";
-import { store } from "../../store/store";
+import { ReduxProvider } from "../../providers";
 import ProductCard from "./ProductCard";
 
 export default function ProductCardWithProvider({ product }: { product: DTProduct }) {
   return (
-    <Provider store={store}>
+    <ReduxProvider>
       <ProductCard product={product} />
-    </Provider>
+    </ReduxProvider>
   );
 }

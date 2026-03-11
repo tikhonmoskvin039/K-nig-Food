@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Provider } from "react-redux";
-import { store } from "../store/store";
+import { ReduxProvider } from "../providers";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useLocalization } from "../context/LocalizationContext";
 import Image from "next/image";
@@ -480,8 +479,8 @@ function CartContent() {
 
 export default function CartPage() {
   return (
-    <Provider store={store}>
+    <ReduxProvider>
       <CartContent />
-    </Provider>
+    </ReduxProvider>
   );
 }

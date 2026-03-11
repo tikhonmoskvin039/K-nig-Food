@@ -70,8 +70,8 @@
   "menu": [
     { "label": "Главная", "href": "/" },
     { "label": "Меню", "href": "/products" },
-    { "label": "Новинки", "href": "/#recent-products" },
-    { "label": "Предложения недели", "href": "/#weekly-offers" },
+    { "label": "Новинки", "href": "/products/new" },
+    { "label": "Предложения недели", "href": "/products/weekly-offers" },
     { "label": "Информация", "href": "/information" },
     { "label": "О нас", "href": "/about" },
     { "label": "Контакты", "href": "/contact" },

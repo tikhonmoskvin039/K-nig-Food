@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,7 +12,7 @@ import { showAddedToCartToast } from "../../utils/cartToasts";
 import {
   hasDiscountPrice,
   isNewArrivalProduct,
-  isPromoProduct,
+  isWeeklyOfferProduct,
 } from "../../utils/productShowcase";
 
 interface ProductCardProps {
@@ -21,7 +22,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const hasDiscount = hasDiscountPrice(product);
   const isNew = isNewArrivalProduct(product);
-  const isPromo = isPromoProduct(product);
+  const isWeeklyOffer = isWeeklyOfferProduct(product);
   const regularPriceValue = Number(product.RegularPrice);
   const salePriceValue = Number(product.SalePrice);
   const discountPercent =
@@ -40,54 +41,90 @@ export default function ProductCard({ product }: ProductCardProps) {
   const inCartQuantity = useAppSelector(
     (state) => state.cart.items.find((item) => item.ID === product.ID)?.quantity || 0,
   );
+  const isHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const safeInCartQuantity = isHydrated ? inCartQuantity : 0;
 
   const handleAddToCart = () => {
     dispatch(addToCart(product));
     showAddedToCartToast(product.Title, () => router.push("/cart"));
   };
 
+  const badgeChipClass =
+    "inline-flex min-h-6 items-center justify-center text-center font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm transition-transform duration-150 hover:scale-110 hover:-translate-y-0.5 active:scale-95";
+
   return (
     <div className="surface-card overflow-hidden transition hover:-translate-y-0.5 flex flex-col h-full">
       {/* Product Image with Link to Product Page */}
       {/* Product Image with Overlay Portion Info */}
-      <Link href={`/product/${product.Slug}`}>
-        <div className="relative w-full aspect-4/3 group">
+      <div className="relative w-full aspect-4/3 group">
+        <Link
+          href={`/product/${product.Slug}`}
+          className="absolute inset-0 z-0"
+          aria-label={`Открыть ${product.Title}`}
+        >
           <Image
             src={product.FeatureImageURL}
             alt={product.Title}
             fill
             className="object-cover rounded-t-lg transition group-hover:scale-105"
           />
+        </Link>
 
-          {/* Portion + Unit Badge */}
-          {product.PortionUnit && (
-            <div className="absolute bottom-2 right-2 bg-slate-900/60 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-              {product.PortionWeight} {product.PortionUnit}
-            </div>
+        {/* Portion + Unit Badge */}
+        {product.PortionUnit && (
+          <div className="absolute z-10 bottom-2 right-2 bg-slate-900/60 text-white font-bold text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+            {product.PortionWeight} {product.PortionUnit}
+          </div>
+        )}
+
+        <div className="absolute z-10 top-2 left-2 flex flex-col gap-1.5">
+          {isNew && (
+            <Link
+              href="/products/new"
+              className={`${badgeChipClass} bg-amber-500/95 text-white`}
+              title="Открыть страницу Новинок"
+              aria-label="Открыть страницу Новинок"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Новинка
+            </Link>
           )}
 
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {isNew && (
-              <span className="bg-amber-500/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
-                Новинка
-              </span>
-            )}
+          {isWeeklyOffer && (
+            <Link
+              href="/products/weekly-offers"
+              className={`${badgeChipClass} bg-rose-600/95 text-white`}
+              title="Открыть страницу Предложений недели"
+              aria-label="Открыть страницу Предложений недели"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Предложение недели
+            </Link>
+          )}
 
-            {isPromo && (
-              <span className="inline-flex min-w-20 items-center justify-center text-center bg-rose-600/95 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm">
-                {discountPercent ? `Скидка ${discountPercent}%` : "Спеццена"}
-              </span>
-            )}
+          {hasDiscount && !isWeeklyOffer && (
+            <Link
+              href="/products/weekly-offers"
+              className={`${badgeChipClass} bg-rose-500/90 text-white`}
+              title="Открыть страницу Предложений недели"
+              aria-label="Открыть страницу Предложений недели"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {discountPercent ? `Скидка ${discountPercent}%` : "Спеццена"}
+            </Link>
+          )}
 
-            {inCartQuantity > 0 && (
-              <span className="bg-emerald-600/90 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full backdrop-blur-sm">
-                В корзине: {inCartQuantity}
-              </span>
-            )}
-          </div>
-
+          {safeInCartQuantity > 0 && (
+            <span className="bg-emerald-600/90 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full backdrop-blur-sm">
+              В корзине: {safeInCartQuantity}
+            </span>
+          )}
         </div>
-      </Link>
+      </div>
 
       {/* Product Info */}
       <div className="p-6 flex flex-col flex-1">
@@ -150,14 +187,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <p
             className={`min-h-4 text-xs leading-4 transition-opacity ${
-              inCartQuantity > 0
+              safeInCartQuantity > 0
                 ? "text-emerald-700 opacity-100"
                 : "text-transparent opacity-0 pointer-events-none select-none"
             }`}
             aria-live="polite"
           >
-            {inCartQuantity > 0
-              ? `Уже добавлено в корзину: ${inCartQuantity} шт.`
+            {safeInCartQuantity > 0
+              ? `Уже добавлено в корзину: ${safeInCartQuantity} шт.`
               : "\u00A0"}
           </p>
         </div>
