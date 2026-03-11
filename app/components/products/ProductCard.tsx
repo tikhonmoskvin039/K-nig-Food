@@ -54,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const badgeChipClass =
-    "inline-flex min-h-6 items-center justify-center text-center font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm transition-transform duration-150 hover:scale-110 hover:-translate-y-0.5 active:scale-95";
+    "inline-flex min-h-6 items-center justify-center text-center font-semibold text-[11px] px-2.5 py-1 rounded-full shadow-sm transform-gpu transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.02] hover:-translate-y-px hover:shadow-md active:scale-[0.99]";
 
   return (
     <div className="surface-card overflow-hidden transition hover:-translate-y-0.5 flex flex-col h-full">

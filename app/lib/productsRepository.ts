@@ -1,16 +1,16 @@
-import productsData from "../../configs/products.json";
+import fs from "fs";
+import path from "path";
 import type { Product as DbProduct } from "@prisma/client";
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
 import { getPrismaClient } from "./prisma";
-
-const FALLBACK_PRODUCTS = productsData as DTProduct[];
-const PRODUCTS_CONFIG_PATH = path.join(process.cwd(), "configs", "products.json");
 
 const SORT_BY_UPDATED_DESC = [
   { updatedAt: "desc" as const },
   { createdAt: "desc" as const },
 ];
+const DEFAULT_PRODUCT_IMAGE_URL = "/placeholder.png";
+const LOCAL_UPLOADS_PREFIX = "/products/uploads/";
+const MEDIA_API_PREFIX = "/api/media/";
+const ABSOLUTE_URL_PATTERN = /^https?:\/\//i;
 
 function toSafeString(value: unknown, fallback = "") {
   if (typeof value === "string") return value;
@@ -78,36 +78,57 @@ function normalizeProducts(products: DTProduct[]) {
   return products.map(normalizeProduct);
 }
 
-function cloneFallbackProducts() {
-  return normalizeProducts(FALLBACK_PRODUCTS);
+function removeQueryAndHash(url: string) {
+  return url.split("#")[0]?.split("?")[0] ?? url;
 }
 
-async function persistProductsConfig(products: DTProduct[]) {
-  const payload = `${JSON.stringify(products, null, 2)}\n`;
-
-  try {
-    await writeFile(PRODUCTS_CONFIG_PATH, payload, "utf8");
-  } catch (error) {
-    console.warn("Failed to sync configs/products.json with database:", error);
-  }
+function ensureLeadingSlash(url: string) {
+  if (!url) return "";
+  return url.startsWith("/") ? url : `/${url}`;
 }
 
-async function hydrateDatabaseFromFallback(prisma: ReturnType<typeof getPrismaClient>) {
-  const fallbackProducts = cloneFallbackProducts();
-  if (fallbackProducts.length === 0) {
-    return fallbackProducts;
+function isExistingLocalPublicAsset(url: string) {
+  const normalized = removeQueryAndHash(ensureLeadingSlash(url));
+  const safeRelativePath = normalized.replace(/^\/+/, "");
+  const absolutePath = path.join(process.cwd(), "public", safeRelativePath);
+  return fs.existsSync(absolutePath);
+}
+
+function sanitizeImageUrl(url: unknown) {
+  const raw = toSafeString(url).trim();
+  if (!raw) return DEFAULT_PRODUCT_IMAGE_URL;
+
+  if (raw.startsWith("data:image/")) {
+    return DEFAULT_PRODUCT_IMAGE_URL;
   }
 
-  try {
-    await prisma.product.createMany({
-      data: fallbackProducts.map(mapDtoToDbProduct),
-      skipDuplicates: true,
-    });
-  } catch (error) {
-    console.warn("Failed to hydrate database from configs/products.json:", error);
+  if (ABSOLUTE_URL_PATTERN.test(raw)) {
+    return raw;
   }
 
-  return fallbackProducts;
+  const normalized = ensureLeadingSlash(raw);
+
+  if (normalized.startsWith(MEDIA_API_PREFIX)) {
+    return normalized;
+  }
+
+  if (normalized.startsWith(LOCAL_UPLOADS_PREFIX)) {
+    return isExistingLocalPublicAsset(normalized)
+      ? normalized
+      : DEFAULT_PRODUCT_IMAGE_URL;
+  }
+
+  if (normalized.startsWith("/")) {
+    return isExistingLocalPublicAsset(normalized)
+      ? normalized
+      : DEFAULT_PRODUCT_IMAGE_URL;
+  }
+
+  return DEFAULT_PRODUCT_IMAGE_URL;
+}
+
+function sanitizeImageGallery(gallery: unknown) {
+  return toStringArray(gallery).map((url) => sanitizeImageUrl(url));
 }
 
 export function isDatabaseConfigured() {
@@ -124,8 +145,8 @@ function mapDbProductToDto(product: DbProduct): DTProduct {
     PortionWeight: product.portionWeight,
     PortionUnit: product.portionUnit,
     ProductCategories: product.productCategories,
-    FeatureImageURL: product.featureImageUrl,
-    ProductImageGallery: product.productImageGallery,
+    FeatureImageURL: sanitizeImageUrl(product.featureImageUrl),
+    ProductImageGallery: sanitizeImageGallery(product.productImageGallery),
     IsNewArrival: product.isNewArrival,
     NewArrivalOrder: product.newArrivalOrder,
     ShortDescription: product.shortDescription,
@@ -165,9 +186,11 @@ function mapDtoToDbProduct(product: DTProduct) {
   };
 }
 
-export async function getAllProductsForAdmin(): Promise<DTProduct[]> {
+async function readProductsFromDatabase(): Promise<DTProduct[]> {
   if (!isDatabaseConfigured()) {
-    return cloneFallbackProducts();
+    throw new Error(
+      "DATABASE_URL не настроен. Каталог доступен только через БД.",
+    );
   }
 
   try {
@@ -176,37 +199,21 @@ export async function getAllProductsForAdmin(): Promise<DTProduct[]> {
       orderBy: SORT_BY_UPDATED_DESC,
     });
 
-    if (products.length === 0) {
-      return hydrateDatabaseFromFallback(prisma);
-    }
-
     return products.map(mapDbProductToDto);
   } catch (error) {
-    console.error("DB read failed, fallback to local products.json:", error);
-    return cloneFallbackProducts();
+    console.error("Failed to read products from database:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Не удалось получить товары из БД.");
   }
 }
 
+export async function getAllProductsForAdmin(): Promise<DTProduct[]> {
+  return readProductsFromDatabase();
+}
+
 export async function getAllProductsFromDatabase(): Promise<DTProduct[]> {
-  if (!isDatabaseConfigured()) {
-    return cloneFallbackProducts();
-  }
-
-  try {
-    const prisma = getPrismaClient();
-    const products = await prisma.product.findMany({
-      orderBy: SORT_BY_UPDATED_DESC,
-    });
-
-    if (products.length === 0) {
-      return hydrateDatabaseFromFallback(prisma);
-    }
-
-    return products.map(mapDbProductToDto);
-  } catch (error) {
-    console.error("DB read failed, fallback to local products.json:", error);
-    return cloneFallbackProducts();
-  }
+  return readProductsFromDatabase();
 }
 
 export async function replaceAllProductsInDatabase(products: DTProduct[]) {
@@ -229,8 +236,6 @@ export async function replaceAllProductsInDatabase(products: DTProduct[]) {
       });
     }
   });
-
-  await persistProductsConfig(normalized);
 }
 
 export function hasBase64Images(products: DTProduct[]) {

@@ -58,12 +58,9 @@ pnpm db:seed
 
 ### Configuration
 
-**/configs/products.json** - Initial seed data for products. Each product includes fields like:
-- ID, Title, Slug, ShortDescription, LongDescription
-- RegularPrice, SalePrice, Currency, FeatureImageURL
-- ProductImageGallery, Category
-
-This file is used as bootstrap data for PostgreSQL (and as local fallback if DB is empty).
+**PostgreSQL (`products` table)** - Source of truth for catalog products.
+- Product data is managed through `/admin`
+- Storefront and API read products directly from DB
 
 **/configs/locale.en.json** - Manages all localized content for your store’s interface including:
 - UI labels (buttons, messages)
@@ -157,14 +154,13 @@ The product catalog lives in PostgreSQL and is edited from `/admin`, while stati
 3. **Easy Content Tweaks** – Locale, checkout, and homepage sections remain JSON-configurable
 4. **Safe Updates** – Pull latest app code without rewriting catalog manually
 5. **Version Control Friendly** – Track content/config changes cleanly
-6. **Fast Onboarding** – Seed catalog from `configs/products.json` on a new environment
+6. **Fast Onboarding** – Run migrations and add products via `/admin` (or API import)
 
 ### Configuration Files Overview
 
 Store customization is split across DB + config files:
 
 - **PostgreSQL (`products` table)** – Main product catalog used by storefront and admin panel
-- **`configs/products.json`** – Seed/fallback catalog for bootstrap and local fallback
 - **`configs/locale.(en/ru).json`** – All text content, labels, contact info, navigation, pages
 - **`configs/checkout.json`** – Payment method settings (enable/disable)
 - **`configs/homepage.json`** – Control which homepage sections appear and how many products to show

@@ -1,10 +1,17 @@
 "use client";
 
-import { Moon } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function ThemeToggleButton() {
-  const { toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
+  const isHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const showSun = isHydrated && theme === "dark";
 
   return (
     <button
@@ -14,7 +21,7 @@ export default function ThemeToggleButton() {
       aria-label="Переключить тему"
       title="Переключить тему"
     >
-      <Moon size={18} />
+      {showSun ? <Sun size={18} /> : <Moon size={18} />}
     </button>
   );
 }
