@@ -5,40 +5,102 @@ import {
 } from "../../../utils/emailUtilities";
 import getProducts from "../../../utils/getProducts";
 import { getCheckoutSettings } from "../../../utils/getCheckout";
+import {
+  beginIdempotentRequest,
+  buildIdempotencyConflictResponse,
+  buildIdempotencyReplayResponse,
+  hashJsonPayload,
+  storeIdempotentResponse,
+} from "../../../lib/idempotency";
 
 export async function POST(req: NextRequest) {
+  const endpoint = "/api/checkout/placeorder";
+
   try {
     const body = (await req.json()) as DTOrderBody;
+    const requestHash = hashJsonPayload(body);
+    const idempotency = await beginIdempotentRequest({
+      headers: req.headers,
+      endpoint,
+      requestHash,
+    });
+
+    if (idempotency.type === "conflict") {
+      return buildIdempotencyConflictResponse();
+    }
+
+    if (idempotency.type === "replay") {
+      return buildIdempotencyReplayResponse({
+        statusCode: idempotency.statusCode,
+        responseBody: idempotency.responseBody,
+      });
+    }
 
     // 1. Basic validation
     if (!body.orderId) {
       console.error("❌ Validation failed: Missing orderId");
-      return NextResponse.json({ error: "Missing order ID." }, { status: 400 });
+      const responseBody = { error: "Missing order ID." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
     if (!body.orderDate) {
       console.error("❌ Validation failed: Missing orderDate");
-      return NextResponse.json(
-        { error: "Missing order date." },
-        { status: 400 },
-      );
+      const responseBody = { error: "Missing order date." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
     if (!body.cartItems?.length) {
       console.error("❌ Validation failed: No cart items");
-      return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
+      const responseBody = { error: "Cart is empty." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
     if (!body.billingForm?.email) {
       console.error("❌ Validation failed: Missing billing email");
-      return NextResponse.json(
-        { error: "Missing billing email." },
-        { status: 400 },
-      );
+      const responseBody = { error: "Missing billing email." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
     if (!body.paymentMethodId) {
       console.error("❌ Validation failed: Missing payment method");
-      return NextResponse.json(
-        { error: "Missing payment method." },
-        { status: 400 },
-      );
+      const responseBody = { error: "Missing payment method." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
 
     // 2. Load settings and validate payment method
@@ -52,10 +114,16 @@ export async function POST(req: NextRequest) {
         "❌ Validation failed: Invalid payment method:",
         body.paymentMethodId,
       );
-      return NextResponse.json(
-        { error: "Invalid payment method." },
-        { status: 400 },
-      );
+      const responseBody = { error: "Invalid payment method." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
 
     // 3. Validate product prices and IDs
@@ -64,10 +132,16 @@ export async function POST(req: NextRequest) {
       const found = allProducts.find((p) => p.ID === item.ID);
       if (!found) {
         console.error("❌ Validation failed: Product not found:", item.ID);
-        return NextResponse.json(
-          { error: `Product not found: ${item.ID}` },
-          { status: 400 },
-        );
+        const responseBody = { error: `Product not found: ${item.ID}` };
+        const statusCode = 400;
+        await storeIdempotentResponse({
+          key: idempotency.key,
+          endpoint,
+          requestHash,
+          statusCode,
+          responseBody,
+        });
+        return NextResponse.json(responseBody, { status: statusCode });
       }
       const expectedPrice = parseFloat(found.SalePrice || found.RegularPrice);
       const submittedPrice = parseFloat(item.SalePrice || item.RegularPrice);
@@ -75,10 +149,16 @@ export async function POST(req: NextRequest) {
         console.error(
           `❌ Validation failed: Price mismatch for ${item.ID}. Expected: ${expectedPrice}, Got: ${submittedPrice}`,
         );
-        return NextResponse.json(
-          { error: `Invalid price for product: ${item.Title}` },
-          { status: 400 },
-        );
+        const responseBody = { error: `Invalid price for product: ${item.Title}` };
+        const statusCode = 400;
+        await storeIdempotentResponse({
+          key: idempotency.key,
+          endpoint,
+          requestHash,
+          statusCode,
+          responseBody,
+        });
+        return NextResponse.json(responseBody, { status: statusCode });
       }
     }
 
@@ -140,10 +220,21 @@ export async function POST(req: NextRequest) {
 
     // Return success with enriched cart items (including download URLs)
     // Frontend needs these to display download links on order confirmation page
-    return NextResponse.json({
+    const responseBody = {
       message: "Order placed successfully",
       cartItems: enrichedCartItems,
+    };
+    const statusCode = 200;
+    await storeIdempotentResponse({
+      key: idempotency.key,
+      endpoint,
+      requestHash,
+      statusCode,
+      responseBody,
+      ttlSeconds: 60 * 60 * 72,
     });
+
+    return NextResponse.json(responseBody, { status: statusCode });
   } catch (error) {
     console.error("❌ Order placement error:", error);
     return NextResponse.json(

@@ -1,14 +1,59 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import {
+  beginIdempotentRequest,
+  buildIdempotencyConflictResponse,
+  buildIdempotencyReplayResponse,
+  hashJsonPayload,
+  storeIdempotentResponse,
+} from "../../lib/idempotency";
 
 export async function POST(req: Request) {
+  const endpoint = "/api/contact";
+
   try {
     const { name, email, message } = await req.json();
+    const payloadForHash = {
+      name: String(name || "").trim(),
+      email: String(email || "").trim().toLowerCase(),
+      message: String(message || "").trim(),
+    };
+
+    const requestHash = hashJsonPayload(payloadForHash);
+    const idempotency = await beginIdempotentRequest({
+      headers: req.headers,
+      endpoint,
+      requestHash,
+    });
+
+    if (idempotency.type === "conflict") {
+      return buildIdempotencyConflictResponse();
+    }
+
+    if (idempotency.type === "replay") {
+      return buildIdempotencyReplayResponse({
+        statusCode: idempotency.statusCode,
+        responseBody: idempotency.responseBody,
+      });
+    }
 
     if (!name || !email || !message) {
+      const responseBody = {
+        success: false,
+        message: "Пропущены обязательные поля.",
+      };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+
       return NextResponse.json(
-        { success: false, message: "Пропущены обязательные поля." },
-        { status: 400 },
+        responseBody,
+        { status: statusCode },
       );
     }
 
@@ -35,7 +80,17 @@ export async function POST(req: Request) {
       `,
     });
 
-    return NextResponse.json({ success: true });
+    const responseBody = { success: true };
+    const statusCode = 200;
+    await storeIdempotentResponse({
+      key: idempotency.key,
+      endpoint,
+      requestHash,
+      statusCode,
+      responseBody,
+    });
+
+    return NextResponse.json(responseBody, { status: statusCode });
   } catch (error) {
     console.error("SMTP email error:", error);
     return NextResponse.json({ success: false }, { status: 500 });

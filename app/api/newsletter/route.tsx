@@ -1,11 +1,50 @@
 import { NextResponse } from "next/server";
+import {
+  beginIdempotentRequest,
+  buildIdempotencyConflictResponse,
+  buildIdempotencyReplayResponse,
+  hashJsonPayload,
+  storeIdempotentResponse,
+} from "../../lib/idempotency";
 
 export async function POST(req: Request) {
+  const endpoint = "/api/newsletter";
+
   try {
     const { email } = await req.json();
+    const payloadForHash = {
+      email: String(email || "").trim().toLowerCase(),
+    };
+
+    const requestHash = hashJsonPayload(payloadForHash);
+    const idempotency = await beginIdempotentRequest({
+      headers: req.headers,
+      endpoint,
+      requestHash,
+    });
+
+    if (idempotency.type === "conflict") {
+      return buildIdempotencyConflictResponse();
+    }
+
+    if (idempotency.type === "replay") {
+      return buildIdempotencyReplayResponse({
+        statusCode: idempotency.statusCode,
+        responseBody: idempotency.responseBody,
+      });
+    }
 
     if (!email) {
-      return NextResponse.json({ error: "Поле Email должно быть заполнено" }, { status: 400 });
+      const responseBody = { error: "Поле Email должно быть заполнено" };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
 
     // Access env vars inside the function to prevent build-time inlining
@@ -27,10 +66,29 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "Subscription failed" }, { status: 400 });
+      const responseBody = { error: "Subscription failed" };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
     }
 
-    return NextResponse.json({ message: "Subscribed successfully" });
+    const responseBody = { message: "Subscribed successfully" };
+    const statusCode = 200;
+    await storeIdempotentResponse({
+      key: idempotency.key,
+      endpoint,
+      requestHash,
+      statusCode,
+      responseBody,
+    });
+
+    return NextResponse.json(responseBody, { status: statusCode });
   } catch (error) {
     console.error("Mailchimp API error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

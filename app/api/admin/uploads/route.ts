@@ -2,6 +2,13 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getPrismaClient } from "../../../lib/prisma";
+import {
+  beginIdempotentRequest,
+  buildIdempotencyConflictResponse,
+  buildIdempotencyReplayResponse,
+  hashFormDataPayload,
+  storeIdempotentResponse,
+} from "../../../lib/idempotency";
 
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -36,35 +43,90 @@ function getImageExtension(fileName: string, mimeType: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const endpoint = "/api/admin/uploads";
+
   if (!(await isAuthenticated(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const formData = await req.formData();
+    const requestHash = await hashFormDataPayload(formData);
+    const idempotency = await beginIdempotentRequest({
+      headers: req.headers,
+      endpoint,
+      requestHash,
+    });
+
+    if (idempotency.type === "conflict") {
+      return buildIdempotencyConflictResponse();
+    }
+
+    if (idempotency.type === "replay") {
+      return buildIdempotencyReplayResponse({
+        statusCode: idempotency.statusCode,
+        responseBody: idempotency.responseBody,
+      });
+    }
 
     const file = formData.get("file");
     const slugValue = String(formData.get("slug") || "product");
     const typeValue = String(formData.get("type") || "image");
 
     if (!(file instanceof File)) {
+      const responseBody = {
+        error: "Upload failed",
+        message: "Файл не передан",
+      };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
       return NextResponse.json(
-        { error: "Upload failed", message: "Файл не передан" },
-        { status: 400 },
+        responseBody,
+        { status: statusCode },
       );
     }
 
     if (!file.type.toLowerCase().startsWith("image/")) {
+      const responseBody = {
+        error: "Upload failed",
+        message: "Можно загружать только изображения",
+      };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
       return NextResponse.json(
-        { error: "Upload failed", message: "Можно загружать только изображения" },
-        { status: 400 },
+        responseBody,
+        { status: statusCode },
       );
     }
 
     if (file.size > MAX_IMAGE_FILE_SIZE_BYTES) {
+      const responseBody = {
+        error: "Upload failed",
+        message: "Файл больше 5 МБ",
+      };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
       return NextResponse.json(
-        { error: "Upload failed", message: "Файл больше 5 МБ" },
-        { status: 400 },
+        responseBody,
+        { status: statusCode },
       );
     }
 
@@ -77,13 +139,15 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     if (!process.env.DATABASE_URL?.trim()) {
+      const responseBody = {
+        error: "Upload failed",
+        message:
+          "DATABASE_URL не настроен. Для загрузки изображений в БД подключите PostgreSQL.",
+      };
+      const statusCode = 500;
       return NextResponse.json(
-        {
-          error: "Upload failed",
-          message:
-            "DATABASE_URL не настроен. Для загрузки изображений в БД подключите PostgreSQL.",
-        },
-        { status: 500 },
+        responseBody,
+        { status: statusCode },
       );
     }
 
@@ -99,8 +163,18 @@ export async function POST(req: NextRequest) {
     });
 
     const localPublicUrl = `/api/media/${encodeURIComponent(imageId)}`;
+    const responseBody = { success: true, url: localPublicUrl };
+    const statusCode = 200;
 
-    return NextResponse.json({ success: true, url: localPublicUrl });
+    await storeIdempotentResponse({
+      key: idempotency.key,
+      endpoint,
+      requestHash,
+      statusCode,
+      responseBody,
+    });
+
+    return NextResponse.json(responseBody, { status: statusCode });
   } catch (error: unknown) {
     console.error("UPLOAD IMAGE ERROR:", error);
 

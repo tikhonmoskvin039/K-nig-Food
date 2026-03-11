@@ -42,6 +42,7 @@ import { sanitizeNumericString } from "../../services/admin/productForm";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
+import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
 
 export default function ProductAdminPanel() {
   const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
@@ -215,6 +216,13 @@ export default function ProductAdminPanel() {
         );
         throw new Error(message);
       }
+      if (isOfflineQueuedResponse(response)) {
+        toast.dismiss(loadingToastId);
+        toast.info("Сохранение поставлено в очередь.", {
+          description: "Настройки отправятся автоматически при восстановлении сети.",
+        });
+        return true;
+      }
 
       toast.dismiss(loadingToastId);
       toast.success("Настройки главной сохранены");
@@ -279,6 +287,13 @@ export default function ProductAdminPanel() {
           "Не удалось сохранить изменения",
         );
         throw new Error(message);
+      }
+      if (isOfflineQueuedResponse(response)) {
+        toast.dismiss(loadingToastId);
+        toast.info("Изменения поставлены в очередь.", {
+          description: "Они отправятся автоматически при восстановлении сети.",
+        });
+        return true;
       }
 
       invalidateCatalogProductsCache();

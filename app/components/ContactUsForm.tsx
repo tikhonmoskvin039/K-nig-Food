@@ -5,6 +5,7 @@ import { useLocalization } from "@/app/context/LocalizationContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ButtonSpinner from "./common/ButtonSpinner";
+import { isOfflineQueuedResponse } from "../lib/offlineRequestQueue";
 
 export default function ContactUsForm() {
   const { contactForm } = useLocalization();
@@ -75,6 +76,16 @@ export default function ContactUsForm() {
       });
 
       if (!res.ok) throw new Error();
+      if (isOfflineQueuedResponse(res)) {
+        toast.info("Сообщение поставлено в очередь.", {
+          description: "Оно будет отправлено автоматически при восстановлении сети.",
+          duration: 3500,
+        });
+        setName("");
+        setEmail("");
+        setMessage("");
+        return;
+      }
 
       toast.success(contactForm.successMessage, { duration: 2000 });
 

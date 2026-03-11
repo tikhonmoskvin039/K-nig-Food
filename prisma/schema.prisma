@@ -56,3 +56,18 @@ model HomepageSettings {
 
   @@map("homepage_settings")
 }
+
+model IdempotencyRequest {
+  id          String   @id @default(cuid())
+  key         String
+  endpoint    String
+  requestHash String
+  statusCode  Int
+  responseBody Json
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@unique([key, endpoint])
+  @@index([expiresAt])
+  @@map("idempotency_requests")
+}

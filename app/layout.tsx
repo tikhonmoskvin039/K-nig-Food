@@ -1,3 +1,4 @@
+import type { Metadata, Viewport } from "next";
 import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
 import "react-image-crop/dist/ReactCrop.css";
@@ -10,6 +11,38 @@ import { Suspense } from "react";
 import GlobalLoader from "./components/GlobalLoader";
 import { ThemeProvider } from "./context/ThemeContext";
 import HapticTapProvider from "./components/HapticTapProvider";
+import PWASetup from "./components/PWASetup";
+
+export const metadata: Metadata = {
+  applicationName: "K-nig Food",
+  title: {
+    default: "K-nig Food",
+    template: "%s | K-nig Food",
+  },
+  description: "K-nig Food storefront with resilient offline-first actions.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-512.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/icons/icon-192.svg" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "K-nig Food",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#00d7ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#050712" },
+  ],
+};
 
 // Load two fonts: one for headings, one for body
 const roboto = Roboto({
@@ -44,6 +77,7 @@ export default function RootLayout({
           <ThemeProvider>
             <LocalizationProvider>
               <HapticTapProvider />
+              <PWASetup />
               <Header />
               <Suspense fallback={<GlobalLoader />}>
                 <div className="pt-(--header-height)">{children}</div>

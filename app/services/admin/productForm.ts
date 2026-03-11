@@ -1,3 +1,5 @@
+import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
+
 export const slugifyProductTitle = (value: string) => {
   const map: Record<string, string> = {
     а: "a",
@@ -150,6 +152,60 @@ export async function uploadImageToAdmin({
     body: formData,
     credentials: "include",
   });
+
+  if (isOfflineQueuedResponse(response)) {
+    const idempotencyKey = response.headers.get("x-idempotency-key");
+
+    await new Promise<void>((resolve) => {
+      if (navigator.onLine) {
+        resolve();
+        return;
+      }
+
+      const handleOnline = () => {
+        window.removeEventListener("online", handleOnline);
+        resolve();
+      };
+
+      window.addEventListener("online", handleOnline);
+    });
+
+    const retryHeaders = new Headers();
+    retryHeaders.set("x-offline-queue", "skip");
+
+    if (idempotencyKey) {
+      retryHeaders.set("x-idempotency-key", idempotencyKey);
+    }
+
+    const replayResponse = await fetch("/api/admin/uploads", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+      headers: retryHeaders,
+    });
+
+    if (!replayResponse.ok) {
+      let replayErrorMessage = "Не удалось загрузить изображение после восстановления сети";
+
+      try {
+        const replayErrorData = (await replayResponse.json()) as { message?: string };
+        if (replayErrorData?.message) {
+          replayErrorMessage = replayErrorData.message;
+        }
+      } catch {
+        // noop
+      }
+
+      throw new Error(replayErrorMessage);
+    }
+
+    const replayData = (await replayResponse.json()) as { url?: string };
+    if (!replayData.url) {
+      throw new Error("Сервер вернул пустой путь изображения после повторной отправки");
+    }
+
+    return replayData.url;
+  }
 
   if (!response.ok) {
     let message = "Не удалось загрузить изображение";

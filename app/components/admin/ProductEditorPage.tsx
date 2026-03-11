@@ -25,6 +25,7 @@ import {
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
+import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
 
 type Props = {
   mode: "create" | "edit";
@@ -186,6 +187,18 @@ export default function ProductEditorPage({ mode, productId }: Props) {
           "Не удалось сохранить товар",
         );
         throw new Error(message);
+      }
+      if (isOfflineQueuedResponse(res)) {
+        toast.dismiss(loadingToastId);
+        queueAdminProductToast({
+          type: "info",
+          message: "Изменения поставлены в очередь",
+          description: "Они отправятся автоматически при восстановлении сети.",
+          delayMs: 500,
+        });
+        router.push("/admin");
+        router.refresh();
+        return;
       }
 
       toast.dismiss(loadingToastId);
