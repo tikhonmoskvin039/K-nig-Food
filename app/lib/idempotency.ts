@@ -1,10 +1,12 @@
 import { createHash, randomUUID } from "crypto";
-import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getPrismaClient } from "./prisma";
 
 const IDEMPOTENCY_KEY_CLEANUP_PROBABILITY = 0.03;
 const DEFAULT_IDEMPOTENCY_TTL_SECONDS = 60 * 60 * 24;
+
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
 type IdempotencyStartResult =
   | { type: "disabled"; key: null }
@@ -13,7 +15,7 @@ type IdempotencyStartResult =
       type: "replay";
       key: string;
       statusCode: number;
-      responseBody: Prisma.JsonValue;
+      responseBody: JsonValue;
     }
   | { type: "conflict"; key: string };
 
@@ -66,8 +68,8 @@ async function cleanupExpiredIdempotencyRows() {
   }
 }
 
-function toJsonValue(value: unknown): Prisma.JsonValue {
-  return JSON.parse(JSON.stringify(value)) as Prisma.JsonValue;
+function toJsonValue(value: unknown): JsonValue {
+  return JSON.parse(JSON.stringify(value)) as JsonValue;
 }
 
 export function hashJsonPayload(payload: unknown): string {
@@ -115,7 +117,7 @@ export async function beginIdempotentRequest(params: {
     Array<{
       requestHash: string;
       statusCode: number;
-      responseBody: Prisma.JsonValue;
+      responseBody: JsonValue;
       expiresAt: Date;
     }>
   >`
@@ -201,7 +203,7 @@ export function buildIdempotencyConflictResponse() {
 
 export function buildIdempotencyReplayResponse(params: {
   statusCode: number;
-  responseBody: Prisma.JsonValue;
+  responseBody: JsonValue;
 }) {
   return NextResponse.json(params.responseBody, {
     status: params.statusCode,

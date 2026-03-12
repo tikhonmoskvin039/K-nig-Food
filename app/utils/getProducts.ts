@@ -1,7 +1,12 @@
 import { getAllProductsFromDatabase } from "../lib/productsRepository";
 
 async function getAllProductsFromSource(): Promise<DTProduct[]> {
-  return getAllProductsFromDatabase();
+  try {
+    return await getAllProductsFromDatabase();
+  } catch (error) {
+    console.error("Failed to read products source. Falling back to empty list:", error);
+    return [];
+  }
 }
 
 // Define function to get all visible products
