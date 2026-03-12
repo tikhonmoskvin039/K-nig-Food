@@ -96,12 +96,18 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
       }
     };
 
-    loadHomepageVisibility();
+    void loadHomepageVisibility();
+
+    const handleWindowFocus = () => {
+      void loadHomepageVisibility();
+    };
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       isCancelled = true;
+      window.removeEventListener("focus", handleWindowFocus);
     };
-  }, []);
+  }, [pathname]);
 
   const visibleMenuItems = menuItems.filter((item) => {
     if (item.href === "/products/new") {

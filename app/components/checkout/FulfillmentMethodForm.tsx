@@ -704,7 +704,8 @@ export default function FulfillmentMethodForm() {
 
       {!deliveryEnabled && (
         <p className="text-sm text-amber-700">
-          Доставка сейчас отключена в админке. Доступен только самовывоз.
+          Сервис доставки сейчас временно недоступен. Приносим извинения за
+          доставленные неудобства.
         </p>
       )}
 
