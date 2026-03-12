@@ -17,8 +17,7 @@ import {
 
 const YANDEX_GO_FALLBACK_URL = "https://go.yandex/ru_ru/";
 const YANDEX_ROUTE_URL = "https://yandex.ru/maps/";
-const YANDEX_GO_DEEPLINK_URL = "https://3.redirect.appmetrica.yandex.com/route";
-const YANDEX_GO_TRACKING_ID = "1178268795219780156";
+const YANDEX_GO_DELIVERY_ROUTE_URL = "https://yandex.go.link/route";
 const SUGGESTION_LIMIT = 5;
 const KALININGRAD_REGION_CITIES = [
   "Калининград",
@@ -512,22 +511,20 @@ export default function FulfillmentMethodForm() {
     const startLng = Number(checkoutSettings.originPoint.lng);
     const hasStartCoords = Number.isFinite(startLat) && Number.isFinite(startLng);
 
-    if (hasStartCoords && deliveryMapTarget) {
+    if (deliveryMapTarget) {
       const deeplinkQuery = new URLSearchParams({
-        "start-lat": String(startLat),
-        "start-lon": String(startLng),
+        vertical: "delivery",
         "end-lat": String(deliveryMapTarget.lat),
         "end-lon": String(deliveryMapTarget.lng),
-        tariffClass: "econom",
         lang: "ru",
-        appmetrica_tracking_id: YANDEX_GO_TRACKING_ID,
       });
-      return `${YANDEX_GO_DEEPLINK_URL}?${deeplinkQuery.toString()}`;
+      if (hasStartCoords) {
+        deeplinkQuery.set("start-lat", String(startLat));
+        deeplinkQuery.set("start-lon", String(startLng));
+      }
+      return `${YANDEX_GO_DELIVERY_ROUTE_URL}?${deeplinkQuery.toString()}`;
     }
 
-    const destinationCoords = deliveryMapTarget
-      ? `${deliveryMapTarget.lat},${deliveryMapTarget.lng}`
-      : null;
     const destinationText = [
       checkout.deliveryAddress.city.trim(),
       checkout.deliveryAddress.street.trim(),
@@ -535,7 +532,7 @@ export default function FulfillmentMethodForm() {
     ]
       .filter(Boolean)
       .join(", ");
-    const destination = destinationCoords ?? destinationText;
+    const destination = destinationText;
 
     if (!destination) {
       return YANDEX_GO_FALLBACK_URL;
@@ -543,9 +540,7 @@ export default function FulfillmentMethodForm() {
 
     const routeText = hasStartCoords
       ? `${startLat},${startLng}~${destination}`
-      : destinationCoords
-        ? `~${destinationCoords}`
-        : destination;
+      : destination;
 
     return `${YANDEX_ROUTE_URL}?mode=routes&rtext=${encodeURIComponent(routeText)}&rtt=auto`;
   }, [
@@ -1039,8 +1034,6 @@ export default function FulfillmentMethodForm() {
             <div className="flex flex-col sm:flex-row gap-2">
               <a
                 href={yandexGoRouteHref}
-                target="_blank"
-                rel="noreferrer"
                 className="btn-secondary"
               >
                 Проверить на Яндекс Гоу

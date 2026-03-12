@@ -595,15 +595,10 @@ export default function ProductAdminPanel() {
 
   return (
     <div className="surface-card p-4 md:p-6">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-bold md:text-2xl">Каталог товаров</h2>
-        <ProductCreateControl />
-      </div>
-
       <div
         role="tablist"
         aria-label="Разделы управления каталога"
-        className="mb-6 inline-flex flex-wrap rounded-xl border p-1 gap-1"
+        className="mb-6 flex w-full flex-col gap-1 rounded-xl border p-1 sm:inline-flex sm:w-auto sm:flex-row"
         style={{
           borderColor: "var(--color-border)",
           background:
@@ -612,7 +607,7 @@ export default function ProductAdminPanel() {
       >
         <button
           type="button"
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
             activeTab === "products"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -635,7 +630,7 @@ export default function ProductAdminPanel() {
         </button>
         <button
           type="button"
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
             activeTab === "showcase"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -658,7 +653,7 @@ export default function ProductAdminPanel() {
         </button>
         <button
           type="button"
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
             activeTab === "delivery"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -988,6 +983,11 @@ export default function ProductAdminPanel() {
         </div>
       ) : (
         <>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xl font-bold md:text-2xl">Каталог товаров</h2>
+            <ProductCreateControl />
+          </div>
+
           {products.length > 0 && (
             <ProductFiltersPanel
               tableState={tableState}
