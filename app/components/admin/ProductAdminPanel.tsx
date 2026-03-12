@@ -43,6 +43,7 @@ import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
 import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
+import type { CheckoutSettings } from "../../types/checkoutSettings";
 
 export default function ProductAdminPanel() {
   const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
@@ -51,11 +52,18 @@ export default function ProductAdminPanel() {
     recentProductsEnabled: boolean;
     weeklyOffersEnabled: boolean;
   } | null>(null);
+  const [checkoutSettings, setCheckoutSettings] = useState<CheckoutSettings | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isHomepageVisibilityLoading, setIsHomepageVisibilityLoading] =
     useState(false);
   const [isHomepageVisibilitySaving, setIsHomepageVisibilitySaving] =
+    useState(false);
+  const [isCheckoutSettingsLoading, setIsCheckoutSettingsLoading] =
+    useState(false);
+  const [isCheckoutSettingsSaving, setIsCheckoutSettingsSaving] =
     useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DTProduct | null>(null);
@@ -194,6 +202,49 @@ export default function ProductAdminPanel() {
     loadHomepageVisibility();
   }, [activeTab, homepageVisibility]);
 
+  const loadCheckoutSettings = async ({ silent = false } = {}) => {
+    if (!silent) {
+      setIsCheckoutSettingsLoading(true);
+    }
+
+    try {
+      const response = await fetch("/api/admin/checkout-settings", {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const message = await readApiErrorMessage(
+          response,
+          "Не удалось загрузить настройки checkout",
+        );
+        throw new Error(message);
+      }
+
+      const data = (await response.json()) as CheckoutSettings;
+      setCheckoutSettings(data);
+      return true;
+    } catch (error) {
+      console.error(error);
+      if (!silent) {
+        toast.error("Ошибка загрузки checkout-настроек", {
+          description:
+            error instanceof Error ? error.message : "Попробуйте позже",
+        });
+      }
+      return false;
+    } finally {
+      if (!silent) {
+        setIsCheckoutSettingsLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab !== "showcase") return;
+    if (checkoutSettings) return;
+    loadCheckoutSettings();
+  }, [activeTab, checkoutSettings]);
+
   const saveHomepageVisibility = async () => {
     if (!homepageVisibility || isHomepageVisibilitySaving) return;
 
@@ -237,6 +288,59 @@ export default function ProductAdminPanel() {
       return false;
     } finally {
       setIsHomepageVisibilitySaving(false);
+    }
+  };
+
+  const saveCheckoutSettings = async () => {
+    if (!checkoutSettings || isCheckoutSettingsSaving) return;
+
+    setIsCheckoutSettingsSaving(true);
+    const loadingToastId = toast.loading("Сохраняем checkout-настройки...");
+
+    try {
+      const response = await fetch("/api/admin/checkout-settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          deliveryEnabled: checkoutSettings.deliveryEnabled,
+          originPoint: checkoutSettings.originPoint,
+          pickupPoint: checkoutSettings.pickupPoint,
+        }),
+      });
+
+      if (!response.ok) {
+        const message = await readApiErrorMessage(
+          response,
+          "Не удалось сохранить настройки checkout",
+        );
+        throw new Error(message);
+      }
+
+      if (isOfflineQueuedResponse(response)) {
+        toast.dismiss(loadingToastId);
+        toast.info("Сохранение поставлено в очередь.", {
+          description: "Настройки отправятся автоматически при восстановлении сети.",
+        });
+        return true;
+      }
+
+      const saved = (await response.json()) as CheckoutSettings;
+      setCheckoutSettings(saved);
+      toast.dismiss(loadingToastId);
+      toast.success("Checkout-настройки сохранены");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.dismiss(loadingToastId);
+      toast.error("Не удалось сохранить checkout-настройки", {
+        description:
+          error instanceof Error ? error.message : "Попробуйте еще раз",
+      });
+      return false;
+    } finally {
+      setIsCheckoutSettingsSaving(false);
     }
   };
 
@@ -463,6 +567,43 @@ export default function ProductAdminPanel() {
     setIsBulkDeleteOpen(false);
   };
 
+  const updateCheckoutPointText = (
+    pointKey: "originPoint" | "pickupPoint",
+    field: "label" | "query",
+    value: string,
+  ) => {
+    setCheckoutSettings((prev) =>
+      prev
+        ? {
+            ...prev,
+            [pointKey]: {
+              ...prev[pointKey],
+              [field]: value,
+            },
+          }
+        : prev,
+    );
+  };
+
+  const updateCheckoutPointNumber = (
+    pointKey: "originPoint" | "pickupPoint",
+    field: "lat" | "lng",
+    value: string,
+  ) => {
+    const parsed = Number(value.replace(",", "."));
+    setCheckoutSettings((prev) =>
+      prev
+        ? {
+            ...prev,
+            [pointKey]: {
+              ...prev[pointKey],
+              [field]: parsed,
+            },
+          }
+        : prev,
+    );
+  };
+
   return (
     <div className="surface-card p-4 md:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -605,6 +746,228 @@ export default function ProductAdminPanel() {
                       className="btn-secondary"
                       onClick={() => loadHomepageVisibility()}
                       disabled={isHomepageVisibilitySaving || isHomepageVisibilityLoading}
+                    >
+                      Обновить из БД
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="surface-card-soft p-4 md:p-5">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-semibold">Настройки доставки и самовывоза</h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Управляйте блоком доставки в checkout и редактируйте точки:
+                  откуда стартует доставка и где расположен пункт самовывоза.
+                </p>
+              </div>
+
+              {isCheckoutSettingsLoading || !checkoutSettings ? (
+                <p className="text-sm text-slate-500">Загружаем checkout-настройки...</p>
+              ) : (
+                <>
+                  <label
+                    className="checkbox-card"
+                    data-checked={checkoutSettings.deliveryEnabled}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checkoutSettings.deliveryEnabled}
+                      onChange={(event) =>
+                        setCheckoutSettings((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                deliveryEnabled: event.target.checked,
+                              }
+                            : prev,
+                        )
+                      }
+                    />
+                    <span className="font-medium select-none">
+                      Показывать и разрешать доставку в checkout
+                    </span>
+                  </label>
+
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div className="rounded-xl border p-3 space-y-3">
+                      <h4 className="font-semibold text-slate-900">
+                        Точка старта доставки
+                      </h4>
+                      <label className="space-y-1 block">
+                        <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                          Название
+                        </span>
+                        <input
+                          className="form-control"
+                          value={checkoutSettings.originPoint.label}
+                          onChange={(event) =>
+                            updateCheckoutPointText(
+                              "originPoint",
+                              "label",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Кухня, адрес"
+                        />
+                      </label>
+                      <label className="space-y-1 block">
+                        <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                          Строка геокодирования
+                        </span>
+                        <input
+                          className="form-control"
+                          value={checkoutSettings.originPoint.query}
+                          onChange={(event) =>
+                            updateCheckoutPointText(
+                              "originPoint",
+                              "query",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Город, улица, дом"
+                        />
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label className="space-y-1 block">
+                          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                            Широта
+                          </span>
+                          <input
+                            className="form-control"
+                            inputMode="decimal"
+                            value={Number.isFinite(checkoutSettings.originPoint.lat) ? checkoutSettings.originPoint.lat : ""}
+                            onChange={(event) =>
+                              updateCheckoutPointNumber(
+                                "originPoint",
+                                "lat",
+                                event.target.value,
+                              )
+                            }
+                            placeholder="54.7384"
+                          />
+                        </label>
+                        <label className="space-y-1 block">
+                          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                            Долгота
+                          </span>
+                          <input
+                            className="form-control"
+                            inputMode="decimal"
+                            value={Number.isFinite(checkoutSettings.originPoint.lng) ? checkoutSettings.originPoint.lng : ""}
+                            onChange={(event) =>
+                              updateCheckoutPointNumber(
+                                "originPoint",
+                                "lng",
+                                event.target.value,
+                              )
+                            }
+                            placeholder="20.4713"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border p-3 space-y-3">
+                      <h4 className="font-semibold text-slate-900">
+                        Точка самовывоза
+                      </h4>
+                      <label className="space-y-1 block">
+                        <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                          Название
+                        </span>
+                        <input
+                          className="form-control"
+                          value={checkoutSettings.pickupPoint.label}
+                          onChange={(event) =>
+                            updateCheckoutPointText(
+                              "pickupPoint",
+                              "label",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Пункт самовывоза, адрес"
+                        />
+                      </label>
+                      <label className="space-y-1 block">
+                        <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                          Строка геокодирования
+                        </span>
+                        <input
+                          className="form-control"
+                          value={checkoutSettings.pickupPoint.query}
+                          onChange={(event) =>
+                            updateCheckoutPointText(
+                              "pickupPoint",
+                              "query",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Город, улица, дом"
+                        />
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label className="space-y-1 block">
+                          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                            Широта
+                          </span>
+                          <input
+                            className="form-control"
+                            inputMode="decimal"
+                            value={Number.isFinite(checkoutSettings.pickupPoint.lat) ? checkoutSettings.pickupPoint.lat : ""}
+                            onChange={(event) =>
+                              updateCheckoutPointNumber(
+                                "pickupPoint",
+                                "lat",
+                                event.target.value,
+                              )
+                            }
+                            placeholder="54.7384"
+                          />
+                        </label>
+                        <label className="space-y-1 block">
+                          <span className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
+                            Долгота
+                          </span>
+                          <input
+                            className="form-control"
+                            inputMode="decimal"
+                            value={Number.isFinite(checkoutSettings.pickupPoint.lng) ? checkoutSettings.pickupPoint.lng : ""}
+                            onChange={(event) =>
+                              updateCheckoutPointNumber(
+                                "pickupPoint",
+                                "lng",
+                                event.target.value,
+                              )
+                            }
+                            placeholder="20.4713"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      className="btn-primary min-w-56"
+                      onClick={saveCheckoutSettings}
+                      disabled={isCheckoutSettingsSaving}
+                    >
+                      {isCheckoutSettingsSaving ? (
+                        <ButtonSpinner />
+                      ) : (
+                        "Сохранить checkout-настройки"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => loadCheckoutSettings()}
+                      disabled={isCheckoutSettingsSaving || isCheckoutSettingsLoading}
                     >
                       Обновить из БД
                     </button>

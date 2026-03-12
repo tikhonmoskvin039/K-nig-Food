@@ -173,6 +173,13 @@ a {
     color: var(--color-foreground);
   }
 
+  .btn-danger-soft {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 min-h-10 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed border;
+    border-color: color-mix(in srgb, #e11d48 36%, var(--color-border));
+    color: color-mix(in srgb, #be123c 78%, var(--color-foreground));
+    background: color-mix(in srgb, #ffe4e6 62%, var(--color-surface) 38%);
+  }
+
   .table-shell {
     @apply rounded-2xl border overflow-hidden;
     background: var(--color-surface);
@@ -203,6 +210,207 @@ a {
     color: color-mix(in srgb, var(--color-foreground) 86%, #78350f 14%);
   }
 
+  .delivery-map-shell {
+    @apply rounded-xl border p-3;
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-soft) 72%, transparent);
+  }
+
+  .delivery-map-canvas {
+    height: 320px;
+    width: 100%;
+    border-radius: 0.875rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+
+  .delivery-map-canvas-compact {
+    height: 280px;
+    min-height: 280px;
+  }
+
+  .delivery-map-canvas-expanded {
+    height: calc(100dvh - var(--header-height) - 12px);
+    min-height: 640px;
+  }
+
+  .delivery-map-canvas > div {
+    height: 100%;
+    width: 100%;
+    background: color-mix(in srgb, var(--color-surface-soft) 86%, #0f172a 14%);
+  }
+
+  .delivery-map-canvas [class*="balloon__content"] {
+    background: var(--color-surface);
+    color: var(--color-foreground);
+  }
+
+  .checkout-route-floating {
+    position: fixed;
+    left: 50%;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(960px, calc(100vw - 0.9rem));
+    border-radius: 0.875rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-surface) 90%, #cffafe 10%),
+        color-mix(in srgb, var(--color-surface-soft) 82%, #e0f2fe 18%)
+      );
+    box-shadow:
+      0 16px 36px -20px rgba(2, 6, 23, 0.48),
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 18%, transparent),
+      0 0 30px -24px color-mix(in srgb, #06b6d4 48%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    min-height: 128px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.45rem;
+    /* Reserve space on the right for the fixed "scroll to top" button */
+    padding: 1.25rem calc(1.35rem + 76px) 1.25rem 1.35rem;
+    z-index: 80;
+  }
+
+  .checkout-route-sheet-head {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.35rem;
+  }
+
+  .checkout-route-sheet-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 0.45rem;
+  }
+
+  .checkout-route-sheet-toggle {
+    border: 1px solid color-mix(in srgb, var(--color-primary) 36%, var(--color-border));
+    background: color-mix(in srgb, var(--color-surface) 78%, transparent);
+    color: var(--color-foreground);
+    border-radius: 999px;
+    padding: 0.36rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .checkout-route-sheet-toggle:hover {
+    background: color-mix(in srgb, var(--color-primary-soft) 56%, var(--color-surface) 44%);
+    border-color: color-mix(in srgb, var(--color-primary) 52%, var(--color-border));
+  }
+
+  .checkout-route-sheet-toggle:active {
+    transform: translateY(1px);
+  }
+
+  .checkout-route-sheet-map-btn {
+    border: 1px solid color-mix(in srgb, #06b6d4 42%, var(--color-border));
+    background: color-mix(in srgb, #ecfeff 62%, var(--color-surface) 38%);
+    color: color-mix(in srgb, #0e7490 76%, var(--color-foreground));
+    border-radius: 999px;
+    padding: 0.36rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .checkout-route-sheet-map-btn:active {
+    transform: translateY(1px);
+  }
+
+  .checkout-route-sheet-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .checkout-route-sheet-preview {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--color-foreground) 82%, var(--color-muted) 18%);
+    text-align: center;
+  }
+
+  .checkout-route-static {
+    position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    padding: 1rem 1.15rem;
+    min-height: 0;
+    margin-bottom: 0.25rem;
+    z-index: 1;
+  }
+
+  @media (max-width: 767px) {
+    .delivery-map-canvas,
+    .delivery-map-canvas-expanded,
+    .delivery-map-canvas-compact {
+      height: 320px;
+      min-height: 320px;
+    }
+
+    .checkout-route-floating {
+      padding-right: calc(1rem + 64px);
+    }
+
+    .checkout-route-sheet-body {
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  .autocomplete-field {
+    position: relative;
+  }
+
+  .autocomplete-menu {
+    position: absolute;
+    z-index: 45;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 230px;
+    overflow-y: auto;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 18px 36px -24px rgba(2, 6, 23, 0.45);
+    padding: 0.35rem;
+  }
+
+  .autocomplete-item {
+    width: 100%;
+    text-align: left;
+    border-radius: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.86rem;
+    color: var(--color-foreground);
+    transition: background-color 0.18s ease;
+  }
+
+  .autocomplete-item:hover {
+    background: color-mix(in srgb, var(--color-primary-soft) 48%, var(--color-surface) 52%);
+  }
+
   #recent-products,
   #weekly-offers {
     scroll-margin-top: calc(var(--header-height) + 10px);
@@ -229,6 +437,16 @@ a {
 
     .btn-ghost:hover {
       background: color-mix(in srgb, var(--color-surface-soft) 90%, transparent);
+    }
+
+    .btn-danger-soft:hover {
+      border-color: color-mix(in srgb, #e11d48 52%, var(--color-border));
+      background: color-mix(in srgb, #fecdd3 70%, var(--color-surface) 30%);
+    }
+
+    .checkout-route-sheet-map-btn:hover {
+      border-color: color-mix(in srgb, #06b6d4 58%, var(--color-border));
+      background: color-mix(in srgb, #cffafe 72%, var(--color-surface) 28%);
     }
 
     .admin-table-row:hover {
@@ -333,6 +551,47 @@ html[data-theme="dark"] .cart-expiry-notice {
     color-mix(in srgb, #78350f 48%, var(--color-surface-soft) 52%)
   ) !important;
   color: #fde68a !important;
+}
+
+html[data-theme="dark"] .checkout-route-floating {
+  border-color: color-mix(in srgb, #22d3ee 42%, var(--color-border)) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #0f172a 72%, var(--color-surface) 28%),
+      color-mix(in srgb, #082f49 56%, var(--color-surface-soft) 44%)
+    ) !important;
+  box-shadow:
+    0 20px 40px -22px rgba(2, 6, 23, 0.95),
+    0 0 0 1px color-mix(in srgb, #22d3ee 28%, transparent),
+    0 0 36px -24px color-mix(in srgb, #22d3ee 62%, transparent) !important;
+}
+
+html[data-theme="dark"] .checkout-route-sheet-toggle {
+  border-color: color-mix(in srgb, #22d3ee 34%, var(--color-border));
+  background: color-mix(in srgb, #0f172a 64%, var(--color-surface) 36%);
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .checkout-route-sheet-map-btn {
+  border-color: color-mix(in srgb, #22d3ee 38%, var(--color-border));
+  background: color-mix(in srgb, #082f49 62%, var(--color-surface) 38%);
+  color: #bae6fd;
+}
+
+html[data-theme="dark"] .autocomplete-menu {
+  background: color-mix(in srgb, var(--color-surface) 90%, #020617 10%);
+  border-color: color-mix(in srgb, #22d3ee 26%, var(--color-border));
+}
+
+html[data-theme="dark"] .autocomplete-item:hover {
+  background: color-mix(in srgb, #1e293b 72%, var(--color-surface) 28%);
+}
+
+html[data-theme="dark"] .btn-danger-soft {
+  border-color: color-mix(in srgb, #fb7185 42%, var(--color-border));
+  color: #fecdd3;
+  background: color-mix(in srgb, #4c0519 56%, var(--color-surface) 44%);
 }
 
 /* Prevent iOS Safari auto-zoom on focused form fields. */

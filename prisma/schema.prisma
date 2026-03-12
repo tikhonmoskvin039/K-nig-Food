@@ -57,6 +57,23 @@ model HomepageSettings {
   @@map("homepage_settings")
 }
 
+model CheckoutSettings {
+  id              String   @id
+  deliveryEnabled Boolean  @default(true)
+  originLabel     String
+  originQuery     String
+  originLat       Float
+  originLng       Float
+  pickupLabel     String
+  pickupQuery     String
+  pickupLat       Float
+  pickupLng       Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("checkout_settings")
+}
+
 model IdempotencyRequest {
   id          String   @id @default(cuid())
   key         String

@@ -43,12 +43,19 @@ export default function OrderSummaryClient() {
 
   if (!order) return null;
 
+  const fulfillmentMethod = order.fulfillmentMethod === "delivery" ? "delivery" : "pickup";
+
   const total = order.cartItems.reduce((sum, item) => {
     const price = parseFloat(item.SalePrice || item.RegularPrice);
     return sum + price * item.quantity;
   }, 0);
 
-  const grandTotal = total;
+  const deliveryAmount =
+    fulfillmentMethod === "delivery" && order.deliveryQuote
+      ? Math.max(0, Number(order.deliveryQuote.amount) || 0)
+      : 0;
+
+  const grandTotal = total + deliveryAmount;
 
   const getProductImage = (id: string): string => {
     const product = products.find((p) => p.ID === id);
@@ -116,17 +123,52 @@ export default function OrderSummaryClient() {
         </ul>
 
         <div className="border-t mt-6 pt-4 space-y-2 text-sm text-gray-700">
+          <div className="flex justify-between">
+            <span>Товары:</span>
+            <span>{total.toFixed(2)} ₽</span>
+          </div>
+
+          {fulfillmentMethod === "delivery" && (
+            <div className="flex justify-between">
+              <span>Доставка (Яндекс Go):</span>
+              <span>{deliveryAmount.toFixed(2)} ₽</span>
+            </div>
+          )}
+
+          {fulfillmentMethod === "pickup" && (
+            <div className="flex justify-between">
+              <span>Самовывоз:</span>
+              <span>0.00 ₽</span>
+            </div>
+          )}
+
           <div className="flex justify-between font-semibold text-gray-900">
             <span>{labels.total || "Итого"}:</span>
             <span>{grandTotal.toFixed(2)} ₽</span>
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 space-y-4">
           {renderCustomerInfo(
             labels.customerInformation || "Информация о покупателе",
             order.billingForm,
           )}
+
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Получение заказа</h3>
+            {fulfillmentMethod === "delivery" ? (
+              <p className="text-sm text-gray-700">
+                Доставка (Яндекс Go): {order.deliveryAddress?.city || "Калининград"},{" "}
+                {order.deliveryAddress?.street || "улица не указана"},{" "}
+                {order.deliveryAddress?.house ? `д. ${order.deliveryAddress.house}` : ""}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-700">
+                Самовывоз:{" "}
+                {order.pickupAddress || "Калининград, Красная 139Б"}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>

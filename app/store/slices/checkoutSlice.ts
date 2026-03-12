@@ -7,11 +7,36 @@ export interface FormData {
   email: string;
 }
 
+export type FulfillmentMethod = "pickup" | "delivery";
+
+export interface DeliveryAddressForm {
+  city: string;
+  street: string;
+  house: string;
+  apartment: string;
+  entrance: string;
+  floor: string;
+  comment: string;
+}
+
+export interface DeliveryQuoteState {
+  provider: "yandex";
+  amount: number;
+  currency: "RUB";
+  calculatedAt: string;
+  reference?: string;
+}
+
 export interface CheckoutState {
   orderId: string;
   orderDate: string;
   billingForm: FormData;
   paymentMethodId: string;
+  fulfillmentMethod: FulfillmentMethod;
+  pickupAddress: string;
+  deliveryAddress: DeliveryAddressForm;
+  deliveryAddressConfirmed: boolean;
+  deliveryQuote: DeliveryQuoteState | null;
 }
 
 const initialForm: FormData = {
@@ -20,11 +45,26 @@ const initialForm: FormData = {
   email: "",
 };
 
+const initialDeliveryAddress: DeliveryAddressForm = {
+  city: "",
+  street: "",
+  house: "",
+  apartment: "",
+  entrance: "",
+  floor: "",
+  comment: "",
+};
+
 const initialState: CheckoutState = {
   orderId: "",
   orderDate: "",
   billingForm: initialForm,
   paymentMethodId: "",
+  fulfillmentMethod: "pickup",
+  pickupAddress: "Калининград, Красная 139Б",
+  deliveryAddress: initialDeliveryAddress,
+  deliveryAddressConfirmed: true,
+  deliveryQuote: null,
 };
 
 const checkoutSlice = createSlice({
@@ -41,6 +81,27 @@ const checkoutSlice = createSlice({
     setPaymentMethod(state, action: PayloadAction<string>) {
       state.paymentMethodId = action.payload;
     },
+    setFulfillmentMethod(state, action: PayloadAction<FulfillmentMethod>) {
+      state.fulfillmentMethod = action.payload;
+      if (action.payload === "pickup") {
+        state.deliveryQuote = null;
+      }
+    },
+    setPickupAddress(state, action: PayloadAction<string>) {
+      state.pickupAddress = action.payload;
+    },
+    setDeliveryAddress(state, action: PayloadAction<Partial<DeliveryAddressForm>>) {
+      state.deliveryAddress = { ...state.deliveryAddress, ...action.payload };
+    },
+    setDeliveryAddressConfirmed(state, action: PayloadAction<boolean>) {
+      state.deliveryAddressConfirmed = action.payload;
+    },
+    setDeliveryQuote(state, action: PayloadAction<DeliveryQuoteState | null>) {
+      state.deliveryQuote = action.payload;
+    },
+    clearDeliveryQuote(state) {
+      state.deliveryQuote = null;
+    },
   },
 });
 
@@ -48,6 +109,12 @@ export const {
   setOrderInfo,
   setBillingForm,
   setPaymentMethod,
+  setFulfillmentMethod,
+  setPickupAddress,
+  setDeliveryAddress,
+  setDeliveryAddressConfirmed,
+  setDeliveryQuote,
+  clearDeliveryQuote,
 } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

@@ -75,6 +75,34 @@ export function formatOrderSummary(cartItems: DTMinimalCartItem[] | DTOrderCartI
   return { lines, subtotal };
 }
 
+function getDeliveryAmount(body: DTOrderBody): number {
+  if (body.fulfillmentMethod !== "delivery") return 0;
+  const deliveryAmount = Number(body.deliveryQuote?.amount ?? 0);
+  if (!Number.isFinite(deliveryAmount) || deliveryAmount <= 0) return 0;
+  return Number(deliveryAmount.toFixed(2));
+}
+
+function formatFulfillmentDetails(body: DTOrderBody): string {
+  const method = body.fulfillmentMethod === "delivery" ? "Доставка" : "Самовывоз";
+
+  if (body.fulfillmentMethod === "delivery" && body.deliveryAddress) {
+    const details = [
+      body.deliveryAddress.city,
+      body.deliveryAddress.street,
+      body.deliveryAddress.house ? `д. ${body.deliveryAddress.house}` : "",
+      body.deliveryAddress.apartment ? `кв. ${body.deliveryAddress.apartment}` : "",
+      body.deliveryAddress.entrance ? `подъезд ${body.deliveryAddress.entrance}` : "",
+      body.deliveryAddress.floor ? `этаж ${body.deliveryAddress.floor}` : "",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return `${method} (Яндекс Go)\nАдрес: ${details || "не указан"}`;
+  }
+
+  return `${method}\nТочка самовывоза: ${body.pickupAddress || "Калининград, Красная 139Б"}`;
+}
+
 // ----- Admin Email -----
 
 export function generateAdminEmail(
@@ -92,6 +120,8 @@ export function generateAdminEmail(
 Email: ${body.billingForm.email}
 
 Метод оплаты: ${body.paymentMethodId.toUpperCase()}
+Способ получения:
+${formatFulfillmentDetails(body)}
 
 Состав заказа:
 ${summary}
@@ -118,6 +148,8 @@ ${labels.orderConfirmationMessage || "Ваш заказ был успешно р
 Номер заказа: ${body.orderId}
 Дата заказа: ${body.orderDate}
 Метод оплаты: ${body.paymentMethodId.toUpperCase()}
+Способ получения:
+${formatFulfillmentDetails(body)}
 
 Состав заказа:
 ${summary}
@@ -133,7 +165,8 @@ ${siteName || "König Food"}
 
 export async function sendAdminEmail(body: DTOrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
-  const total = subtotal;
+  const deliveryAmount = getDeliveryAmount(body);
+  const total = subtotal + deliveryAmount;
 
   const text = generateAdminEmail(body, lines, total);
   const subject = `🛒 Новый заказ от ${body.billingForm.firstName} ${body.billingForm.lastName}`;
@@ -149,7 +182,8 @@ export async function sendAdminEmail(body: DTOrderBody) {
 
 export async function sendCustomerEmail(body: DTOrderBody) {
   const { lines, subtotal } = formatOrderSummary(body.cartItems);
-  const total = subtotal;
+  const deliveryAmount = getDeliveryAmount(body);
+  const total = subtotal + deliveryAmount;
 
   const text = generateCustomerEmail(body, lines, total);
   const subject =

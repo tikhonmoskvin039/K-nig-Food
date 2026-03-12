@@ -155,13 +155,16 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
     return { label: displayLabel, finalHref };
   });
 
-  const activeFinalHref =
+  const bestMatch =
     resolvedMenuItems
       .map((item) => ({
         href: item.finalHref,
         score: getMatchScore(item.finalHref),
       }))
-      .sort((a, b) => b.score - a.score)[0]?.href || null;
+      .sort((a, b) => b.score - a.score)[0] ?? null;
+
+  const activeFinalHref =
+    bestMatch && bestMatch.score >= 0 ? bestMatch.href : null;
 
   return (
     <ReduxProvider>
@@ -175,7 +178,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <MiniCart />
+        <MiniCart onNavigate={() => setIsMenuOpen(false)} />
       </div>
 
       <nav
@@ -210,7 +213,7 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
         })}
 
         <div className="hidden lg:flex lg:ml-4">
-          <MiniCart />
+          <MiniCart onNavigate={() => setIsMenuOpen(false)} />
         </div>
       </nav>
     </ReduxProvider>

@@ -47,12 +47,36 @@ declare type DTAddress = {
   email: string;
 };
 
+declare type DTFulfillmentMethod = "pickup" | "delivery";
+
+declare type DTDeliveryAddress = {
+  city: string;
+  street: string;
+  house: string;
+  apartment?: string;
+  entrance?: string;
+  floor?: string;
+  comment?: string;
+};
+
+declare type DTDeliveryQuote = {
+  provider: "yandex";
+  amount: number;
+  currency: "RUB";
+  calculatedAt: string;
+  reference?: string;
+};
+
 declare type DTOrderData = {
   orderId: string;
   orderDate: string;
   cartItems: DTCartItem[];
-  billingForm: Address;
+  billingForm: DTAddress;
   paymentMethodId: string;
+  fulfillmentMethod?: DTFulfillmentMethod;
+  pickupAddress?: string;
+  deliveryAddress?: DTDeliveryAddress | null;
+  deliveryQuote?: DTDeliveryQuote | null;
 };
 
 // Minimal cart item interface with only required fields for emails
@@ -74,6 +98,10 @@ declare type DTOrderBody = {
   cartItems: DTMinimalCartItem[] | DTOrderCartItem[];
   billingForm: DTAddress;
   paymentMethodId: string;
+  fulfillmentMethod?: DTFulfillmentMethod;
+  pickupAddress?: string;
+  deliveryAddress?: DTDeliveryAddress | null;
+  deliveryQuote?: DTDeliveryQuote | null;
 };
 
 declare type DTSocialIcon =

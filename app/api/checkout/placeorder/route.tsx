@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as DTOrderBody;
     const requestHash = hashJsonPayload(body);
+    const fulfillmentMethod = body.fulfillmentMethod ?? "pickup";
     const idempotency = await beginIdempotentRequest({
       headers: req.headers,
       endpoint,
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Load settings and validate payment method
-    const settings = getCheckoutSettings();
+    const settings = await getCheckoutSettings();
     const paymentMethodValid = settings.paymentMethods.some(
       (pm) => pm.id === body.paymentMethodId && pm.enabled,
     );
@@ -124,6 +125,71 @@ export async function POST(req: NextRequest) {
         responseBody,
       });
       return NextResponse.json(responseBody, { status: statusCode });
+    }
+
+    if (fulfillmentMethod !== "pickup" && fulfillmentMethod !== "delivery") {
+      console.error("❌ Validation failed: Invalid fulfillment method:", fulfillmentMethod);
+      const responseBody = { error: "Invalid fulfillment method." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
+    }
+
+    if (fulfillmentMethod === "delivery" && !settings.deliveryEnabled) {
+      console.error("❌ Validation failed: Delivery is disabled in checkout settings");
+      const responseBody = { error: "Delivery is currently disabled." };
+      const statusCode = 400;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+      return NextResponse.json(responseBody, { status: statusCode });
+    }
+
+    if (fulfillmentMethod === "delivery") {
+      const requiredDeliveryFields = [
+        body.deliveryAddress?.city,
+        body.deliveryAddress?.street,
+        body.deliveryAddress?.house,
+      ];
+
+      if (!requiredDeliveryFields.every((field) => field && field.trim() !== "")) {
+        console.error("❌ Validation failed: Missing delivery address");
+        const responseBody = { error: "Missing required delivery address fields." };
+        const statusCode = 400;
+        await storeIdempotentResponse({
+          key: idempotency.key,
+          endpoint,
+          requestHash,
+          statusCode,
+          responseBody,
+        });
+        return NextResponse.json(responseBody, { status: statusCode });
+      }
+
+      const deliveryAmount = Number(body.deliveryQuote?.amount ?? 0);
+      if (!Number.isFinite(deliveryAmount) || deliveryAmount <= 0) {
+        console.error("❌ Validation failed: Invalid delivery quote amount");
+        const responseBody = { error: "Invalid delivery quote." };
+        const statusCode = 400;
+        await storeIdempotentResponse({
+          key: idempotency.key,
+          endpoint,
+          requestHash,
+          statusCode,
+          responseBody,
+        });
+        return NextResponse.json(responseBody, { status: statusCode });
+      }
     }
 
     // 3. Validate product prices and IDs
@@ -170,8 +236,28 @@ export async function POST(req: NextRequest) {
     });
 
     // Update body with enriched cart items
-    const enrichedBody = {
+    const deliveryAmount = Number(body.deliveryQuote?.amount ?? 0);
+    const normalizedDeliveryQuote =
+      fulfillmentMethod === "delivery" && Number.isFinite(deliveryAmount) && deliveryAmount > 0
+        ? {
+            provider: "yandex" as const,
+            amount: Number(deliveryAmount.toFixed(2)),
+            currency: "RUB" as const,
+            calculatedAt: body.deliveryQuote?.calculatedAt || new Date().toISOString(),
+            reference: body.deliveryQuote?.reference,
+          }
+        : null;
+
+    const enrichedBody: DTOrderBody = {
       ...body,
+      fulfillmentMethod,
+      pickupAddress:
+        fulfillmentMethod === "pickup"
+          ? body.pickupAddress ||
+            settings.pickupPoint.label
+          : undefined,
+      deliveryAddress: fulfillmentMethod === "delivery" ? body.deliveryAddress || null : null,
+      deliveryQuote: normalizedDeliveryQuote,
       cartItems: enrichedCartItems,
     };
 

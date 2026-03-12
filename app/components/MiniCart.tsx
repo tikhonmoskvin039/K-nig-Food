@@ -10,7 +10,11 @@ import { useEffect, useRef, useState } from "react";
 import { removeFromCart } from "../store/slices/cartSlice";
 import { registerMiniCartTrigger } from "../utils/MiniCartController";
 
-export default function MiniCart() {
+type MiniCartProps = {
+  onNavigate?: () => void;
+};
+
+export default function MiniCart({ onNavigate }: MiniCartProps) {
   const pathname = usePathname();
   const isCartPage = pathname === "/cart";
   const isPreviewEnabled = !isCartPage;
@@ -137,6 +141,7 @@ export default function MiniCart() {
         className="relative flex items-center justify-center ml-2 mr-4"
         aria-label={labels.viewCart || "View cart"}
         onClick={() => {
+          onNavigate?.();
           setIsVisible(false);
           clearHideTimeout();
         }}
@@ -181,7 +186,10 @@ export default function MiniCart() {
                       <Link
                         href={`/product/${item.Slug}`}
                         className="text-sm font-semibold text-slate-900 hover:text-amber-700"
-                        onClick={() => setIsVisible(false)}
+                        onClick={() => {
+                          onNavigate?.();
+                          setIsVisible(false);
+                        }}
                       >
                         {item.Title}
                       </Link>
@@ -217,7 +225,10 @@ export default function MiniCart() {
               <Link
                 href="/cart"
                 className="mt-4 btn-secondary w-full"
-                onClick={() => setIsVisible(false)}
+                onClick={() => {
+                  onNavigate?.();
+                  setIsVisible(false);
+                }}
               >
                 {labels.viewCart || "Посмотореть корзину"}
               </Link>
@@ -225,7 +236,10 @@ export default function MiniCart() {
               <Link
                 href="/checkout"
                 className="mt-3 btn-primary w-full"
-                onClick={() => setIsVisible(false)}
+                onClick={() => {
+                  onNavigate?.();
+                  setIsVisible(false);
+                }}
               >
                 {labels.proceedToCheckout || "Перейти к оформлению заказа"}
               </Link>

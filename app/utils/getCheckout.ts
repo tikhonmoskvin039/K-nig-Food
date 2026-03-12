@@ -1,19 +1,8 @@
-import checkoutData from "../../configs/checkout.json";
+import { getCheckoutSettingsState } from "../lib/checkoutSettingsRepository";
+import type { CheckoutSettings } from "../types/checkoutSettings";
 
-// Define Checkout Settings Structure
-interface PaymentMethod {
-  id: string;
-  name: string;
-  enabled: boolean;
-  icon: string;
-}
+export type { CheckoutSettings };
 
-export interface CheckoutSettings {
-  paymentMethods: PaymentMethod[];
-}
-
-// Fetch Checkout Settings
-// Now using direct import for compatibility with Vercel
-export const getCheckoutSettings = (): CheckoutSettings => {
-  return checkoutData as CheckoutSettings;
+export const getCheckoutSettings = async (): Promise<CheckoutSettings> => {
+  return getCheckoutSettingsState();
 };

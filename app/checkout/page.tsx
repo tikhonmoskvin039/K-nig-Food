@@ -1,5 +1,6 @@
 import OrderInfoInitializer from "../components/checkout/OrderInfoInitializer";
 import BillingForm from "../components/checkout/BillingForm";
+import FulfillmentMethodForm from "../components/checkout/FulfillmentMethodForm";
 import OrderSummary from "../components/checkout/OrderSummary";
 import { CheckoutProvider } from "../context/CheckoutContext";
 import { ReduxProvider } from "../providers";
@@ -14,6 +15,7 @@ export default function CheckoutPage() {
             <div className="lg:col-span-2 space-y-8">
               <OrderInfoInitializer />
               <BillingForm />
+              <FulfillmentMethodForm />
             </div>
 
             {/* Right Column - Order Summary */}
