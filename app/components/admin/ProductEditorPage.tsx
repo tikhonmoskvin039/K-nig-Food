@@ -7,10 +7,7 @@ import GlobalLoader from "../GlobalLoader";
 import ProductForm from "./ProductForm";
 import ConfirmModal from "../common/ConfirmModal";
 import {
-  ADMIN_PROPAGATION_WARNING_DESCRIPTION,
-  ADMIN_PROPAGATION_WARNING_TITLE,
   queueAdminProductToast,
-  shouldShowAdminPropagationWarning,
 } from "../../lib/adminProductToast";
 import {
   formatBytes,
@@ -125,13 +122,6 @@ export default function ProductEditorPage({ mode, productId }: Props) {
   const handleSave = async () => {
     if (!product || isSaving || (mode === "edit" && !hasChanges)) return;
 
-    if (shouldShowAdminPropagationWarning()) {
-      toast.warning(ADMIN_PROPAGATION_WARNING_TITLE, {
-        description: ADMIN_PROPAGATION_WARNING_DESCRIPTION,
-        duration: 7000,
-      });
-    }
-
     const now = new Date().toISOString();
     const productWithDates: DTProduct = {
       ...product,
@@ -209,8 +199,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
           mode === "create"
             ? "Товар успешно добавлен"
             : "Изменения товара успешно сохранены",
-        description:
-          "Изменения в меню могут появиться в течение нескольких минут.",
+        description: "Изменения в меню опубликованы.",
         delayMs: 500,
       });
 

@@ -8,13 +8,6 @@ export type AdminProductPendingToast = {
 };
 
 const STORAGE_KEY = "admin_product_pending_toast_v1";
-const PROPAGATION_WARNING_KEY = "admin_product_propagation_warning_at";
-const PROPAGATION_WARNING_COOLDOWN_MS = 5 * 60 * 1000;
-
-export const ADMIN_PROPAGATION_WARNING_TITLE =
-  "Публикация изменений может занять несколько минут";
-export const ADMIN_PROPAGATION_WARNING_DESCRIPTION =
-  "Из-за архитектуры синхронизации через репозиторий обновления в меню появляются не мгновенно.";
 
 export const queueAdminProductToast = (toast: AdminProductPendingToast) => {
   if (typeof window === "undefined") return;
@@ -59,29 +52,5 @@ export const popAdminProductToast = (): AdminProductPendingToast | null => {
     };
   } catch {
     return null;
-  }
-};
-
-export const shouldShowAdminPropagationWarning = () => {
-  if (typeof window === "undefined") return false;
-
-  const now = Date.now();
-
-  try {
-    const raw = localStorage.getItem(PROPAGATION_WARNING_KEY);
-    const lastShownAt = raw ? Number(raw) : 0;
-
-    if (
-      Number.isFinite(lastShownAt) &&
-      lastShownAt > 0 &&
-      now - lastShownAt < PROPAGATION_WARNING_COOLDOWN_MS
-    ) {
-      return false;
-    }
-
-    localStorage.setItem(PROPAGATION_WARNING_KEY, String(now));
-    return true;
-  } catch {
-    return true;
   }
 };

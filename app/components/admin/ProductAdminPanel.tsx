@@ -11,12 +11,7 @@ import ProductFiltersPanel from "./product-admin/ProductFiltersPanel";
 import ProductMobileGrid from "./product-admin/ProductMobileGrid";
 import ProductPagination from "./product-admin/ProductPagination";
 import ProductShowcaseManager from "./product-admin/ProductShowcaseManager";
-import {
-  ADMIN_PROPAGATION_WARNING_DESCRIPTION,
-  ADMIN_PROPAGATION_WARNING_TITLE,
-  popAdminProductToast,
-  shouldShowAdminPropagationWarning,
-} from "../../lib/adminProductToast";
+import { popAdminProductToast } from "../../lib/adminProductToast";
 import {
   formatBytes,
   getJsonPayloadSizeBytes,
@@ -361,13 +356,6 @@ export default function ProductAdminPanel() {
 
     setIsSaving(true);
 
-    if (shouldShowAdminPropagationWarning()) {
-      toast.warning(ADMIN_PROPAGATION_WARNING_TITLE, {
-        description: ADMIN_PROPAGATION_WARNING_DESCRIPTION,
-        duration: 7000,
-      });
-    }
-
     const loadingToastId = toast.loading("Сохраняем изменения...");
 
     try {
@@ -406,15 +394,14 @@ export default function ProductAdminPanel() {
 
       if (isReloaded) {
         toast.success(messages.success, {
-          description:
-            "Изменения в меню могут появиться в течение нескольких минут.",
+          description: "Изменения в меню опубликованы.",
         });
       } else {
         toast.warning(
           `${messages.success}. Но не удалось обновить список автоматически.`,
           {
             description:
-              "Обновление меню на сайте также может занять несколько минут.",
+              "Обновите страницу, чтобы увидеть актуальное состояние каталога.",
           },
         );
       }
