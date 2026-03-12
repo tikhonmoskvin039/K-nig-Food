@@ -41,7 +41,9 @@ import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
 import type { CheckoutSettings } from "../../types/checkoutSettings";
 
 export default function ProductAdminPanel() {
-  const [activeTab, setActiveTab] = useState<"catalog" | "showcase">("catalog");
+  const [activeTab, setActiveTab] = useState<
+    "products" | "showcase" | "delivery"
+  >("products");
   const [products, setProducts] = useState<DTProduct[]>([]);
   const [homepageVisibility, setHomepageVisibility] = useState<{
     recentProductsEnabled: boolean;
@@ -235,7 +237,7 @@ export default function ProductAdminPanel() {
   };
 
   useEffect(() => {
-    if (activeTab !== "showcase") return;
+    if (activeTab !== "delivery") return;
     if (checkoutSettings) return;
     loadCheckoutSettings();
   }, [activeTab, checkoutSettings]);
@@ -599,7 +601,9 @@ export default function ProductAdminPanel() {
       </div>
 
       <div
-        className="mb-6 inline-flex rounded-xl border p-1 gap-1"
+        role="tablist"
+        aria-label="Разделы управления каталога"
+        className="mb-6 inline-flex flex-wrap rounded-xl border p-1 gap-1"
         style={{
           borderColor: "var(--color-border)",
           background:
@@ -609,12 +613,12 @@ export default function ProductAdminPanel() {
         <button
           type="button"
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-            activeTab === "catalog"
+            activeTab === "products"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
           }`}
           style={
-            activeTab === "catalog"
+            activeTab === "products"
               ? {
                   background:
                     "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
@@ -623,10 +627,11 @@ export default function ProductAdminPanel() {
                 }
               : { color: "var(--color-muted)" }
           }
-          onClick={() => setActiveTab("catalog")}
-          aria-pressed={activeTab === "catalog"}
+          onClick={() => setActiveTab("products")}
+          role="tab"
+          aria-selected={activeTab === "products"}
         >
-          Таблица и фильтры
+          Управление продуктами
         </button>
         <button
           type="button"
@@ -646,9 +651,33 @@ export default function ProductAdminPanel() {
               : { color: "var(--color-muted)" }
           }
           onClick={() => setActiveTab("showcase")}
-          aria-pressed={activeTab === "showcase"}
+          role="tab"
+          aria-selected={activeTab === "showcase"}
         >
           Управление витриной
+        </button>
+        <button
+          type="button"
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            activeTab === "delivery"
+              ? "shadow-sm"
+              : "hover:opacity-100 opacity-90"
+          }`}
+          style={
+            activeTab === "delivery"
+              ? {
+                  background:
+                    "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
+                  color: "var(--color-foreground)",
+                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                }
+              : { color: "var(--color-muted)" }
+          }
+          onClick={() => setActiveTab("delivery")}
+          role="tab"
+          aria-selected={activeTab === "delivery"}
+        >
+          Доставка и самовывоз
         </button>
       </div>
 
@@ -728,20 +757,21 @@ export default function ProductAdminPanel() {
                         "Сохранить настройки секций"
                       )}
                     </button>
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => loadHomepageVisibility()}
-                      disabled={isHomepageVisibilitySaving || isHomepageVisibilityLoading}
-                    >
-                      Обновить из БД
-                    </button>
                   </div>
                 </>
               )}
             </div>
           </div>
 
+          <ProductShowcaseManager
+            products={products}
+            isSaving={isSaving}
+            onProductsChange={setProducts}
+            onSaveProducts={saveProducts}
+          />
+        </div>
+      ) : activeTab === "delivery" ? (
+        <div className="space-y-5">
           <div className="surface-card-soft p-4 md:p-5">
             <div className="flex flex-col gap-4">
               <div>
@@ -950,26 +980,11 @@ export default function ProductAdminPanel() {
                         "Сохранить checkout-настройки"
                       )}
                     </button>
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => loadCheckoutSettings()}
-                      disabled={isCheckoutSettingsSaving || isCheckoutSettingsLoading}
-                    >
-                      Обновить из БД
-                    </button>
                   </div>
                 </>
               )}
             </div>
           </div>
-
-          <ProductShowcaseManager
-            products={products}
-            isSaving={isSaving}
-            onProductsChange={setProducts}
-            onSaveProducts={saveProducts}
-          />
         </div>
       ) : (
         <>

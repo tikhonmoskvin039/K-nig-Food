@@ -1,5 +1,5 @@
 const CACHE_NAME = "kfood-pwa-v1";
-const APP_SHELL_ASSETS = ["/", "/offline", "/manifest.webmanifest", "/placeholder.png"];
+const APP_SHELL_ASSETS = ["/", "/offline", "/manifest.json", "/placeholder.png"];
 const OFFLINE_QUEUE_DB = "kfood-offline-queue";
 const OFFLINE_QUEUE_STORE = "requests";
 const OFFLINE_QUEUE_DB_VERSION = 1;

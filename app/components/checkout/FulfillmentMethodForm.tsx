@@ -8,7 +8,6 @@ import ConfirmModal from "../common/ConfirmModal";
 import DeliveryMapPicker, { type RouteStats } from "./DeliveryMapPicker";
 import {
   clearDeliveryQuote,
-  type DeliveryAddressForm,
   setDeliveryAddress,
   setDeliveryAddressConfirmed,
   setDeliveryQuote,
@@ -16,7 +15,10 @@ import {
   setPickupAddress,
 } from "../../store/slices/checkoutSlice";
 
-const YANDEX_GO_URL = "https://go.yandex/ru_ru/";
+const YANDEX_GO_FALLBACK_URL = "https://go.yandex/ru_ru/";
+const YANDEX_ROUTE_URL = "https://yandex.ru/maps/";
+const YANDEX_GO_DEEPLINK_URL = "https://3.redirect.appmetrica.yandex.com/route";
+const YANDEX_GO_TRACKING_ID = "1178268795219780156";
 const SUGGESTION_LIMIT = 5;
 const KALININGRAD_REGION_CITIES = [
   "Калининград",
@@ -76,6 +78,14 @@ type AddressSuggestion = {
   house: string;
 };
 
+type MapPickedAddress = {
+  city?: string;
+  street?: string;
+  house?: string;
+  lat?: number;
+  lng?: number;
+};
+
 export default function FulfillmentMethodForm() {
   const dispatch = useAppDispatch();
   const { labels } = useLocalization();
@@ -105,6 +115,10 @@ export default function FulfillmentMethodForm() {
   const [isStreetFocused, setIsStreetFocused] = useState(false);
   const [showAddressFieldErrors, setShowAddressFieldErrors] = useState(false);
   const [addressValidationError, setAddressValidationError] = useState("");
+  const [deliveryMapTarget, setDeliveryMapTarget] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const lastActivityAtRef = useRef(0);
   const lastIdleRefreshAtRef = useRef(0);
   const hasAutoGeoPrefillTriedRef = useRef(false);
@@ -261,6 +275,7 @@ export default function FulfillmentMethodForm() {
             house,
           }),
         );
+        setDeliveryMapTarget(null);
         dispatch(setDeliveryAddressConfirmed(false));
         setCitySuggestions([]);
         setStreetSuggestions([]);
@@ -366,6 +381,9 @@ export default function FulfillmentMethodForm() {
     if (checkout.deliveryAddressConfirmed) {
       dispatch(setDeliveryAddressConfirmed(false));
     }
+    if (name === "city" || name === "street" || name === "house") {
+      setDeliveryMapTarget(null);
+    }
     dispatch(setDeliveryAddress({ [name]: value }));
   };
 
@@ -387,6 +405,7 @@ export default function FulfillmentMethodForm() {
     setGeoAutofillMessage(null);
     setShowAddressFieldErrors(false);
     setAddressValidationError("");
+    setDeliveryMapTarget(null);
   };
 
   const triggerRequiredAddressValidation = () => {
@@ -452,24 +471,91 @@ export default function FulfillmentMethodForm() {
   );
 
   const handleMapAddressPicked = useCallback(
-    (address: {
-      city?: string;
-      street?: string;
-      house?: string;
-    }) => {
-      const patch: Partial<DeliveryAddressForm> = {};
-      if (address.city) patch.city = address.city;
-      if (address.street) patch.street = address.street;
-      if (address.house) patch.house = address.house;
-      if (Object.keys(patch).length > 0) {
-        if (checkout.deliveryAddressConfirmed) {
-          dispatch(setDeliveryAddressConfirmed(false));
-        }
-        dispatch(setDeliveryAddress(patch));
+    (address: MapPickedAddress) => {
+      const nextCity = typeof address.city === "string" ? address.city.trim() : "";
+      const nextStreet =
+        typeof address.street === "string" ? address.street.trim() : "";
+      const nextHouse = typeof address.house === "string" ? address.house.trim() : "";
+      const hasCoords =
+        Number.isFinite(address.lat) && Number.isFinite(address.lng);
+
+      if (checkout.deliveryAddressConfirmed) {
+        dispatch(setDeliveryAddressConfirmed(false));
+      }
+      dispatch(
+        setDeliveryAddress({
+          city: nextCity,
+          street: nextStreet,
+          house: nextHouse,
+        }),
+      );
+      setShowAddressFieldErrors(false);
+      setAddressValidationError("");
+      setSuggestionsError("");
+      setCitySuggestions([]);
+      setStreetSuggestions([]);
+
+      if (hasCoords) {
+        setDeliveryMapTarget({
+          lat: Number(address.lat),
+          lng: Number(address.lng),
+        });
+      } else {
+        setDeliveryMapTarget(null);
       }
     },
     [checkout.deliveryAddressConfirmed, dispatch],
   );
+
+  const yandexGoRouteHref = useMemo(() => {
+    const startLat = Number(checkoutSettings.originPoint.lat);
+    const startLng = Number(checkoutSettings.originPoint.lng);
+    const hasStartCoords = Number.isFinite(startLat) && Number.isFinite(startLng);
+
+    if (hasStartCoords && deliveryMapTarget) {
+      const deeplinkQuery = new URLSearchParams({
+        "start-lat": String(startLat),
+        "start-lon": String(startLng),
+        "end-lat": String(deliveryMapTarget.lat),
+        "end-lon": String(deliveryMapTarget.lng),
+        tariffClass: "econom",
+        lang: "ru",
+        appmetrica_tracking_id: YANDEX_GO_TRACKING_ID,
+      });
+      return `${YANDEX_GO_DEEPLINK_URL}?${deeplinkQuery.toString()}`;
+    }
+
+    const destinationCoords = deliveryMapTarget
+      ? `${deliveryMapTarget.lat},${deliveryMapTarget.lng}`
+      : null;
+    const destinationText = [
+      checkout.deliveryAddress.city.trim(),
+      checkout.deliveryAddress.street.trim(),
+      checkout.deliveryAddress.house.trim(),
+    ]
+      .filter(Boolean)
+      .join(", ");
+    const destination = destinationCoords ?? destinationText;
+
+    if (!destination) {
+      return YANDEX_GO_FALLBACK_URL;
+    }
+
+    const routeText = hasStartCoords
+      ? `${startLat},${startLng}~${destination}`
+      : destinationCoords
+        ? `~${destinationCoords}`
+        : destination;
+
+    return `${YANDEX_ROUTE_URL}?mode=routes&rtext=${encodeURIComponent(routeText)}&rtt=auto`;
+  }, [
+    checkout.deliveryAddress.city,
+    checkout.deliveryAddress.house,
+    checkout.deliveryAddress.street,
+    checkoutSettings.originPoint.lat,
+    checkoutSettings.originPoint.lng,
+    deliveryMapTarget,
+  ]);
 
   const handleApplyYandexDelivery = () => {
     const normalizedAmount = deliveryAmountInput.replace(",", ".").trim();
@@ -527,6 +613,7 @@ export default function FulfillmentMethodForm() {
     if (checkout.deliveryAddressConfirmed) {
       dispatch(setDeliveryAddressConfirmed(false));
     }
+    setDeliveryMapTarget(null);
     dispatch(setDeliveryAddress({ city: cityName }));
     setCitySuggestions([]);
     setIsCityFocused(false);
@@ -536,6 +623,7 @@ export default function FulfillmentMethodForm() {
     if (checkout.deliveryAddressConfirmed) {
       dispatch(setDeliveryAddressConfirmed(false));
     }
+    setDeliveryMapTarget(null);
     dispatch(
       setDeliveryAddress({
         city: suggestion.city || checkout.deliveryAddress.city,
@@ -950,7 +1038,7 @@ export default function FulfillmentMethodForm() {
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <a
-                href={YANDEX_GO_URL}
+                href={yandexGoRouteHref}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-secondary"

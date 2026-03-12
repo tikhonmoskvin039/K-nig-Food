@@ -50,14 +50,8 @@ export default function HapticTapProvider() {
       return;
     }
 
-    const onPointerUp = (event: PointerEvent) => {
-      if (event.pointerType !== "touch" && event.pointerType !== "pen") {
-        return;
-      }
-
-      const target = event.target instanceof Element ? event.target : null;
+    const triggerForTarget = (target: Element | null) => {
       if (!target) return;
-
       if (target.closest("[data-haptic='off']")) {
         return;
       }
@@ -67,15 +61,31 @@ export default function HapticTapProvider() {
       if (clickable.hasAttribute("disabled")) return;
 
       const now = Date.now();
-      if (now - lastTapRef.current < 65) return;
+      if (now - lastTapRef.current < 120) return;
       lastTapRef.current = now;
 
       triggerHapticFeedback(readHapticKind(clickable));
     };
 
+    const onPointerUp = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" && event.pointerType !== "pen") {
+        return;
+      }
+
+      const target = event.target instanceof Element ? event.target : null;
+      triggerForTarget(target);
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      triggerForTarget(target);
+    };
+
     window.addEventListener("pointerup", onPointerUp, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("touchend", onTouchEnd);
     };
   }, []);
 

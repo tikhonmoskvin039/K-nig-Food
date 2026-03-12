@@ -33,6 +33,8 @@ type PickedAddress = {
   city?: string;
   street?: string;
   house?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export type RouteStats = {
@@ -196,14 +198,44 @@ function extractAddress(geoObject: YGeoObject): PickedAddress {
   for (const part of components) {
     if (!part || typeof part.name !== "string") continue;
     const kinds = Array.isArray(part.kinds) ? part.kinds : [];
-    if (!city && (kinds.includes("locality") || kinds.includes("province"))) {
+    if (
+      !city &&
+      (kinds.includes("locality") ||
+        kinds.includes("district") ||
+        kinds.includes("province"))
+    ) {
       city = part.name;
     }
-    if (!street && kinds.includes("street")) {
+    if (!street && (kinds.includes("street") || kinds.includes("route"))) {
       street = part.name;
     }
-    if (!house && kinds.includes("house")) {
+    if (!house && (kinds.includes("house") || kinds.includes("building"))) {
       house = part.name;
+    }
+  }
+
+  const nameRaw = geoObject.properties.get("name");
+  if ((!street || !house) && typeof nameRaw === "string") {
+    const nameParts = nameRaw
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (!street && nameParts[0]) {
+      street = nameParts[0];
+    }
+    if (!house && nameParts[1]) {
+      house = nameParts[1];
+    }
+  }
+
+  const descriptionRaw = geoObject.properties.get("description");
+  if (!city && typeof descriptionRaw === "string") {
+    const parsedCity = descriptionRaw
+      .split(",")
+      .map((part) => part.trim())
+      .find(Boolean);
+    if (parsedCity) {
+      city = parsedCity;
     }
   }
 
@@ -677,7 +709,11 @@ export default function DeliveryMapPicker({
           });
           const first = reverseResult?.geoObjects?.get(0);
           if (first) {
-            safeAddressPick(extractAddress(first));
+            safeAddressPick({
+              ...extractAddress(first),
+              lat: endCoords[0],
+              lng: endCoords[1],
+            });
           }
         } catch (error) {
           console.error("Yandex reverse geocode failed:", error);
