@@ -3,7 +3,7 @@ import type {
   CheckoutPoint,
   CheckoutSettings,
 } from "../types/checkoutSettings";
-import { getPrismaClient } from "./prisma";
+import { getPrismaClient, resolveDatabaseUrl } from "./prisma";
 
 const CHECKOUT_SETTINGS_ID = "default";
 const DEFAULT_COORDINATES = {
@@ -54,7 +54,7 @@ type CheckoutSettingsDelegate = {
 };
 
 function isDatabaseConfigured() {
-  return Boolean(process.env.DATABASE_URL?.trim());
+  return Boolean(resolveDatabaseUrl());
 }
 
 function getCheckoutSettingsDelegate(prismaClient: unknown): CheckoutSettingsDelegate | null {

@@ -11,8 +11,42 @@ function createPrismaClient() {
   });
 }
 
+function pickFirstNonEmpty(value: string | undefined) {
+  if (!value) return "";
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : "";
+}
+
+export function resolveDatabaseUrl() {
+  return (
+    pickFirstNonEmpty(process.env.DATABASE_URL) ||
+    pickFirstNonEmpty(process.env.DATABASE_URL_PROD) ||
+    pickFirstNonEmpty(process.env.DATABASE_URL_DEV)
+  );
+}
+
+function ensureDatabaseEnv() {
+  const databaseUrl = resolveDatabaseUrl();
+  if (!databaseUrl) return "";
+
+  if (!pickFirstNonEmpty(process.env.DATABASE_URL)) {
+    process.env.DATABASE_URL = databaseUrl;
+  }
+
+  const directUrl =
+    pickFirstNonEmpty(process.env.DIRECT_URL) ||
+    pickFirstNonEmpty(process.env.DIRECT_URL_PROD) ||
+    pickFirstNonEmpty(process.env.DIRECT_URL_DEV);
+  if (directUrl && !pickFirstNonEmpty(process.env.DIRECT_URL)) {
+    process.env.DIRECT_URL = directUrl;
+  }
+
+  return databaseUrl;
+}
+
 export function getPrismaClient() {
-  if (!process.env.DATABASE_URL) {
+  const databaseUrl = ensureDatabaseEnv();
+  if (!databaseUrl) {
     throw new Error("DATABASE_URL is not configured");
   }
 

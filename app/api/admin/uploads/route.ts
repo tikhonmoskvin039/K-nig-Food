@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getPrismaClient } from "../../../lib/prisma";
+import { getPrismaClient, resolveDatabaseUrl } from "../../../lib/prisma";
 import {
   beginIdempotentRequest,
   buildIdempotencyConflictResponse,
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    if (!process.env.DATABASE_URL?.trim()) {
+    if (!resolveDatabaseUrl()) {
       const responseBody = {
         error: "Upload failed",
         message:

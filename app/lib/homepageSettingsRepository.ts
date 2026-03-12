@@ -1,5 +1,5 @@
 import homepageData from "../../configs/homepage.json";
-import { getPrismaClient } from "./prisma";
+import { getPrismaClient, resolveDatabaseUrl } from "./prisma";
 
 const HOMEPAGE_SETTINGS_ID = "default";
 
@@ -27,7 +27,7 @@ function getFallbackVisibilityState(): HomepageVisibilityState {
 }
 
 function isDatabaseConfigured() {
-  return Boolean(process.env.DATABASE_URL?.trim());
+  return Boolean(resolveDatabaseUrl());
 }
 
 export async function getHomepageVisibilityState(): Promise<HomepageVisibilityState> {

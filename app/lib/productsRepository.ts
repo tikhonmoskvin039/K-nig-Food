@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { Product as DbProduct } from "@prisma/client";
-import { getPrismaClient } from "./prisma";
+import { getPrismaClient, resolveDatabaseUrl } from "./prisma";
 
 const SORT_BY_UPDATED_DESC = [
   { updatedAt: "desc" as const },
@@ -132,7 +132,7 @@ function sanitizeImageGallery(gallery: unknown) {
 }
 
 export function isDatabaseConfigured() {
-  return Boolean(process.env.DATABASE_URL?.trim());
+  return Boolean(resolveDatabaseUrl());
 }
 
 function mapDbProductToDto(product: DbProduct): DTProduct {

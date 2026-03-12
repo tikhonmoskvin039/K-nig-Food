@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPrismaClient } from "../../../lib/prisma";
+import { getPrismaClient, resolveDatabaseUrl } from "../../../lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export async function GET(
   _request: NextRequest,
   context: { params: Params },
 ) {
-  if (!process.env.DATABASE_URL?.trim()) {
+  if (!resolveDatabaseUrl()) {
     return NextResponse.json({ error: "Media storage is unavailable" }, { status: 503 });
   }
 
