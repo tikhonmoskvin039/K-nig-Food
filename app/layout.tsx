@@ -14,10 +14,10 @@ import HapticTapProvider from "./components/HapticTapProvider";
 import PWASetup from "./components/PWASetup";
 
 export const metadata: Metadata = {
-  applicationName: "K-nig Food",
+  applicationName: "König Food",
   title: {
-    default: "K-nig Food",
-    template: "%s | K-nig Food",
+    default: "König Food",
+    template: "%s | König Food",
   },
   description: "K-nig Food storefront with resilient offline-first actions.",
   manifest: "/manifest.json",
@@ -29,11 +29,13 @@ export const metadata: Metadata = {
       { url: "/icons/icon-192.svg", type: "image/svg+xml" },
       { url: "/icons/icon-512.svg", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   appleWebApp: {
     capable: true,
-    title: "K-nig Food",
+    title: "König Food",
     statusBarStyle: "black-translucent",
   },
 };
@@ -41,6 +43,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#00d7ff" },
     { media: "(prefers-color-scheme: dark)", color: "#050712" },

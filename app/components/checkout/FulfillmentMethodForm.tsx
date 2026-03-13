@@ -423,24 +423,8 @@ export default function FulfillmentMethodForm() {
       setMinRouteAmountRub(autoAmount);
 
       if (isDeliveryAmountManual) {
-        const currentQuoteAmount = Number(checkout.deliveryQuote?.amount ?? 0);
-        if (currentQuoteAmount >= autoAmount) {
-          setDeliveryError("");
-          return;
-        }
-
-        setDeliveryAmountInput(autoAmount.toFixed(2));
-        dispatch(
-          setDeliveryQuote({
-            provider: "yandex",
-            amount: autoAmount,
-            currency: "RUB",
-            calculatedAt: new Date().toISOString(),
-            reference: `ymaps-route-floor-${stats.distanceKm}-${stats.durationMin}`,
-          }),
-        );
         setRouteAutoPriceNote(
-          "Стоимость обновлена до минимальной по маршруту Яндекс Карт.",
+          "Цена зафиксирована вручную. Точную стоимость проверьте в Яндекс Go.",
         );
         setDeliveryError("");
         return;
@@ -457,12 +441,11 @@ export default function FulfillmentMethodForm() {
         }),
       );
       setRouteAutoPriceNote(
-        "Стоимость подставлена автоматически по маршруту Яндекс Карт.",
+        "Подставлена ориентировочная стоимость по маршруту Яндекс Карт. Точная цена — в Яндекс Go.",
       );
       setDeliveryError("");
     },
     [
-      checkout.deliveryQuote?.amount,
       checkout.fulfillmentMethod,
       dispatch,
       isDeliveryAmountManual,
@@ -569,13 +552,6 @@ export default function FulfillmentMethodForm() {
     if (!checkout.deliveryAddressConfirmed) {
       setDeliveryError(
         "Перед добавлением доставки подтвердите, что проверили адрес вручную.",
-      );
-      return;
-    }
-
-    if (minRouteAmountRub && amount < minRouteAmountRub) {
-      setDeliveryError(
-        `Стоимость не может быть ниже ${minRouteAmountRub.toFixed(2)} ₽ (минимум по маршруту Яндекс).`,
       );
       return;
     }
@@ -1020,8 +996,8 @@ export default function FulfillmentMethodForm() {
           <div className="rounded-xl border p-4 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <p className="text-sm text-slate-700 sm:pr-4">
-                Стоимость можно подставить автоматически по маршруту. При
-                необходимости скорректируйте вручную.
+                Сумма в форме рассчитывается как ориентир. Проверьте точную цену
+                в Яндекс Go и перенесите её в поле вручную.
               </p>
               <button
                 type="button"
@@ -1053,7 +1029,7 @@ export default function FulfillmentMethodForm() {
             {deliveryError && <p className="text-sm text-red-500">{deliveryError}</p>}
             {minRouteAmountRub && (
               <p className="text-xs text-slate-600">
-                Минимальная стоимость по маршруту Яндекс: {minRouteAmountRub.toFixed(2)} ₽
+                Ориентировочная стоимость по маршруту Яндекс: {minRouteAmountRub.toFixed(2)} ₽
               </p>
             )}
             {routeAutoPriceNote && (

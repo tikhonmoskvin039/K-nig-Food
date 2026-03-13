@@ -984,122 +984,129 @@ export default function DeliveryMapPicker({
   const renderRouteDetailsSheet = (
     stats: RouteStats,
     className?: string,
-  ) => (
-    <div
-      className={`checkout-route-floating ${className ?? ""}`.trim()}
-      onTouchStart={(event) => {
-        if (!isMobileViewport) return;
-        const touch = event.touches[0];
-        if (!touch) return;
-        routeSheetTouchStartRef.current = {
-          x: touch.clientX,
-          y: touch.clientY,
-        };
-        routeSheetSwipeHandledRef.current = false;
-      }}
-      onTouchMove={(event) => {
-        if (!isMobileViewport) return;
-        if (routeSheetSwipeHandledRef.current) return;
+  ) => {
+    const isStaticSheet = className?.includes("checkout-route-static") ?? false;
 
-        const touch = event.touches[0];
-        const start = routeSheetTouchStartRef.current;
-        if (!touch || !start) return;
+    return (
+      <div
+        className={`checkout-route-floating ${className ?? ""}`.trim()}
+        onTouchStart={(event) => {
+          if (!isMobileViewport || isStaticSheet) return;
+          const touch = event.touches[0];
+          if (!touch) return;
+          routeSheetTouchStartRef.current = {
+            x: touch.clientX,
+            y: touch.clientY,
+          };
+          routeSheetSwipeHandledRef.current = false;
+        }}
+        onTouchMove={(event) => {
+          if (!isMobileViewport || isStaticSheet) return;
+          event.preventDefault();
+          if (routeSheetSwipeHandledRef.current) return;
 
-        const deltaY = touch.clientY - start.y;
-        const deltaX = Math.abs(touch.clientX - start.x);
+          const touch = event.touches[0];
+          const start = routeSheetTouchStartRef.current;
+          if (!touch || !start) return;
 
-        const isVerticalGesture = Math.abs(deltaY) > deltaX * 1.2;
-        if (!isVerticalGesture) return;
+          const deltaY = touch.clientY - start.y;
+          const deltaX = Math.abs(touch.clientX - start.x);
 
-        if (
-          !isSheetCollapsed &&
-          deltaY > ROUTE_SHEET_SWIPE_DOWN_THRESHOLD_PX
-        ) {
-          setIsRouteSheetCollapsed(true);
-          routeSheetSwipeHandledRef.current = true;
+          const isVerticalGesture = Math.abs(deltaY) > deltaX * 1.2;
+          if (!isVerticalGesture) return;
+
+          if (
+            !isSheetCollapsed &&
+            deltaY > ROUTE_SHEET_SWIPE_DOWN_THRESHOLD_PX
+          ) {
+            setIsRouteSheetCollapsed(true);
+            routeSheetSwipeHandledRef.current = true;
+            routeSheetTouchStartRef.current = null;
+            return;
+          }
+
+          if (
+            isSheetCollapsed &&
+            deltaY < -ROUTE_SHEET_SWIPE_DOWN_THRESHOLD_PX
+          ) {
+            setIsRouteSheetCollapsed(false);
+            routeSheetSwipeHandledRef.current = true;
+            routeSheetTouchStartRef.current = null;
+          }
+        }}
+        onTouchEnd={() => {
+          if (!isMobileViewport || isStaticSheet) return;
           routeSheetTouchStartRef.current = null;
-          return;
-        }
-
-        if (
-          isSheetCollapsed &&
-          deltaY < -ROUTE_SHEET_SWIPE_DOWN_THRESHOLD_PX
-        ) {
-          setIsRouteSheetCollapsed(false);
-          routeSheetSwipeHandledRef.current = true;
+          routeSheetSwipeHandledRef.current = false;
+        }}
+        onTouchCancel={() => {
+          if (!isMobileViewport || isStaticSheet) return;
           routeSheetTouchStartRef.current = null;
-        }
-      }}
-      onTouchEnd={() => {
-        routeSheetTouchStartRef.current = null;
-        routeSheetSwipeHandledRef.current = false;
-      }}
-      onTouchCancel={() => {
-        routeSheetTouchStartRef.current = null;
-        routeSheetSwipeHandledRef.current = false;
-      }}
-    >
-      {isMobileViewport ? (
-        <>
-          <div className="checkout-route-sheet-head">
-            <div className="checkout-route-sheet-head-actions">
-              <button
-                type="button"
-                className="checkout-route-sheet-map-btn"
-                onClick={scrollToMapCanvas}
-              >
-                Показать маршрут на карте
-              </button>
-              <button
-                type="button"
-                className="checkout-route-sheet-toggle"
-                onClick={() => setIsRouteSheetCollapsed((prev) => !prev)}
-                aria-expanded={!isSheetCollapsed}
-              >
-                {isSheetCollapsed
-                  ? "Поднять шторку маршрута"
-                  : "Скрыть шторку маршрута"}
-              </button>
+          routeSheetSwipeHandledRef.current = false;
+        }}
+      >
+        {isMobileViewport ? (
+          <>
+            <div className="checkout-route-sheet-head">
+              <div className="checkout-route-sheet-head-actions">
+                <button
+                  type="button"
+                  className="checkout-route-sheet-map-btn"
+                  onClick={scrollToMapCanvas}
+                >
+                  Показать маршрут на карте
+                </button>
+                <button
+                  type="button"
+                  className="checkout-route-sheet-toggle"
+                  onClick={() => setIsRouteSheetCollapsed((prev) => !prev)}
+                  aria-expanded={!isSheetCollapsed}
+                >
+                  {isSheetCollapsed
+                    ? "Поднять шторку маршрута"
+                    : "Скрыть шторку маршрута"}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {isSheetCollapsed ? (
-            <p className="checkout-route-sheet-preview">
-              {stats.distanceKm.toFixed(1)} км · ~ {stats.durationMin} мин · свайп вверх
-            </p>
-          ) : (
-            <div className="checkout-route-sheet-body">
-              <p className="text-xl md:text-2xl font-semibold text-slate-900">
-                Маршрут: {stats.distanceKm.toFixed(1)} км
+            {isSheetCollapsed ? (
+              <p className="checkout-route-sheet-preview">
+                {stats.distanceKm.toFixed(1)} км · ~ {stats.durationMin} мин · свайп вверх
               </p>
-              <p className="text-base md:text-lg font-bold text-cyan-700">
-                В пути: ~ {stats.durationMin} мин
-              </p>
-              {stats.estimatedPriceRub ? (
-                <p className="text-sm md:text-base text-slate-700">
-                  Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+            ) : (
+              <div className="checkout-route-sheet-body">
+                <p className="text-xl md:text-2xl font-semibold text-slate-900">
+                  Маршрут: {stats.distanceKm.toFixed(1)} км
                 </p>
-              ) : null}
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="checkout-route-sheet-body">
-          <p className="text-xl md:text-2xl font-semibold text-slate-900">
-            Маршрут: {stats.distanceKm.toFixed(1)} км
-          </p>
-          <p className="text-base md:text-lg font-bold text-cyan-700">
-            В пути: ~ {stats.durationMin} мин
-          </p>
-          {stats.estimatedPriceRub ? (
-            <p className="text-sm md:text-base text-slate-700">
-              Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+                <p className="text-base md:text-lg font-bold text-cyan-700">
+                  В пути: ~ {stats.durationMin} мин
+                </p>
+                {stats.estimatedPriceRub ? (
+                  <p className="text-sm md:text-base text-slate-700">
+                    Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="checkout-route-sheet-body">
+            <p className="text-xl md:text-2xl font-semibold text-slate-900">
+              Маршрут: {stats.distanceKm.toFixed(1)} км
             </p>
-          ) : null}
-        </div>
-      )}
-    </div>
-  );
+            <p className="text-base md:text-lg font-bold text-cyan-700">
+              В пути: ~ {stats.durationMin} мин
+            </p>
+            {stats.estimatedPriceRub ? (
+              <p className="text-sm md:text-base text-slate-700">
+                Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+              </p>
+            ) : null}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="delivery-map-shell space-y-3">

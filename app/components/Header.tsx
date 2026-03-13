@@ -14,7 +14,7 @@ export default function Header() {
   const pathname = usePathname();
 
   const [visible, setVisible] = useState(true);
-  const headerRef = useRef<HTMLElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
   const showBackHomeButton = pathname !== "/";
 
   useEffect(() => {
@@ -66,13 +66,13 @@ export default function Header() {
 
   return (
     <motion.div
+      ref={headerRef}
       initial={{ y: 0 }}
       animate={{ y: visible ? 0 : -120 }}
       transition={{ duration: 0.25 }}
-      className="fixed top-0 left-0 w-full z-50"
+      className="site-header-shell fixed top-0 left-0 w-full z-50"
     >
       <header
-        ref={headerRef}
         className="border-b bg-(--color-surface)/90 text-(--color-foreground) backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85 shadow-sm"
         style={{ borderColor: "var(--color-border)" }}
       >
