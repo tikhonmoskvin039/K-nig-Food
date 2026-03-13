@@ -87,8 +87,11 @@ export default function Header() {
         style={{ backgroundColor: safeAreaBackground }}
       >
         <header
-          className="border-b bg-(--color-surface)/90 text-(--color-foreground) backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85 shadow-sm"
-          style={{ borderColor: "var(--color-border)" }}
+          className="border-b text-(--color-foreground) shadow-sm"
+          style={{
+            borderColor: "var(--color-border)",
+            backgroundColor: safeAreaBackground,
+          }}
         >
           <div className="app-shell py-3.5 flex justify-between items-center gap-4">
             <div className="min-w-0">
