@@ -77,9 +77,10 @@ export default function Header() {
     <>
       <div
         aria-hidden="true"
-        className="fixed top-0 left-0 right-0 pointer-events-none z-55 bg-[color:var(--safe-area-header-bg)]"
+        className="fixed top-0 left-0 right-0 pointer-events-none bg-[color:var(--safe-area-header-bg)]"
         style={{
           height: "env(safe-area-inset-top, 0px)",
+          zIndex: 1000000001,
         }}
       />
 

@@ -7,6 +7,7 @@ const CHECKOUT_PAY_BUTTON_ID = "checkout-pay-button";
 
 const ScrollToTopButton = () => {
   const pathname = usePathname();
+  const isCheckoutPage = pathname === "/checkout";
   const [showScroll, setShowScroll] = useState(false);
   const [showCheckoutPayShortcut, setShowCheckoutPayShortcut] = useState(false);
 
@@ -65,9 +66,12 @@ const ScrollToTopButton = () => {
 
   const floatingActionBaseClass =
     "h-12 w-12 rounded-xl shadow-lg text-white transition flex items-center justify-center";
+  const floatingContainerClass = isCheckoutPage
+    ? "fixed bottom-[calc(var(--safe-area-bottom)+5rem)] right-4 md:right-8 md:bottom-8 z-[110] flex flex-col items-end gap-2"
+    : "fixed bottom-[calc(var(--safe-area-bottom)+1rem)] right-4 md:right-8 md:bottom-8 z-[110] flex flex-col items-end gap-2";
 
   return (
-    <div className="fixed bottom-8 right-8 z-[110] flex flex-col items-end gap-2">
+    <div className={floatingContainerClass}>
       {showCheckoutPayShortcut ? (
         <>
           <button

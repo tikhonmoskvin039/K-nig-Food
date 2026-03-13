@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { CheckoutPoint } from "../../types/checkoutSettings";
 
 const DEFAULT_PICKUP_LAT = 54.7384;
@@ -987,10 +988,14 @@ export default function DeliveryMapPicker({
     className?: string,
   ) => {
     const isStaticSheet = className?.includes("checkout-route-static") ?? false;
+    const isCollapsedMobileSheet =
+      isMobileViewport && !isStaticSheet && isSheetCollapsed;
 
     return (
       <div
-        className={`checkout-route-floating ${className ?? ""}`.trim()}
+        className={`checkout-route-floating ${
+          isCollapsedMobileSheet ? "checkout-route-sheet-collapsed" : ""
+        } ${className ?? ""}`.trim()}
         onTouchStart={(event) => {
           if (!isMobileViewport || isStaticSheet) return;
           const touch = event.touches[0];
@@ -1050,46 +1055,56 @@ export default function DeliveryMapPicker({
         {isMobileViewport ? (
           <>
             <div className="checkout-route-sheet-head">
-              <div className="checkout-route-sheet-head-actions">
-                <button
-                  type="button"
-                  className="checkout-route-sheet-map-btn"
-                  onClick={scrollToMapCanvas}
-                >
-                  Показать маршрут на карте
-                </button>
-                <button
-                  type="button"
-                  className="checkout-route-sheet-toggle"
-                  onClick={() => setIsRouteSheetCollapsed((prev) => !prev)}
-                  aria-expanded={!isSheetCollapsed}
-                >
-                  {isSheetCollapsed
+              <button
+                type="button"
+                className="checkout-route-sheet-toggle"
+                onClick={() => setIsRouteSheetCollapsed((prev) => !prev)}
+                aria-expanded={!isSheetCollapsed}
+                aria-label={
+                  isSheetCollapsed
                     ? "Поднять шторку маршрута"
-                    : "Скрыть шторку маршрута"}
-                </button>
-              </div>
+                    : "Свернуть шторку маршрута"
+                }
+                title={
+                  isSheetCollapsed
+                    ? "Поднять шторку маршрута"
+                    : "Свернуть шторку маршрута"
+                }
+              >
+                {isSheetCollapsed ? (
+                  <ChevronUp size={22} strokeWidth={2.8} />
+                ) : (
+                  <ChevronDown size={22} strokeWidth={2.8} />
+                )}
+              </button>
             </div>
 
-            {isSheetCollapsed ? (
-              <p className="checkout-route-sheet-preview">
-                {stats.distanceKm.toFixed(1)} км · ~ {stats.durationMin} мин · свайп вверх
-              </p>
-            ) : (
-              <div className="checkout-route-sheet-body">
-                <p className="text-xl md:text-2xl font-semibold text-slate-900">
-                  Маршрут: {stats.distanceKm.toFixed(1)} км
-                </p>
-                <p className="text-base md:text-lg font-bold text-cyan-700">
-                  В пути: ~ {stats.durationMin} мин
-                </p>
-                {stats.estimatedPriceRub ? (
-                  <p className="text-sm md:text-base text-slate-700">
-                    Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+            {!isSheetCollapsed ? (
+              <>
+                <div className="checkout-route-sheet-map-row">
+                  <button
+                    type="button"
+                    className="checkout-route-sheet-map-btn"
+                    onClick={scrollToMapCanvas}
+                  >
+                    Показать маршрут на карте
+                  </button>
+                </div>
+                <div className="checkout-route-sheet-body">
+                  <p className="text-xl md:text-2xl font-semibold text-slate-900">
+                    Маршрут: {stats.distanceKm.toFixed(1)} км
                   </p>
-                ) : null}
-              </div>
-            )}
+                  <p className="text-base md:text-lg font-bold text-cyan-700">
+                    В пути: ~ {stats.durationMin} мин
+                  </p>
+                  {stats.estimatedPriceRub ? (
+                    <p className="text-sm md:text-base text-slate-700">
+                      Предварительная стоимость доставки: {stats.estimatedPriceRub} ₽
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
           </>
         ) : (
           <div className="checkout-route-sheet-body">

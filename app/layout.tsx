@@ -86,7 +86,18 @@ export default function RootLayout({
                 <div className="pt-(--header-height)">{children}</div>
               </Suspense>
               <Footer />
-              <Toaster position="top-right" richColors />
+              <Toaster
+                position="top-right"
+                offset={{
+                  top: "var(--toast-top-offset)",
+                  right: "16px",
+                }}
+                mobileOffset={{
+                  top: "var(--toast-top-offset)",
+                  left: "12px",
+                  right: "12px",
+                }}
+              />
             </LocalizationProvider>
           </ThemeProvider>
         </AuthProvider>
