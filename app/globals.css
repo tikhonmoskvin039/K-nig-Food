@@ -60,19 +60,6 @@ body {
     color 0.2s ease;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--safe-area-top);
-  background: var(--safe-area-header-bg);
-  transition: background-color 0.2s ease;
-  pointer-events: none;
-  z-index: 55;
-}
-
 h1,
 h2,
 h3,

@@ -1,6 +1,6 @@
 {
-  "name": "König Food",
-  "short_name": "König",
+  "name": "König Food Delivery",
+  "short_name": "König Food",
   "description": "Digital-first food storefront with resilient offline actions.",
   "start_url": "/",
   "scope": "/",
