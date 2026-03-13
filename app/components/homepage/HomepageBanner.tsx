@@ -23,6 +23,7 @@ export default function HomepageBanner() {
         items-center
         text-center
         overflow-hidden
+        isolate
         text-white
       "
     >
@@ -38,18 +39,18 @@ export default function HomepageBanner() {
     md:object-[center_25%]
     xl:object-[center_20%]
     2xl:object-[center_15%]
-    -z-10
+    z-0
   "
       />
 
       {/* Optional overlay for readability */}
-      <div className="absolute inset-0 bg-black/40 -z-10" />
+      <div className="absolute inset-0 bg-black/40 z-10" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="max-w-4xl mx-auto px-6 relative z-10"
+        className="max-w-4xl mx-auto px-6 relative z-20"
       >
         <h2 className="text-3xl md:text-4xl font-extrabold mb-6 drop-shadow-lg">
           {title}

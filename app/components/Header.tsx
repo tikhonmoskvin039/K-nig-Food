@@ -67,9 +67,9 @@ export default function Header() {
   return (
     <motion.div
       ref={headerRef}
-      initial={{ y: 0 }}
-      animate={{ y: visible ? 0 : -120 }}
-      transition={{ duration: 0.25 }}
+      initial={{ y: "0%" }}
+      animate={{ y: visible ? "0%" : "-100%" }}
+      transition={{ duration: 0.28, ease: "easeOut" }}
       className="site-header-shell fixed top-0 left-0 w-full z-50"
     >
       <header
