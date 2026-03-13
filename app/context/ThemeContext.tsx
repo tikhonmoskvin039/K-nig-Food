@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useLayoutEffect, useMemo, useState } from "react";
 
 export type ThemeMode = "light" | "dark";
 
@@ -12,6 +12,7 @@ type ThemeContextValue = {
 const THEME_STORAGE_KEY = "kfood_theme_mode";
 const LIGHT_THEME_COLOR = "#ffffff";
 const DARK_THEME_COLOR = "#1f2937";
+const SAFE_AREA_HEADER_BG_VAR = "--safe-area-header-bg";
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function upsertMetaTag(name: string) {
@@ -24,20 +25,29 @@ function upsertMetaTag(name: string) {
   return created;
 }
 
-function replaceThemeColorMeta(themeColor: string) {
-  const existingThemeColorTags = document.querySelectorAll<HTMLMetaElement>(
-    'meta[name="theme-color"]',
+function applyThemeColorMeta(themeColor: string) {
+  const existingThemeColorTags = Array.from(
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'),
   );
-  existingThemeColorTags.forEach((tag) => tag.remove());
 
-  const themeColorMeta = document.createElement("meta");
-  themeColorMeta.setAttribute("name", "theme-color");
-  themeColorMeta.setAttribute("content", themeColor);
-  document.head.appendChild(themeColorMeta);
+  if (existingThemeColorTags.length === 0) {
+    const created = document.createElement("meta");
+    created.setAttribute("name", "theme-color");
+    created.setAttribute("content", themeColor);
+    created.setAttribute("data-kfood-theme-color", "1");
+    document.head.appendChild(created);
+  } else {
+    existingThemeColorTags.forEach((tag) => {
+      tag.setAttribute("content", themeColor);
+    });
+  }
 
-  // Safari sometimes applies toolbar color only after tag recreation/repaint.
+  // Safari may apply toolbar color with a small delay after dynamic updates.
   window.requestAnimationFrame(() => {
-    themeColorMeta.setAttribute("content", themeColor);
+    const tags = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+    tags.forEach((tag) => {
+      tag.setAttribute("content", themeColor);
+    });
   });
 }
 
@@ -45,9 +55,10 @@ function applyTheme(mode: ThemeMode) {
   const themeColor = mode === "dark" ? DARK_THEME_COLOR : LIGHT_THEME_COLOR;
   document.documentElement.setAttribute("data-theme", mode);
   document.documentElement.style.backgroundColor = themeColor;
+  document.documentElement.style.setProperty(SAFE_AREA_HEADER_BG_VAR, themeColor);
 
   // Keep mobile browser UI color in sync with the in-app theme toggle.
-  replaceThemeColorMeta(themeColor);
+  applyThemeColorMeta(themeColor);
 
   const appleStatusBar = upsertMetaTag("apple-mobile-web-app-status-bar-style");
   appleStatusBar.setAttribute(
@@ -72,7 +83,7 @@ function resolveInitialTheme(): ThemeMode {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<ThemeMode>(() => resolveInitialTheme());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     applyTheme(theme);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);

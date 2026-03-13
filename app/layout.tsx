@@ -82,7 +82,7 @@ export default function RootLayout({
               <HapticTapProvider />
               <PWASetup />
               <Header />
-              <Suspense fallback={<GlobalLoader />}>
+              <Suspense fallback={<GlobalLoader blockInteractions={false} />}>
                 <div className="pt-(--header-height)">{children}</div>
               </Suspense>
               <Footer />

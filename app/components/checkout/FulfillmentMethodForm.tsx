@@ -16,8 +16,9 @@ import {
 } from "../../store/slices/checkoutSlice";
 
 const YANDEX_GO_FALLBACK_URL = "https://go.yandex/ru_ru/";
-const YANDEX_ROUTE_URL = "https://yandex.ru/maps/";
-const YANDEX_GO_DELIVERY_ROUTE_URL = "https://yandex.go.link/route";
+const YANDEX_GO_ROUTE_REDIRECT_URL = "https://3.redirect.appmetrica.yandex.com/route";
+const YANDEX_GO_APP_STORE_TRACKING_ID = "1178268795219780156";
+const YANDEX_GO_ROUTE_REF = "konigfood";
 const SUGGESTION_LIMIT = 5;
 const KALININGRAD_REGION_CITIES = [
   "Калининград",
@@ -188,12 +189,9 @@ export default function FulfillmentMethodForm() {
     };
 
     const events: Array<keyof WindowEventMap> = [
-      "mousemove",
+      "pointerdown",
       "keydown",
-      "click",
-      "touchstart",
       "scroll",
-      "input",
     ];
 
     for (const eventName of events) {
@@ -496,6 +494,8 @@ export default function FulfillmentMethodForm() {
 
     if (deliveryMapTarget) {
       const deeplinkQuery = new URLSearchParams({
+        appmetrica_tracking_id: YANDEX_GO_APP_STORE_TRACKING_ID,
+        ref: YANDEX_GO_ROUTE_REF,
         vertical: "delivery",
         "end-lat": String(deliveryMapTarget.lat),
         "end-lon": String(deliveryMapTarget.lng),
@@ -505,31 +505,11 @@ export default function FulfillmentMethodForm() {
         deeplinkQuery.set("start-lat", String(startLat));
         deeplinkQuery.set("start-lon", String(startLng));
       }
-      return `${YANDEX_GO_DELIVERY_ROUTE_URL}?${deeplinkQuery.toString()}`;
+      return `${YANDEX_GO_ROUTE_REDIRECT_URL}?${deeplinkQuery.toString()}`;
     }
 
-    const destinationText = [
-      checkout.deliveryAddress.city.trim(),
-      checkout.deliveryAddress.street.trim(),
-      checkout.deliveryAddress.house.trim(),
-    ]
-      .filter(Boolean)
-      .join(", ");
-    const destination = destinationText;
-
-    if (!destination) {
-      return YANDEX_GO_FALLBACK_URL;
-    }
-
-    const routeText = hasStartCoords
-      ? `${startLat},${startLng}~${destination}`
-      : destination;
-
-    return `${YANDEX_ROUTE_URL}?mode=routes&rtext=${encodeURIComponent(routeText)}&rtt=auto`;
+    return YANDEX_GO_FALLBACK_URL;
   }, [
-    checkout.deliveryAddress.city,
-    checkout.deliveryAddress.house,
-    checkout.deliveryAddress.street,
     checkoutSettings.originPoint.lat,
     checkoutSettings.originPoint.lng,
     deliveryMapTarget,
@@ -848,7 +828,10 @@ export default function FulfillmentMethodForm() {
                         key={`city-${item}`}
                         type="button"
                         className="autocomplete-item"
-                        onMouseDown={() => applyCitySuggestion(item)}
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          applyCitySuggestion(item);
+                        }}
                       >
                         {item}
                       </button>
@@ -887,7 +870,10 @@ export default function FulfillmentMethodForm() {
                         key={item.key}
                         type="button"
                         className="autocomplete-item"
-                        onMouseDown={() => applyStreetSuggestion(item)}
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          applyStreetSuggestion(item);
+                        }}
                       >
                         {item.label}
                       </button>

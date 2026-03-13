@@ -42,8 +42,21 @@ export default function PWASetup() {
   const lastQueuedToastAtRef = useRef(0);
 
   useEffect(() => {
+    let idleFlushHandle = 0;
+
     installOfflineFetchQueue();
-    void flushOfflineQueue();
+    const scheduleInitialFlush = () => {
+      if (!navigator.onLine) return;
+      void flushOfflineQueue();
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleFlushHandle = window.requestIdleCallback(() => {
+        scheduleInitialFlush();
+      }, { timeout: 1200 }) as unknown as number;
+    } else {
+      idleFlushHandle = window.setTimeout(scheduleInitialFlush, 400);
+    }
 
     if (document.readyState === "complete") {
       void registerServiceWorker();
@@ -143,6 +156,11 @@ export default function PWASetup() {
     }
 
     return () => {
+      if (typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleFlushHandle as unknown as number);
+      } else {
+        window.clearTimeout(idleFlushHandle);
+      }
       window.clearInterval(intervalId);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);

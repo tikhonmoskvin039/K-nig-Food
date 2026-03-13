@@ -34,23 +34,28 @@ const ScrollToTopButton = () => {
   }, [pathname]);
 
   useEffect(() => {
-    const rafId = window.requestAnimationFrame(() => {
+    let rafId = 0;
+    const runEvaluate = () => {
       evaluateFloatingButtons();
-    });
+      rafId = 0;
+    };
+
+    rafId = window.requestAnimationFrame(runEvaluate);
 
     const handleViewportChange = () => {
-      evaluateFloatingButtons();
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(runEvaluate);
     };
 
     window.addEventListener("scroll", handleViewportChange, { passive: true });
     window.addEventListener("resize", handleViewportChange);
-    const intervalId = window.setInterval(evaluateFloatingButtons, 1000);
 
     return () => {
-      window.cancelAnimationFrame(rafId);
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
       window.removeEventListener("scroll", handleViewportChange);
       window.removeEventListener("resize", handleViewportChange);
-      window.clearInterval(intervalId);
     };
   }, [evaluateFloatingButtons]);
 

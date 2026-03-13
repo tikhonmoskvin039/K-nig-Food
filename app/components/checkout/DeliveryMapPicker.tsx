@@ -953,6 +953,7 @@ export default function DeliveryMapPicker({
           endCoords: coords,
           markerCoords: coords,
           markerHint: "Точка доставки",
+          reverseGeocodeEnd: true,
         });
       } catch (error) {
         if (!cancelled) {
@@ -1002,9 +1003,6 @@ export default function DeliveryMapPicker({
         }}
         onTouchMove={(event) => {
           if (!isMobileViewport || isStaticSheet) return;
-          event.preventDefault();
-          if (routeSheetSwipeHandledRef.current) return;
-
           const touch = event.touches[0];
           const start = routeSheetTouchStartRef.current;
           if (!touch || !start) return;
@@ -1012,8 +1010,12 @@ export default function DeliveryMapPicker({
           const deltaY = touch.clientY - start.y;
           const deltaX = Math.abs(touch.clientX - start.x);
 
-          const isVerticalGesture = Math.abs(deltaY) > deltaX * 1.2;
+          const isVerticalGesture =
+            Math.abs(deltaY) > Math.max(6, deltaX * 1.2);
           if (!isVerticalGesture) return;
+          event.preventDefault();
+
+          if (routeSheetSwipeHandledRef.current) return;
 
           if (
             !isSheetCollapsed &&

@@ -8,17 +8,14 @@ import { House } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import { getLocalization } from "../utils/getLocalization";
 import ThemeToggleButton from "./ThemeToggleButton";
-import { useTheme } from "../context/ThemeContext";
 
 export default function Header() {
   const content = getLocalization();
   const pathname = usePathname();
-  const { theme } = useTheme();
 
   const [visible, setVisible] = useState(true);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const showBackHomeButton = pathname !== "/";
-  const safeAreaBackground = theme === "dark" ? "#1f2937" : "#ffffff";
 
   useEffect(() => {
     const updateHeaderHeightVar = () => {
@@ -49,32 +46,40 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    let lastScroll = 0;
+    let lastScroll = window.scrollY;
+    let rafId = 0;
+    let ticking = false;
 
-    const handleScroll = () => {
+    const updateVisibility = () => {
       const currentScroll = window.scrollY;
-
-      if (currentScroll > lastScroll && currentScroll > 50) {
-        setVisible(false); // scroll down
-      } else {
-        setVisible(true); // scroll up
-      }
-
+      const shouldBeVisible = !(currentScroll > lastScroll && currentScroll > 50);
+      setVisible((prev) => (prev === shouldBeVisible ? prev : shouldBeVisible));
       lastScroll = currentScroll;
+      ticking = false;
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      rafId = window.requestAnimationFrame(updateVisibility);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, []);
 
   return (
     <>
       <div
         aria-hidden="true"
-        className="fixed top-0 left-0 right-0 pointer-events-none z-55"
+        className="fixed top-0 left-0 right-0 pointer-events-none z-55 bg-[color:var(--safe-area-header-bg)]"
         style={{
           height: "env(safe-area-inset-top, 0px)",
-          backgroundColor: safeAreaBackground,
         }}
       />
 
@@ -83,16 +88,9 @@ export default function Header() {
         initial={{ y: "0%" }}
         animate={{ y: visible ? "0%" : "-100%" }}
         transition={{ duration: 0.28, ease: "easeOut" }}
-        className="site-header-shell fixed top-0 left-0 w-full z-50"
-        style={{ backgroundColor: safeAreaBackground }}
+        className="site-header-shell fixed top-0 left-0 w-full z-50 bg-[color:var(--safe-area-header-bg)]"
       >
-        <header
-          className="border-b text-(--color-foreground) shadow-sm"
-          style={{
-            borderColor: "var(--color-border)",
-            backgroundColor: safeAreaBackground,
-          }}
-        >
+        <header className="border-b border-[color:var(--color-border)] bg-[color:var(--safe-area-header-bg)] text-(--color-foreground) shadow-sm">
           <div className="app-shell py-3.5 flex justify-between items-center gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">

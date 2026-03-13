@@ -1,4 +1,4 @@
-const CACHE_NAME = "kfood-pwa-v1";
+const CACHE_NAME = "kfood-pwa-v2";
 const APP_SHELL_ASSETS = ["/", "/offline", "/manifest.json", "/placeholder.png"];
 const OFFLINE_QUEUE_DB = "kfood-offline-queue";
 const OFFLINE_QUEUE_STORE = "requests";
@@ -212,6 +212,30 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) {
+    return;
+  }
+
+  const isNextStaticAsset = url.pathname.startsWith("/_next/static/");
+  const isCriticalRuntimeAsset =
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "worker";
+
+  if (isNextStaticAsset || isCriticalRuntimeAsset) {
+    event.respondWith(
+      (async () => {
+        try {
+          const networkResponse = await fetch(request);
+          if (networkResponse && networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch {
+          return (await caches.match(request)) || Response.error();
+        }
+      })(),
+    );
     return;
   }
 

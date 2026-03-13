@@ -19,7 +19,7 @@ const CLICKABLE_SELECTOR = [
   "[role='button']",
 ].join(", ");
 
-function readHapticKind(target: Element | null): HapticKind {
+function readHapticKind(target: Element | null): HapticKind | null {
   const value = target?.getAttribute("data-haptic");
   if (
     value === "light" ||
@@ -31,15 +31,8 @@ function readHapticKind(target: Element | null): HapticKind {
     return value;
   }
 
-  if (target?.classList.contains("btn-danger")) {
-    return "warning";
-  }
-
-  if (target?.classList.contains("btn-primary")) {
-    return "medium";
-  }
-
-  return "light";
+  // Keep haptics opt-in to avoid affecting tap responsiveness.
+  return null;
 }
 
 export default function HapticTapProvider() {
@@ -59,12 +52,17 @@ export default function HapticTapProvider() {
       const clickable = target.closest(CLICKABLE_SELECTOR);
       if (!clickable) return;
       if (clickable.hasAttribute("disabled")) return;
+      const hapticKind = readHapticKind(clickable);
+      if (!hapticKind) return;
 
       const now = Date.now();
       if (now - lastTapRef.current < 120) return;
       lastTapRef.current = now;
 
-      triggerHapticFeedback(readHapticKind(clickable));
+      // Defer haptics outside the input event task to avoid delaying click handling.
+      window.setTimeout(() => {
+        triggerHapticFeedback(hapticKind);
+      }, 0);
     };
 
     const onPointerUp = (event: PointerEvent) => {
@@ -76,16 +74,25 @@ export default function HapticTapProvider() {
       triggerForTarget(target);
     };
 
+    window.addEventListener("pointerup", onPointerUp, { passive: true });
+
+    // Fallback for very old browsers without Pointer Events.
+    const supportsPointerEvents =
+      typeof window !== "undefined" &&
+      "PointerEvent" in window;
     const onTouchEnd = (event: TouchEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       triggerForTarget(target);
     };
+    if (!supportsPointerEvents) {
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+    }
 
-    window.addEventListener("pointerup", onPointerUp, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("touchend", onTouchEnd);
+      if (!supportsPointerEvents) {
+        window.removeEventListener("touchend", onTouchEnd);
+      }
     };
   }, []);
 
