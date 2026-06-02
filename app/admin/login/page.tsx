@@ -2,6 +2,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Eye, EyeOff, Lock, LogIn, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import ButtonSpinner from "../../components/common/ButtonSpinner";
 
 type AdminAuthResponse = {
@@ -33,7 +34,8 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
-  const [error, setError] = useState("");
+  const credentialsMissing = !username.trim() || !password;
+  const submitDisabled = loading || checkingSession || credentialsMissing;
 
   useEffect(() => {
     let isCancelled = false;
@@ -67,21 +69,22 @@ export default function AdminLogin() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!username.trim() || !password) {
-      setError("Введите логин и пароль.");
+    if (credentialsMissing) {
+      toast.error("Введите логин и пароль.");
       return;
     }
 
     try {
       setLoading(true);
-      setError("");
 
       await requestAdminSession(username.trim(), password);
 
       router.replace("/admin");
       router.refresh();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Не удалось выполнить вход.");
+      toast.error(
+        error instanceof Error ? error.message : "Не удалось выполнить вход.",
+      );
     } finally {
       setLoading(false);
     }
@@ -147,16 +150,10 @@ export default function AdminLogin() {
             </span>
           </label>
 
-          {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </p>
-          ) : null}
-
           <button
             type="submit"
             className="btn-primary inline-flex min-h-[52px] w-full items-center justify-center gap-2 text-lg px-8 py-3"
-            disabled={loading || checkingSession}
+            disabled={submitDisabled}
             aria-busy={loading}
           >
             <span
