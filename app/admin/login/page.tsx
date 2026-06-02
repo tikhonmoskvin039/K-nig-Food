@@ -4,136 +4,31 @@ import { Eye, EyeOff, Lock, LogIn, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ButtonSpinner from "../../components/common/ButtonSpinner";
 
-type AdminLoginSocketResponse =
-  | {
-      type: "admin.login.ok";
-      loginToken: string;
-    }
-  | {
-      type: "admin.login.error";
-      message?: string;
-    };
+type AdminAuthResponse = {
+  authenticated?: boolean;
+  message?: string;
+};
 
-function buildAdminAuthSocketUrl(host: string) {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-
-  return `${protocol}//${host}/api/admin/auth/ws`;
-}
-
-function getAdminAuthSocketUrls() {
-  const { hostname, host, port } = window.location;
-  const fallbackHost = port ? `127.0.0.1:${port}` : "127.0.0.1";
-  const hosts =
-    hostname === "0.0.0.0" || hostname === "::" || hostname === "[::]"
-      ? [fallbackHost, host]
-      : [host];
-
-  if (hostname === "localhost") {
-    hosts.push(fallbackHost);
-  }
-
-  if (hostname === "127.0.0.1") {
-    hosts.push(port ? `localhost:${port}` : "localhost");
-  }
-
-  return Array.from(new Set(hosts)).map(buildAdminAuthSocketUrl);
-}
-
-function requestLoginTokenFromSocketUrl(
-  socketUrl: string,
-  username: string,
-  password: string,
-) {
-  return new Promise<string>((resolve, reject) => {
-    const socket = new WebSocket(socketUrl);
-    let settled = false;
-
-    const timeoutId = window.setTimeout(() => {
-      settleWithError(new Error("Сервер авторизации не отвечает."));
-    }, 3500);
-
-    const settleWithToken = (loginToken: string) => {
-      if (settled) return;
-
-      settled = true;
-      window.clearTimeout(timeoutId);
-      socket.close(1000);
-      resolve(loginToken);
-    };
-
-    const settleWithError = (error: Error) => {
-      if (settled) return;
-
-      settled = true;
-      window.clearTimeout(timeoutId);
-      socket.close();
-      reject(error);
-    };
-
-    socket.addEventListener("open", () => {
-      socket.send(
-        JSON.stringify({
-          type: "admin.login",
-          username,
-          password,
-        }),
-      );
-    });
-
-    socket.addEventListener("message", (event) => {
-      let payload: AdminLoginSocketResponse;
-
-      try {
-        payload = JSON.parse(String(event.data));
-      } catch {
-        settleWithError(new Error("Некорректный ответ сервера авторизации."));
-        return;
-      }
-
-      if (payload.type === "admin.login.ok" && payload.loginToken) {
-        settleWithToken(payload.loginToken);
-        return;
-      }
-
-      if (payload.type === "admin.login.error") {
-        settleWithError(
-          new Error(payload.message || "Не удалось выполнить вход."),
-        );
-        return;
-      }
-
-      settleWithError(new Error("Не удалось выполнить вход."));
-    });
-
-    socket.addEventListener("error", () => {
-      settleWithError(new Error("WebSocket авторизации недоступен."));
-    });
-
-    socket.addEventListener("close", (event) => {
-      if (!settled && event.code !== 1000) {
-        settleWithError(new Error("Соединение авторизации закрыто."));
-      }
-    });
+async function requestAdminSession(username: string, password: string) {
+  const response = await fetch("/api/admin/auth", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
   });
-}
+  const data = (await response.json().catch(() => null)) as
+    | AdminAuthResponse
+    | null;
 
-async function requestLoginToken(username: string, password: string) {
-  let lastError: Error | null = null;
-
-  for (const socketUrl of getAdminAuthSocketUrls()) {
-    try {
-      return await requestLoginTokenFromSocketUrl(socketUrl, username, password);
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error("Не удалось выполнить вход.");
-    }
+  if (!response.ok || !data?.authenticated) {
+    throw new Error(data?.message || "Не удалось выполнить вход.");
   }
-
-  throw lastError || new Error("Сервер авторизации не отвечает.");
 }
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -181,21 +76,7 @@ export default function AdminLogin() {
       setLoading(true);
       setError("");
 
-      const loginToken = await requestLoginToken(username.trim(), password);
-      const response = await fetch("/api/admin/session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ loginToken }),
-      });
-      const data = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Не удалось открыть сессию.");
-      }
+      await requestAdminSession(username.trim(), password);
 
       router.replace("/admin");
       router.refresh();
@@ -218,7 +99,7 @@ export default function AdminLogin() {
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} autoComplete="off">
           <label className="block text-left">
             <span className="block text-sm font-semibold text-slate-700 mb-2">
               Логин
@@ -229,7 +110,7 @@ export default function AdminLogin() {
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 className="w-full bg-transparent outline-none text-slate-900"
-                autoComplete="username"
+                autoComplete="off"
                 disabled={loading || checkingSession}
               />
             </span>
@@ -274,17 +155,17 @@ export default function AdminLogin() {
 
           <button
             type="submit"
-            className="btn-primary inline-flex w-full items-center justify-center gap-2 text-lg px-8 py-3"
+            className="btn-primary inline-flex min-h-[52px] w-full items-center justify-center gap-2 text-lg px-8 py-3"
             disabled={loading || checkingSession}
+            aria-busy={loading}
           >
-            {loading ? (
-              <ButtonSpinner />
-            ) : (
-              <>
-                <LogIn size={20} aria-hidden="true" />
-                Войти
-              </>
-            )}
+            <span
+              className="inline-flex h-5 w-5 shrink-0 items-center justify-center"
+              aria-hidden="true"
+            >
+              {loading ? <ButtonSpinner /> : <LogIn size={20} />}
+            </span>
+            <span>Войти</span>
           </button>
         </form>
       </div>
