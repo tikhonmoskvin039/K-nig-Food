@@ -86,7 +86,10 @@ function CartItemGallery({ images, title, className }: CartItemGalleryProps) {
         style={{ transform: `translateX(-${safeActiveIndex * 100}%)` }}
       >
         {images.map((imageUrl, index) => (
-          <div key={`${imageUrl}-${index}`} className="relative h-full min-w-full">
+          <div
+            key={`${imageUrl}-${index}`}
+            className="relative h-full min-w-full"
+          >
             <Image
               src={imageUrl}
               alt={`${title} (${index + 1})`}
@@ -139,7 +142,9 @@ function CartContent() {
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state.cart.items);
   const [isClearCartConfirmOpen, setIsClearCartConfirmOpen] = useState(false);
-  const [deleteCandidate, setDeleteCandidate] = useState<DTCartItem | null>(null);
+  const [deleteCandidate, setDeleteCandidate] = useState<DTCartItem | null>(
+    null,
+  );
   const [isCheckoutCtaInView, setIsCheckoutCtaInView] = useState(true);
   const [catalogProducts, setCatalogProducts] = useState<DTProduct[]>([]);
   const checkoutCtaRef = useRef<HTMLDivElement | null>(null);
@@ -203,7 +208,10 @@ function CartContent() {
           setCatalogProducts(payload as DTProduct[]);
         }
       } catch (error) {
-        console.error("Не удалось загрузить галереи товаров для корзины", error);
+        console.error(
+          "Не удалось загрузить галереи товаров для корзины",
+          error,
+        );
       }
     };
 
@@ -269,7 +277,9 @@ function CartContent() {
         catalogProduct?.FeatureImageURL,
         ...(catalogProduct?.ProductImageGallery || []),
       ]),
-    ).filter((imageUrl): imageUrl is string => Boolean(imageUrl && imageUrl.trim()));
+    ).filter((imageUrl): imageUrl is string =>
+      Boolean(imageUrl && imageUrl.trim()),
+    );
 
     return images.length > 0 ? images : ["/placeholder.png"];
   };
@@ -320,10 +330,6 @@ function CartContent() {
 
         {items.length === 0 ? (
           <div className="mt-10 mb-30 text-center flex flex-col items-center gap-2">
-            <ShoppingCart
-              size={28}
-              className="text-(--color-muted)"
-            />
             <Link
               href="/products"
               ref={emptyCartCtaRef}
@@ -418,7 +424,10 @@ function CartContent() {
               })}
             </div>
 
-            <div ref={checkoutCtaRef} className="mt-8 space-y-4 flex flex-col items-end">
+            <div
+              ref={checkoutCtaRef}
+              className="mt-8 space-y-4 flex flex-col items-end"
+            >
               <p className="text-xl font-semibold text-slate-900 inline-flex items-center gap-2">
                 <CreditCard size={18} className="text-amber-600" />
                 {labels.total || "Всего"}: {total.toFixed(2)} ₽
@@ -438,8 +447,7 @@ function CartContent() {
           onClick={handleScrollToCheckout}
           className="fixed bottom-8 right-24 md:right-24 z-40 btn-primary min-h-12 px-5 text-base font-semibold shadow-lg md:cursor-pointer"
         >
-          <ArrowDownCircle size={18} />
-          К оплате
+          <ArrowDownCircle size={18} />К оплате
         </button>
       )}
 

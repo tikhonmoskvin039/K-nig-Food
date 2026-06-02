@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import getProducts, { getProductBySlug } from "../../utils/getProducts";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import ProductLightbox from "../../components/products/ProductLightbox";
-import ProductCard from "../../components/products/ProductCard";
+import ProductRecommendations from "../../components/products/ProductRecommendations";
 import { getLocalization } from "../../utils/getLocalization";
 import AddToCartButtonWrapper from "../../components/products/AddToCartButtonWrapper";
 import ProductBackButton from "../../components/products/ProductBackButton";
@@ -206,20 +206,13 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
         </div>
 
         {recommendedProducts.length > 0 && (
-          <div className="mt-8">
-            <h2 className="section-title">
-              {localeData.labels.recommendedProducts ||
-                "С этим блюдом часто выбирают"}
-            </h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {recommendedProducts.map((recommendedProduct) => (
-                <ProductCard
-                  key={recommendedProduct.ID}
-                  product={recommendedProduct}
-                />
-              ))}
-            </div>
-          </div>
+          <ProductRecommendations
+            products={recommendedProducts}
+            title={
+              localeData.labels.recommendedProducts ||
+              "С этим блюдом часто выбирают"
+            }
+          />
         )}
       </div>
     </section>

@@ -48,9 +48,8 @@ export default function ProductAdminPanel() {
     recentProductsEnabled: boolean;
     weeklyOffersEnabled: boolean;
   } | null>(null);
-  const [checkoutSettings, setCheckoutSettings] = useState<CheckoutSettings | null>(
-    null,
-  );
+  const [checkoutSettings, setCheckoutSettings] =
+    useState<CheckoutSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isHomepageVisibilityLoading, setIsHomepageVisibilityLoading] =
@@ -211,7 +210,7 @@ export default function ProductAdminPanel() {
       if (!response.ok) {
         const message = await readApiErrorMessage(
           response,
-          "Не удалось загрузить настройки checkout",
+          "Не удалось загрузить настройки",
         );
         throw new Error(message);
       }
@@ -222,7 +221,7 @@ export default function ProductAdminPanel() {
     } catch (error) {
       console.error(error);
       if (!silent) {
-        toast.error("Ошибка загрузки checkout-настроек", {
+        toast.error("Ошибка загрузки настроек", {
           description:
             error instanceof Error ? error.message : "Попробуйте позже",
         });
@@ -266,7 +265,8 @@ export default function ProductAdminPanel() {
       if (isOfflineQueuedResponse(response)) {
         toast.dismiss(loadingToastId);
         toast.info("Сохранение поставлено в очередь.", {
-          description: "Настройки отправятся автоматически при восстановлении сети.",
+          description:
+            "Настройки отправятся автоматически при восстановлении сети.",
         });
         return true;
       }
@@ -291,7 +291,7 @@ export default function ProductAdminPanel() {
     if (!checkoutSettings || isCheckoutSettingsSaving) return;
 
     setIsCheckoutSettingsSaving(true);
-    const loadingToastId = toast.loading("Сохраняем checkout-настройки...");
+    const loadingToastId = toast.loading("Сохраняем настройки...");
 
     try {
       const response = await fetch("/api/admin/checkout-settings", {
@@ -309,7 +309,7 @@ export default function ProductAdminPanel() {
       if (!response.ok) {
         const message = await readApiErrorMessage(
           response,
-          "Не удалось сохранить настройки checkout",
+          "Не удалось сохранить настройки",
         );
         throw new Error(message);
       }
@@ -317,7 +317,8 @@ export default function ProductAdminPanel() {
       if (isOfflineQueuedResponse(response)) {
         toast.dismiss(loadingToastId);
         toast.info("Сохранение поставлено в очередь.", {
-          description: "Настройки отправятся автоматически при восстановлении сети.",
+          description:
+            "Настройки отправятся автоматически при восстановлении сети.",
         });
         return true;
       }
@@ -330,7 +331,7 @@ export default function ProductAdminPanel() {
     } catch (error) {
       console.error(error);
       toast.dismiss(loadingToastId);
-      toast.error("Не удалось сохранить checkout-настройки", {
+      toast.error("Не удалось сохранить настройки", {
         description:
           error instanceof Error ? error.message : "Попробуйте еще раз",
       });
@@ -593,7 +594,7 @@ export default function ProductAdminPanel() {
       <div
         role="tablist"
         aria-label="Разделы управления каталога"
-        className="mb-6 flex w-full flex-col gap-1 rounded-xl border p-1 sm:inline-flex sm:w-auto sm:flex-row"
+        className="mb-6 flex w-full flex-col gap-1 rounded-xl border p-1 sm:inline-flex sm:w-full sm:flex-row"
         style={{
           borderColor: "var(--color-border)",
           background:
@@ -602,7 +603,7 @@ export default function ProductAdminPanel() {
       >
         <button
           type="button"
-          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition ${
             activeTab === "products"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -613,7 +614,8 @@ export default function ProductAdminPanel() {
                   background:
                     "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
                   color: "var(--color-foreground)",
-                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
                 }
               : { color: "var(--color-muted)" }
           }
@@ -625,7 +627,7 @@ export default function ProductAdminPanel() {
         </button>
         <button
           type="button"
-          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition ${
             activeTab === "showcase"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -636,7 +638,8 @@ export default function ProductAdminPanel() {
                   background:
                     "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
                   color: "var(--color-foreground)",
-                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
                 }
               : { color: "var(--color-muted)" }
           }
@@ -648,7 +651,7 @@ export default function ProductAdminPanel() {
         </button>
         <button
           type="button"
-          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition sm:min-w-[220px] ${
+          className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition ${
             activeTab === "delivery"
               ? "shadow-sm"
               : "hover:opacity-100 opacity-90"
@@ -659,7 +662,8 @@ export default function ProductAdminPanel() {
                   background:
                     "color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface) 70%)",
                   color: "var(--color-foreground)",
-                  border: "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border))",
                 }
               : { color: "var(--color-muted)" }
           }
@@ -689,12 +693,13 @@ export default function ProductAdminPanel() {
               </div>
 
               {isHomepageVisibilityLoading || !homepageVisibility ? (
-                <p className="text-sm text-slate-500">
-                  Загружаем настройки...
-                </p>
+                <p className="text-sm text-slate-500">Загружаем настройки...</p>
               ) : (
                 <>
-                  <label className="checkbox-card" data-checked={homepageVisibility.recentProductsEnabled}>
+                  <label
+                    className="checkbox-card"
+                    data-checked={homepageVisibility.recentProductsEnabled}
+                  >
                     <input
                       type="checkbox"
                       checked={homepageVisibility.recentProductsEnabled}
@@ -714,7 +719,10 @@ export default function ProductAdminPanel() {
                     </span>
                   </label>
 
-                  <label className="checkbox-card" data-checked={homepageVisibility.weeklyOffersEnabled}>
+                  <label
+                    className="checkbox-card"
+                    data-checked={homepageVisibility.weeklyOffersEnabled}
+                  >
                     <input
                       type="checkbox"
                       checked={homepageVisibility.weeklyOffersEnabled}
@@ -765,15 +773,19 @@ export default function ProductAdminPanel() {
           <div className="surface-card-soft p-4 md:p-5">
             <div className="flex flex-col gap-4">
               <div>
-                <h3 className="text-lg font-semibold">Настройки доставки и самовывоза</h3>
+                <h3 className="text-lg font-semibold">
+                  Настройки доставки и самовывоза
+                </h3>
                 <p className="text-sm text-slate-600 mt-1">
-                  Управляйте блоком доставки в checkout и редактируйте точки:
+                  Управляйте блоком доставки и редактируйте точки:
                   откуда стартует доставка и где расположен пункт самовывоза.
                 </p>
               </div>
 
               {isCheckoutSettingsLoading || !checkoutSettings ? (
-                <p className="text-sm text-slate-500">Загружаем checkout-настройки...</p>
+                <p className="text-sm text-slate-500">
+                  Загружаем настройки...
+                </p>
               ) : (
                 <>
                   <label
@@ -795,7 +807,7 @@ export default function ProductAdminPanel() {
                       }
                     />
                     <span className="font-medium select-none">
-                      Показывать и разрешать доставку в checkout
+                      Показывать и разрешать доставку
                     </span>
                   </label>
 
@@ -846,7 +858,11 @@ export default function ProductAdminPanel() {
                           <input
                             className="form-control"
                             inputMode="decimal"
-                            value={Number.isFinite(checkoutSettings.originPoint.lat) ? checkoutSettings.originPoint.lat : ""}
+                            value={
+                              Number.isFinite(checkoutSettings.originPoint.lat)
+                                ? checkoutSettings.originPoint.lat
+                                : ""
+                            }
                             onChange={(event) =>
                               updateCheckoutPointNumber(
                                 "originPoint",
@@ -864,7 +880,11 @@ export default function ProductAdminPanel() {
                           <input
                             className="form-control"
                             inputMode="decimal"
-                            value={Number.isFinite(checkoutSettings.originPoint.lng) ? checkoutSettings.originPoint.lng : ""}
+                            value={
+                              Number.isFinite(checkoutSettings.originPoint.lng)
+                                ? checkoutSettings.originPoint.lng
+                                : ""
+                            }
                             onChange={(event) =>
                               updateCheckoutPointNumber(
                                 "originPoint",
@@ -924,7 +944,11 @@ export default function ProductAdminPanel() {
                           <input
                             className="form-control"
                             inputMode="decimal"
-                            value={Number.isFinite(checkoutSettings.pickupPoint.lat) ? checkoutSettings.pickupPoint.lat : ""}
+                            value={
+                              Number.isFinite(checkoutSettings.pickupPoint.lat)
+                                ? checkoutSettings.pickupPoint.lat
+                                : ""
+                            }
                             onChange={(event) =>
                               updateCheckoutPointNumber(
                                 "pickupPoint",
@@ -942,7 +966,11 @@ export default function ProductAdminPanel() {
                           <input
                             className="form-control"
                             inputMode="decimal"
-                            value={Number.isFinite(checkoutSettings.pickupPoint.lng) ? checkoutSettings.pickupPoint.lng : ""}
+                            value={
+                              Number.isFinite(checkoutSettings.pickupPoint.lng)
+                                ? checkoutSettings.pickupPoint.lng
+                                : ""
+                            }
                             onChange={(event) =>
                               updateCheckoutPointNumber(
                                 "pickupPoint",
@@ -967,7 +995,7 @@ export default function ProductAdminPanel() {
                       {isCheckoutSettingsSaving ? (
                         <ButtonSpinner />
                       ) : (
-                        "Сохранить checkout-настройки"
+                        "Сохранить настройки"
                       )}
                     </button>
                   </div>
