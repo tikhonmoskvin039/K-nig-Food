@@ -380,9 +380,17 @@ export default function ProductForm({
     </p>
   );
 
-  const renderFieldLabel = (label: string) => (
-    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-      {label}
+  const renderFieldLabel = (label: string, required = false) => (
+    <p className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+      <span>{label}</span>
+      {required && (
+        <>
+          <span className="text-red-600" aria-hidden="true">
+            *
+          </span>
+          <span className="sr-only">обязательное поле</span>
+        </>
+      )}
     </p>
   );
 
@@ -393,7 +401,7 @@ export default function ProductForm({
       </h3>
 
       <div className="space-y-1">
-        {renderFieldLabel("Название")}
+        {renderFieldLabel("Название", true)}
         <input
           className="form-control"
           placeholder="Название, например: Борщ домашний"
@@ -439,7 +447,7 @@ export default function ProductForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          {renderFieldLabel("Стандартная цена")}
+          {renderFieldLabel("Стандартная цена", true)}
           <input
             className="form-control"
             placeholder="Цена, например: 350"
@@ -471,7 +479,7 @@ export default function ProductForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          {renderFieldLabel("Вес/объем порции")}
+          {renderFieldLabel("Вес/объем порции", true)}
           <input
             className="form-control"
             placeholder="Порция, например: 300"
@@ -487,7 +495,7 @@ export default function ProductForm({
         </div>
 
         <div className="space-y-1">
-          {renderFieldLabel("Единица измерения")}
+          {renderFieldLabel("Единица измерения", true)}
           <select
             className="form-control"
             value={product.PortionUnit}
@@ -579,7 +587,7 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-1">
-        {renderFieldLabel("Категории")}
+        {renderFieldLabel("Категории", true)}
         <select
           className="form-control"
           value={categoryToAdd}
@@ -662,7 +670,7 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-1">
-        {renderFieldLabel("Краткое описание")}
+        {renderFieldLabel("Краткое описание", true)}
         <textarea
           className="form-control min-h-20"
           placeholder="Краткое описание, например: Насыщенный борщ со сметаной"
@@ -673,7 +681,7 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-1">
-        {renderFieldLabel("Полное описание")}
+        {renderFieldLabel("Полное описание", true)}
         <textarea
           className="form-control min-h-28"
           placeholder="Полное описание, например: Готовим на наваристом бульоне..."
@@ -684,7 +692,7 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        {renderFieldLabel("Главное изображение (до 5 МБ)")}
+        {renderFieldLabel("Главное изображение (до 5 МБ)", true)}
         <p className="text-xs text-gray-500">
           Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
           качества: 1200x1200 px (квадрат 1:1).
