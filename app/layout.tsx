@@ -6,7 +6,6 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";
 import { Toaster } from "sonner";
-import AuthProvider from "./providers/SessionProvider";
 import { Suspense } from "react";
 import GlobalLoader from "./components/GlobalLoader";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -76,31 +75,29 @@ export default function RootLayout({
           ${manrope.variable}
         `}
       >
-        <AuthProvider>
-          <ThemeProvider>
-            <LocalizationProvider>
-              <HapticTapProvider />
-              <PWASetup />
-              <Header />
-              <Suspense fallback={<GlobalLoader blockInteractions={false} />}>
-                <div className="pt-(--header-height)">{children}</div>
-              </Suspense>
-              <Footer />
-              <Toaster
-                position="top-right"
-                offset={{
-                  top: "var(--toast-top-offset)",
-                  right: "16px",
-                }}
-                mobileOffset={{
-                  top: "var(--toast-top-offset)",
-                  left: "12px",
-                  right: "12px",
-                }}
-              />
-            </LocalizationProvider>
-          </ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <LocalizationProvider>
+            <HapticTapProvider />
+            <PWASetup />
+            <Header />
+            <Suspense fallback={<GlobalLoader blockInteractions={false} />}>
+              <div className="pt-(--header-height)">{children}</div>
+            </Suspense>
+            <Footer />
+            <Toaster
+              position="top-right"
+              offset={{
+                top: "var(--toast-top-offset)",
+                right: "16px",
+              }}
+              mobileOffset={{
+                top: "var(--toast-top-offset)",
+                left: "12px",
+                right: "12px",
+              }}
+            />
+          </LocalizationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

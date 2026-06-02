@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getAdminSessionFromRequest } from "../../../lib/adminAuth";
 import {
   getCheckoutSettingsState,
   saveCheckoutSettingsState,
 } from "../../../lib/checkoutSettingsRepository";
 import type { CheckoutPoint } from "../../../types/checkoutSettings";
 
-async function isAuthenticated(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  return !!token;
+function isAuthenticated(req: NextRequest) {
+  return Boolean(getAdminSessionFromRequest(req));
 }
 
 function parsePoint(raw: unknown, fieldName: string): CheckoutPoint | null {
@@ -35,7 +30,7 @@ function parsePoint(raw: unknown, fieldName: string): CheckoutPoint | null {
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -55,7 +50,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

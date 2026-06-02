@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import AdminPageFrame from "../../../../components/admin/AdminPageFrame";
 import ProductEditorPage from "../../../../components/admin/ProductEditorPage";
+import { getAdminSessionFromCookies } from "../../../../lib/adminAuth";
 
 type Props = {
   params: Promise<{
@@ -8,6 +10,10 @@ type Props = {
 };
 
 export default async function AdminEditProductPage({ params }: Props) {
+  if (!(await getAdminSessionFromCookies())) {
+    redirect("/admin/login");
+  }
+
   const { id } = await params;
 
   return (

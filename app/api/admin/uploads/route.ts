@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getAdminSessionFromRequest } from "../../../lib/adminAuth";
 import { getPrismaClient, resolveDatabaseUrl } from "../../../lib/prisma";
 import {
   beginIdempotentRequest,
@@ -12,13 +12,8 @@ import {
 
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
-async function isAuthenticated(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  return !!token;
+function isAuthenticated(req: NextRequest) {
+  return Boolean(getAdminSessionFromRequest(req));
 }
 
 function sanitizeFilePart(value: string) {
@@ -45,7 +40,7 @@ function getImageExtension(fileName: string, mimeType: string) {
 export async function POST(req: NextRequest) {
   const endpoint = "/api/admin/uploads";
 
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

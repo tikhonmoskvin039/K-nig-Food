@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getAdminSessionFromRequest } from "../../../lib/adminAuth";
 import {
   getHomepageVisibilityState,
   saveHomepageVisibilityState,
 } from "../../../lib/homepageSettingsRepository";
 
-async function isAuthenticated(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  return !!token;
+function isAuthenticated(req: NextRequest) {
+  return Boolean(getAdminSessionFromRequest(req));
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -32,7 +27,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

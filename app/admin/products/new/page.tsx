@@ -1,7 +1,13 @@
+import { redirect } from "next/navigation";
 import AdminPageFrame from "../../../components/admin/AdminPageFrame";
 import ProductEditorPage from "../../../components/admin/ProductEditorPage";
+import { getAdminSessionFromCookies } from "../../../lib/adminAuth";
 
-export default function AdminCreateProductPage() {
+export default async function AdminCreateProductPage() {
+  if (!(await getAdminSessionFromCookies())) {
+    redirect("/admin/login");
+  }
+
   return (
     <AdminPageFrame
       title="Новый товар"

@@ -208,12 +208,12 @@ This is what makes König Food perfect for small businesses and developers who w
   - `GMAIL_USER` – Your Gmail address (used for sending all emails AND receiving admin notifications)
   - `GMAIL_APP_PASSWORD` – Gmail App Password (NOT your regular password - see setup guide below)
 
-- **Admin Auth (NextAuth + GitHub OAuth)**
-  - `GITHUB_CLIENT_ID`
-  - `GITHUB_CLIENT_SECRET`
-  - `ADMIN_EMAIL`
-  - `NEXTAUTH_URL`
-  - `NEXTAUTH_SECRET`
+- **Admin Auth (WebSocket login/password)**
+  - `ADMIN_USERNAME` – admin login created by `pnpm db:seed` (defaults to `admin`)
+  - `ADMIN_PASSWORD` – strong admin password used by the seed script
+  - `ADMIN_AUTH_SECRET` – secret for signing login tokens and HttpOnly admin session cookies
+
+Admin login runs through the custom Node server in `server.mjs`; use `pnpm dev` or `pnpm start` so `/api/admin/auth/ws` is available.
 
 Note: Never commit this file to Git or public repositories.
 

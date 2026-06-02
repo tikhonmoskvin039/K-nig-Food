@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "../../../lib/payloadSize";
+import { getAdminSessionFromRequest } from "../../../lib/adminAuth";
 import {
   getAllProductsForAdmin,
   hasBase64Images,
@@ -8,13 +8,8 @@ import {
   validateProductsPayload,
 } from "../../../lib/productsRepository";
 
-async function isAuthenticated(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  return !!token;
+function isAuthenticated(req: NextRequest) {
+  return Boolean(getAdminSessionFromRequest(req));
 }
 
 /*
@@ -23,7 +18,7 @@ GET — list products
 ========================
 */
 export async function GET(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -51,7 +46,7 @@ POST / PUT — rewrite catalog
 */
 
 export async function PUT(req: NextRequest) {
-  if (!(await isAuthenticated(req))) {
+  if (!isAuthenticated(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

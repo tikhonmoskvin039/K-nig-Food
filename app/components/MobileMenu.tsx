@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import MiniCart from "./MiniCart";
 import { ReduxProvider } from "../providers";
-import { useSession } from "next-auth/react";
 import { useAppDispatch } from "../store/hooks";
 import { reconcileCartWithCatalog } from "../store/slices/cartSlice";
 import { toast } from "sonner";
@@ -68,8 +67,8 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
     recentProductsEnabled: true,
     weeklyOffersEnabled: true,
   });
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const pathname = usePathname();
-  const { data: session } = useSession();
 
   useEffect(() => {
     let isCancelled = false;
@@ -100,6 +99,39 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
 
     const handleWindowFocus = () => {
       void loadHomepageVisibility();
+    };
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      isCancelled = true;
+      window.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadAdminSession = async () => {
+      try {
+        const response = await fetch("/api/admin/session", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+
+        const data = (await response.json()) as { authenticated?: boolean };
+
+        if (!isCancelled) {
+          setIsAdminAuthenticated(Boolean(data.authenticated));
+        }
+      } catch (error) {
+        console.error("Failed to load admin session:", error);
+      }
+    };
+
+    void loadAdminSession();
+
+    const handleWindowFocus = () => {
+      void loadAdminSession();
     };
     window.addEventListener("focus", handleWindowFocus);
 
@@ -154,8 +186,8 @@ const MobileMenu = ({ menuItems }: MobileMenuProps) => {
     let displayLabel = label;
 
     if (href === "/admin/login") {
-      finalHref = session ? "/admin" : "/admin/login";
-      displayLabel = session ? "Администраторам" : "Сотрудникам";
+      finalHref = isAdminAuthenticated ? "/admin" : "/admin/login";
+      displayLabel = isAdminAuthenticated ? "Администраторам" : "Сотрудникам";
     }
 
     return { label: displayLabel, finalHref };

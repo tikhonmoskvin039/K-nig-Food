@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import ConfirmModal from "../common/ConfirmModal";
 import ButtonSpinner from "../common/ButtonSpinner";
 
 export function AdminLogoutButton() {
+  const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -13,9 +14,11 @@ export function AdminLogoutButton() {
     try {
       setLoading(true);
 
-      await signOut({
-        callbackUrl: "/admin/login",
+      await fetch("/api/admin/session", {
+        method: "DELETE",
       });
+      router.replace("/admin/login");
+      router.refresh();
     } finally {
       setLoading(false);
       setConfirmOpen(false);

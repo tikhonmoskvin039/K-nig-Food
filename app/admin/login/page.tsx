@@ -1,37 +1,239 @@
 "use client";
-import { signIn, useSession } from "next-auth/react";
+import { FormEvent, useEffect, useState } from "react";
+import { Lock, LogIn, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import ButtonSpinner from "../../components/common/ButtonSpinner";
+
+type AdminLoginSocketResponse =
+  | {
+      type: "admin.login.ok";
+      loginToken: string;
+    }
+  | {
+      type: "admin.login.error";
+      message?: string;
+    };
+
+function getAdminAuthSocketUrl() {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}/api/admin/auth/ws`;
+}
+
+function requestLoginToken(username: string, password: string) {
+  return new Promise<string>((resolve, reject) => {
+    const socket = new WebSocket(getAdminAuthSocketUrl());
+    let settled = false;
+
+    const timeoutId = window.setTimeout(() => {
+      settleWithError(new Error("Сервер авторизации не отвечает."));
+    }, 10000);
+
+    const settleWithToken = (loginToken: string) => {
+      if (settled) return;
+
+      settled = true;
+      window.clearTimeout(timeoutId);
+      socket.close(1000);
+      resolve(loginToken);
+    };
+
+    const settleWithError = (error: Error) => {
+      if (settled) return;
+
+      settled = true;
+      window.clearTimeout(timeoutId);
+      socket.close();
+      reject(error);
+    };
+
+    socket.addEventListener("open", () => {
+      socket.send(
+        JSON.stringify({
+          type: "admin.login",
+          username,
+          password,
+        }),
+      );
+    });
+
+    socket.addEventListener("message", (event) => {
+      let payload: AdminLoginSocketResponse;
+
+      try {
+        payload = JSON.parse(String(event.data));
+      } catch {
+        settleWithError(new Error("Некорректный ответ сервера авторизации."));
+        return;
+      }
+
+      if (payload.type === "admin.login.ok" && payload.loginToken) {
+        settleWithToken(payload.loginToken);
+        return;
+      }
+
+      if (payload.type === "admin.login.error") {
+        settleWithError(
+          new Error(payload.message || "Не удалось выполнить вход."),
+        );
+        return;
+      }
+
+      settleWithError(new Error("Не удалось выполнить вход."));
+    });
+
+    socket.addEventListener("error", () => {
+      settleWithError(new Error("WebSocket авторизации недоступен."));
+    });
+
+    socket.addEventListener("close", (event) => {
+      if (!settled && event.code !== 1000) {
+        settleWithError(new Error("Соединение авторизации закрыто."));
+      }
+    });
+  });
+}
 
 export default function AdminLogin() {
-  const { data: session } = useSession();
   const router = useRouter();
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (session) {
-      router.replace("/admin");
+    let isCancelled = false;
+
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/admin/session", {
+          cache: "no-store",
+        });
+        const data = (await response.json()) as { authenticated?: boolean };
+
+        if (!isCancelled && data.authenticated) {
+          router.replace("/admin");
+        }
+      } catch {
+        // Login form remains available when the session probe fails.
+      } finally {
+        if (!isCancelled) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    void checkSession();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [router]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!username.trim() || !password) {
+      setError("Введите логин и пароль.");
+      return;
     }
-  }, [session, router]);
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const loginToken = await requestLoginToken(username.trim(), password);
+      const response = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ loginToken }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Не удалось открыть сессию.");
+      }
+
+      router.replace("/admin");
+      router.refresh();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Не удалось выполнить вход.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center py-16 px-4 text-center">
-      <div className="surface-card max-w-xl w-full p-6 md:p-8 space-y-6">
+    <section className="min-h-[calc(100vh-var(--header-height))] flex items-center justify-center py-16 px-4">
+      <div className="surface-card max-w-md w-full p-6 md:p-8 space-y-6">
         <div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 text-slate-900 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3 text-slate-900 leading-tight">
             Авторизация
           </h1>
+          <p className="text-slate-600 text-base">
+            Вход в административную панель
+          </p>
         </div>
 
-        <p className="text-slate-600 text-base md:text-lg">
-          Вход в административную панель через oAuth. Только для сотрудников.
-        </p>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <label className="block text-left">
+            <span className="block text-sm font-semibold text-slate-700 mb-2">
+              Логин
+            </span>
+            <span className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200">
+              <User size={18} className="text-slate-500" aria-hidden="true" />
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                className="w-full bg-transparent outline-none text-slate-900"
+                autoComplete="username"
+                disabled={loading || checkingSession}
+              />
+            </span>
+          </label>
 
-        <button
-          onClick={() => signIn("github", { callbackUrl: "/admin" })}
-          className="btn-primary text-lg md:text-xl px-8 py-3 w-full sm:w-auto"
-        >
-          Войти
-        </button>
+          <label className="block text-left">
+            <span className="block text-sm font-semibold text-slate-700 mb-2">
+              Пароль
+            </span>
+            <span className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200">
+              <Lock size={18} className="text-slate-500" aria-hidden="true" />
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full bg-transparent outline-none text-slate-900"
+                autoComplete="current-password"
+                disabled={loading || checkingSession}
+              />
+            </span>
+          </label>
+
+          {error ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            className="btn-primary inline-flex w-full items-center justify-center gap-2 text-lg px-8 py-3"
+            disabled={loading || checkingSession}
+          >
+            {loading ? (
+              <ButtonSpinner />
+            ) : (
+              <>
+                <LogIn size={20} aria-hidden="true" />
+                Войти
+              </>
+            )}
+          </button>
+        </form>
       </div>
     </section>
   );
