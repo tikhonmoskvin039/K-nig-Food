@@ -135,14 +135,14 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
           {product.Title}
         </h1>
 
-        <div className="surface-card p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="surface-card mt-6 grid grid-cols-1 items-stretch gap-6 p-5 md:grid-cols-2 md:p-6">
           {/* LEFT COLUMN: IMAGES */}
           <ProductLightbox
             images={[product.FeatureImageURL, ...product.ProductImageGallery]}
           />
 
           {/* RIGHT COLUMN: DETAILS */}
-          <div>
+          <div className="flex self-stretch flex-col">
             <p className="text-lg text-slate-700">{product.ShortDescription}</p>
 
             {/* PORTION INFO */}
@@ -159,14 +159,14 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
                     key={label}
                     className="grid grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-3 py-3 text-sm text-slate-700"
                   >
-                    <div className="inline-flex min-w-0 items-center gap-3">
+                    <dt className="inline-flex min-w-0 items-center gap-3">
                       <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-700">
                         <Icon className="size-4" aria-hidden="true" />
                       </span>
-                      <dt className="min-w-0 font-semibold text-slate-900">
+                      <span className="min-w-0 font-semibold text-slate-900">
                         {label}
-                      </dt>
-                    </div>
+                      </span>
+                    </dt>
                     <dd className="min-w-0 justify-self-end text-right leading-6">
                       {value}
                     </dd>
@@ -175,10 +175,11 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
               </dl>
             )}
 
-            <div className="mt-4">{priceBlock}</div>
-
-            <div className="mt-4">
-              <AddToCartButtonWrapper product={product} />
+            <div className="mt-auto pt-6">
+              <div>{priceBlock}</div>
+              <div className="mt-4">
+                <AddToCartButtonWrapper product={product} />
+              </div>
             </div>
           </div>
         </div>

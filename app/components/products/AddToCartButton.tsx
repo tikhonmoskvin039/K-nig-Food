@@ -24,13 +24,7 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
   };
 
   return (
-    <div className="mt-4 flex flex-col gap-2">
-      <button
-        onClick={handleAddToCart}
-        className="w-full sm:w-auto btn-primary min-h-11 min-w-44 justify-center"
-      >
-        {labels.addToCart || "Add to Cart"}
-      </button>
+    <div className="flex flex-col gap-2">
       <p
         className={`min-h-4 text-xs leading-4 transition-opacity ${
           inCartQuantity > 0
@@ -43,6 +37,12 @@ export default function AddToCartButton({ product }: IAddToCartButtonProps) {
           ? `Уже добавлено в корзину: ${inCartQuantity} шт.`
           : "\u00A0"}
       </p>
+      <button
+        onClick={handleAddToCart}
+        className="w-full sm:w-auto btn-primary min-h-11 min-w-44 justify-center"
+      >
+        {labels.addToCart || "Add to Cart"}
+      </button>
     </div>
   );
 }
