@@ -149,17 +149,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="mt-3">
             {hasDiscount ? (
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-red-600">
+                <span className="text-lg font-bold text-red-600 md:text-2xl">
                   {product.SalePrice}
                   {currencySymbol}
                 </span>
-                <span className="text-slate-500 line-through">
+                <span className="text-slate-500 line-through md:text-lg">
                   {product.RegularPrice}
                   {currencySymbol}
                 </span>
               </div>
             ) : (
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-bold text-gray-900 md:text-2xl">
                 {product.RegularPrice}
                 {currencySymbol}
               </span>

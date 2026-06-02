@@ -153,21 +153,23 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
             )}
 
             {productAttributes.length > 0 && (
-              <dl className="mt-4 space-y-3">
+              <dl className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
                 {productAttributes.map(({ label, value, icon: Icon }) => (
                   <div
                     key={label}
-                    className="grid grid-cols-[1.5rem_1fr] gap-3 text-sm text-slate-700"
+                    className="grid grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-3 py-3 text-sm text-slate-700"
                   >
-                    <Icon
-                      size={18}
-                      className="mt-0.5 text-amber-700"
-                      aria-hidden="true"
-                    />
-                    <div>
-                      <dt className="font-semibold text-slate-900">{label}</dt>
-                      <dd className="mt-0.5 leading-relaxed">{value}</dd>
+                    <div className="inline-flex min-w-0 items-center gap-3">
+                      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-700">
+                        <Icon className="size-4" aria-hidden="true" />
+                      </span>
+                      <dt className="min-w-0 font-semibold text-slate-900">
+                        {label}
+                      </dt>
                     </div>
+                    <dd className="min-w-0 justify-self-end text-right leading-6">
+                      {value}
+                    </dd>
                   </div>
                 ))}
               </dl>
