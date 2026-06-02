@@ -5,6 +5,7 @@ import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import ProductLightbox from "../../components/products/ProductLightbox";
 import { getLocalization } from "../../utils/getLocalization";
 import AddToCartButtonWrapper from "../../components/products/AddToCartButtonWrapper";
+import ProductBackButton from "../../components/products/ProductBackButton";
 import {
   CalendarDays,
   ClipboardList,
@@ -131,9 +132,11 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
   return (
     <section className="section-wrap min-h-[calc(100vh-var(--header-height))]">
       <div className="app-shell">
-        <h1 className="page-title text-center">
-          {product.Title}
-        </h1>
+        <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-3 md:grid-cols-[minmax(7rem,auto)_minmax(0,1fr)_minmax(7rem,auto)]">
+          <ProductBackButton />
+          <h1 className="page-title min-w-0 text-center">{product.Title}</h1>
+          <div className="h-11 w-11 md:min-w-28" aria-hidden="true" />
+        </div>
 
         <div className="surface-card mt-6 grid grid-cols-1 items-stretch gap-6 p-5 md:grid-cols-2 md:p-6">
           {/* LEFT COLUMN: IMAGES */}

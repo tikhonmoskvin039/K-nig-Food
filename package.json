@@ -21,6 +21,7 @@
     "@reduxjs/toolkit": "^2.11.2",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
+    "material-icons": "^1.13.14",
     "next": "^16.1.1",
     "nodemailer": "^7.0.12",
     "pg": "^8.20.0",

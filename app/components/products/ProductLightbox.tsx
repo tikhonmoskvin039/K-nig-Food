@@ -69,10 +69,6 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
         ))}
       </div>
 
-      <p className="mt-2 text-xs text-slate-500">
-        В просмотре: используйте колесо мыши или жест pinch для увеличения.
-      </p>
-
       {/* LIGHTBOX MODAL */}
       {lightboxOpen && (
         <Lightbox

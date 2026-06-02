@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
 import "react-image-crop/dist/ReactCrop.css";
+import "material-icons/iconfont/material-icons.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { LocalizationProvider } from "./context/LocalizationContext";
