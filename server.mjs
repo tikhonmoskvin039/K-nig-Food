@@ -17,12 +17,13 @@ if (productionStart && !process.env.NODE_ENV) {
 
 const { default: next } = await import("next");
 const dev = process.env.NODE_ENV !== "production";
-const hostname = process.env.HOSTNAME || "0.0.0.0";
+const configuredHostname = process.env.HOSTNAME;
+const displayHostname = configuredHostname || "localhost";
 const port = Number.parseInt(process.env.PORT || "3000", 10);
 const app = next({
   dev,
   dir: process.cwd(),
-  hostname,
+  hostname: configuredHostname || "localhost",
   port,
   httpServer: {
     on() {},
@@ -211,7 +212,9 @@ server.on("upgrade", (req, socket, head) => {
   });
 });
 
-server.listen(port, hostname, () => {
-  console.log(`K-nig Food ready on http://${hostname}:${port}`);
+const listenArgs = configuredHostname ? [port, configuredHostname] : [port];
+
+server.listen(...listenArgs, () => {
+  console.log(`K-nig Food ready on http://${displayHostname}:${port}`);
   console.log(`Admin auth WebSocket listening on ${authSocketPath}`);
 });

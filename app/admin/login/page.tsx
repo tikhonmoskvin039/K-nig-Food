@@ -14,19 +14,43 @@ type AdminLoginSocketResponse =
       message?: string;
     };
 
-function getAdminAuthSocketUrl() {
+function buildAdminAuthSocketUrl(host: string) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/api/admin/auth/ws`;
+
+  return `${protocol}//${host}/api/admin/auth/ws`;
 }
 
-function requestLoginToken(username: string, password: string) {
+function getAdminAuthSocketUrls() {
+  const { hostname, host, port } = window.location;
+  const fallbackHost = port ? `127.0.0.1:${port}` : "127.0.0.1";
+  const hosts =
+    hostname === "0.0.0.0" || hostname === "::" || hostname === "[::]"
+      ? [fallbackHost, host]
+      : [host];
+
+  if (hostname === "localhost") {
+    hosts.push(fallbackHost);
+  }
+
+  if (hostname === "127.0.0.1") {
+    hosts.push(port ? `localhost:${port}` : "localhost");
+  }
+
+  return Array.from(new Set(hosts)).map(buildAdminAuthSocketUrl);
+}
+
+function requestLoginTokenFromSocketUrl(
+  socketUrl: string,
+  username: string,
+  password: string,
+) {
   return new Promise<string>((resolve, reject) => {
-    const socket = new WebSocket(getAdminAuthSocketUrl());
+    const socket = new WebSocket(socketUrl);
     let settled = false;
 
     const timeoutId = window.setTimeout(() => {
       settleWithError(new Error("Сервер авторизации не отвечает."));
-    }, 10000);
+    }, 3500);
 
     const settleWithToken = (loginToken: string) => {
       if (settled) return;
@@ -91,6 +115,20 @@ function requestLoginToken(username: string, password: string) {
       }
     });
   });
+}
+
+async function requestLoginToken(username: string, password: string) {
+  let lastError: Error | null = null;
+
+  for (const socketUrl of getAdminAuthSocketUrls()) {
+    try {
+      return await requestLoginTokenFromSocketUrl(socketUrl, username, password);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Не удалось выполнить вход.");
+    }
+  }
+
+  throw lastError || new Error("Сервер авторизации не отвечает.");
 }
 
 export default function AdminLogin() {
