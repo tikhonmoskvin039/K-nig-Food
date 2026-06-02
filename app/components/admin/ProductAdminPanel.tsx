@@ -24,7 +24,6 @@ import {
   TABLE_STATE_STORAGE_KEY,
   filterAndSortProducts,
   getCategoryOptions,
-  getCurrencyOptions,
   getPortionUnitOptions,
   hasActiveProductFilters,
   readTableState,
@@ -424,10 +423,6 @@ export default function ProductAdminPanel() {
 
   const categoryOptions = useMemo(
     () => getCategoryOptions(products),
-    [products],
-  );
-  const currencyOptions = useMemo(
-    () => getCurrencyOptions(products),
     [products],
   );
   const portionUnitOptions = useMemo(
@@ -992,7 +987,6 @@ export default function ProductAdminPanel() {
             <ProductFiltersPanel
               tableState={tableState}
               categoryOptions={categoryOptions}
-              currencyOptions={currencyOptions}
               portionUnitOptions={portionUnitOptions}
               filteredCount={filteredProducts.length}
               currentPage={currentPage}
@@ -1000,7 +994,6 @@ export default function ProductAdminPanel() {
               hasActiveFilters={hasActiveFilters}
               onSearchChange={(value) => setFilter("search", value)}
               onCategoryChange={(value) => setFilter("category", value)}
-              onCurrencyChange={(value) => setFilter("currency", value)}
               onPortionUnitChange={(value) => setFilter("portionUnit", value)}
               onEnabledChange={(value) =>
                 setFilter("enabled", value as EnabledFilter)

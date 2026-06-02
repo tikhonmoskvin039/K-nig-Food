@@ -18,6 +18,11 @@ declare type DTProduct = {
 
   PortionWeight: number;
   PortionUnit: string;
+  Composition?: string;
+  StorageCondition?: string;
+  StorageTerm?: string;
+  ManufactureDate?: string;
+  UsageMethod?: string;
 
   ProductCategories: string[];
 

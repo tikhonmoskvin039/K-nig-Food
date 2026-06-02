@@ -1,0 +1,6 @@
+ALTER TABLE "products"
+ADD COLUMN "composition" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "storageCondition" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "storageTerm" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "manufactureDate" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "usageMethod" TEXT NOT NULL DEFAULT '';

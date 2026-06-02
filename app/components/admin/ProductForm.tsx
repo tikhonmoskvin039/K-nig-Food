@@ -309,7 +309,6 @@ export default function ProductForm({
     if (!product.PortionUnit.trim()) {
       errors.PortionUnit = "Ед. измерения обязательна.";
     }
-    if (!product.Currency.trim()) errors.Currency = "Валюта обязательна.";
     if (product.ProductCategories.length === 0) {
       errors.ProductCategories = "Выберите хотя бы одну категорию.";
     }
@@ -325,7 +324,6 @@ export default function ProductForm({
 
     return errors;
   }, [
-    product.Currency,
     product.FeatureImageURL,
     product.LongDescription,
     product.PortionUnit,
@@ -513,15 +511,65 @@ export default function ProductForm({
         </div>
       </div>
 
-      <div className="space-y-1">
-        {renderFieldLabel("Валюта")}
-        <input
-          className="form-control bg-gray-100 text-gray-600 cursor-not-allowed"
-          value="RUR (рубли)"
-          disabled
-          readOnly
-        />
-        {renderFieldError(mergedErrors.Currency)}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          {renderFieldLabel("Состав")}
+          <textarea
+            className="form-control min-h-20"
+            placeholder="Например: говядина, картофель, морковь"
+            value={product.Composition || ""}
+            onChange={(event) => onChange("Composition", event.target.value)}
+          />
+          {renderFieldError(mergedErrors.Composition)}
+        </div>
+
+        <div className="space-y-1">
+          {renderFieldLabel("Условие хранения")}
+          <textarea
+            className="form-control min-h-20"
+            placeholder="Например: хранить при температуре от +2 до +6 °C"
+            value={product.StorageCondition || ""}
+            onChange={(event) =>
+              onChange("StorageCondition", event.target.value)
+            }
+          />
+          {renderFieldError(mergedErrors.StorageCondition)}
+        </div>
+
+        <div className="space-y-1">
+          {renderFieldLabel("Срок хранения")}
+          <input
+            className="form-control"
+            placeholder="Например: 72 часа"
+            value={product.StorageTerm || ""}
+            onChange={(event) => onChange("StorageTerm", event.target.value)}
+          />
+          {renderFieldError(mergedErrors.StorageTerm)}
+        </div>
+
+        <div className="space-y-1">
+          {renderFieldLabel("Дата изготовления")}
+          <input
+            type="date"
+            className="form-control"
+            value={product.ManufactureDate || ""}
+            onChange={(event) =>
+              onChange("ManufactureDate", event.target.value)
+            }
+          />
+          {renderFieldError(mergedErrors.ManufactureDate)}
+        </div>
+
+        <div className="space-y-1 sm:col-span-2">
+          {renderFieldLabel("Способ употребления")}
+          <textarea
+            className="form-control min-h-20"
+            placeholder="Например: разогреть перед употреблением"
+            value={product.UsageMethod || ""}
+            onChange={(event) => onChange("UsageMethod", event.target.value)}
+          />
+          {renderFieldError(mergedErrors.UsageMethod)}
+        </div>
       </div>
 
       <div className="space-y-1">

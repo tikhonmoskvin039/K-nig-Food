@@ -16,6 +16,11 @@ model Product {
   catalogVisible      Boolean  @default(true)
   portionWeight       Int
   portionUnit         String
+  composition         String   @default("")
+  storageCondition    String   @default("")
+  storageTerm         String   @default("")
+  manufactureDate     String   @default("")
+  usageMethod         String   @default("")
   productCategories   String[] @default([])
   featureImageUrl     String
   productImageGallery String[] @default([])

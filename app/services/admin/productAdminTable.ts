@@ -20,7 +20,6 @@ export type SortBy =
 export type TableState = {
   search: string;
   category: string;
-  currency: string;
   portionUnit: string;
   enabled: EnabledFilter;
   visible: VisibleFilter;
@@ -38,7 +37,6 @@ export const PAGE_SIZE = 10;
 export const DEFAULT_TABLE_STATE: TableState = {
   search: "",
   category: "all",
-  currency: "all",
   portionUnit: "all",
   enabled: "all",
   visible: "all",
@@ -81,15 +79,6 @@ export const getCategoryOptions = (products: DTProduct[]) =>
     new Set(products.flatMap((product) => product.ProductCategories || [])),
   ).sort();
 
-export const getCurrencyOptions = (products: DTProduct[]) =>
-  Array.from(
-    new Set(
-      products
-        .map((product) => product.Currency)
-        .filter((currency) => currency && currency.trim()),
-    ),
-  ).sort();
-
 export const getPortionUnitOptions = (products: DTProduct[]) =>
   Array.from(
     new Set(
@@ -128,10 +117,6 @@ export const filterAndSortProducts = (
     result = result.filter((product) =>
       product.ProductCategories.includes(tableState.category),
     );
-  }
-
-  if (tableState.currency !== "all") {
-    result = result.filter((product) => product.Currency === tableState.currency);
   }
 
   if (tableState.portionUnit !== "all") {
@@ -214,7 +199,6 @@ export const filterAndSortProducts = (
 export const hasActiveProductFilters = (tableState: TableState) =>
   tableState.search !== DEFAULT_TABLE_STATE.search ||
   tableState.category !== DEFAULT_TABLE_STATE.category ||
-  tableState.currency !== DEFAULT_TABLE_STATE.currency ||
   tableState.portionUnit !== DEFAULT_TABLE_STATE.portionUnit ||
   tableState.enabled !== DEFAULT_TABLE_STATE.enabled ||
   tableState.visible !== DEFAULT_TABLE_STATE.visible ||

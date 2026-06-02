@@ -12,7 +12,6 @@ import { DEFAULT_TABLE_STATE } from "../../../services/admin/productAdminTable";
 type Props = {
   tableState: TableState;
   categoryOptions: string[];
-  currencyOptions: string[];
   portionUnitOptions: string[];
   filteredCount: number;
   currentPage: number;
@@ -20,7 +19,6 @@ type Props = {
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
-  onCurrencyChange: (value: string) => void;
   onPortionUnitChange: (value: string) => void;
   onEnabledChange: (value: EnabledFilter) => void;
   onVisibleChange: (value: VisibleFilter) => void;
@@ -34,7 +32,6 @@ type Props = {
 export default function ProductFiltersPanel({
   tableState,
   categoryOptions,
-  currencyOptions,
   portionUnitOptions,
   filteredCount,
   currentPage,
@@ -42,7 +39,6 @@ export default function ProductFiltersPanel({
   hasActiveFilters,
   onSearchChange,
   onCategoryChange,
-  onCurrencyChange,
   onPortionUnitChange,
   onEnabledChange,
   onVisibleChange,
@@ -60,7 +56,6 @@ export default function ProductFiltersPanel({
 
   const isSearchActive = tableState.search !== DEFAULT_TABLE_STATE.search;
   const isCategoryActive = tableState.category !== DEFAULT_TABLE_STATE.category;
-  const isCurrencyActive = tableState.currency !== DEFAULT_TABLE_STATE.currency;
   const isPortionUnitActive =
     tableState.portionUnit !== DEFAULT_TABLE_STATE.portionUnit;
   const isEnabledActive = tableState.enabled !== DEFAULT_TABLE_STATE.enabled;
@@ -121,22 +116,6 @@ export default function ProductFiltersPanel({
             {categoryOptions.map((category) => (
               <option key={category} value={category}>
                 {category}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-1">
-          <p className={filterLabelClass}>Валюта</p>
-          <select
-            value={tableState.currency}
-            onChange={(e) => onCurrencyChange(e.target.value)}
-            className={getFilterClass(isCurrencyActive)}
-          >
-            <option value="all">Все валюты</option>
-            {currencyOptions.map((currency) => (
-              <option key={currency} value={currency}>
-                {currency}
               </option>
             ))}
           </select>
