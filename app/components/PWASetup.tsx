@@ -12,6 +12,44 @@ import {
 const QUEUED_TOAST_COOLDOWN_MS = 4_000;
 const QUEUED_TOAST_ID = "offline-queue-queued";
 const FLUSHED_TOAST_ID = "offline-queue-flushed";
+const DEV_PWA_CLEANUP_RELOAD_KEY = "kfood-dev-pwa-cleanup-reloaded";
+const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
+
+async function cleanupDevelopmentPwaArtifacts() {
+  if (typeof window === "undefined") return;
+
+  let hadActiveController = false;
+
+  if ("serviceWorker" in navigator) {
+    hadActiveController = Boolean(navigator.serviceWorker.controller);
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(
+      registrations.map((registration) => registration.unregister()),
+    );
+  }
+
+  if ("caches" in window) {
+    const cacheNames = await window.caches.keys();
+    await Promise.all(
+      cacheNames
+        .filter((cacheName) => cacheName.startsWith("kfood-pwa"))
+        .map((cacheName) => window.caches.delete(cacheName)),
+    );
+  }
+
+  if (!hadActiveController) {
+    window.sessionStorage.removeItem(DEV_PWA_CLEANUP_RELOAD_KEY);
+    return;
+  }
+
+  if (window.sessionStorage.getItem(DEV_PWA_CLEANUP_RELOAD_KEY) === "1") {
+    return;
+  }
+
+  window.sessionStorage.setItem(DEV_PWA_CLEANUP_RELOAD_KEY, "1");
+  window.location.reload();
+}
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
@@ -43,6 +81,13 @@ export default function PWASetup() {
 
   useEffect(() => {
     let idleFlushHandle = 0;
+
+    if (IS_DEVELOPMENT) {
+      void cleanupDevelopmentPwaArtifacts().catch((error) => {
+        console.warn("Failed to clean development PWA artifacts:", error);
+      });
+      return;
+    }
 
     installOfflineFetchQueue();
     const scheduleInitialFlush = () => {

@@ -7,7 +7,6 @@ import { getLocalization } from "../utils/getLocalization";
 interface LocalizationData {
   labels: { [key: string]: string };
   menu: { label: string; href: string }[];
-  footerLinks: { label: string; href: string }[];
   socialLinks: { id: string; icon: string; url: string }[];
   homepage: {
     banner: {
@@ -63,6 +62,7 @@ interface LocalizationData {
 const LocalizationContext = createContext<LocalizationData | null>(null);
 const LOCALIZATION_CACHE_KEY = "localization_cache_v1";
 const LOCALIZATION_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const SHOULD_CACHE_LOCALIZATION = process.env.NODE_ENV !== "development";
 const FALLBACK_LOCALIZATION = getLocalization() as unknown as LocalizationData;
 
 export function LocalizationProvider({ children }: { children: React.ReactNode }) {
@@ -96,12 +96,14 @@ export function LocalizationProvider({ children }: { children: React.ReactNode }
     const fetchFreshLocalization = async () => {
       try {
         const response = await fetch("/api/localization", {
-          cache: "force-cache",
+          cache: SHOULD_CACHE_LOCALIZATION ? "force-cache" : "no-store",
         });
         if (!response.ok) return;
 
         const data = (await response.json()) as LocalizationData;
         setLocalization(data);
+
+        if (!SHOULD_CACHE_LOCALIZATION) return;
 
         sessionStorage.setItem(
           LOCALIZATION_CACHE_KEY,
@@ -115,7 +117,12 @@ export function LocalizationProvider({ children }: { children: React.ReactNode }
       }
     };
 
-    hydrateFromStorage();
+    if (SHOULD_CACHE_LOCALIZATION) {
+      hydrateFromStorage();
+    } else {
+      sessionStorage.removeItem(LOCALIZATION_CACHE_KEY);
+    }
+
     fetchFreshLocalization();
   }, []);
 

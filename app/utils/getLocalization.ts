@@ -33,7 +33,6 @@ interface LocalizationData {
     orderConfirmationMessage: string;
   };
   menu: { label: string; href: string }[];
-  footerLinks: { label: string; href: string }[];
   socialLinks: { id: string; icon: string; url: string }[];
   homepage: {
     banner: {

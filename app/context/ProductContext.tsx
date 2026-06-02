@@ -19,6 +19,7 @@ import {
 
 const CLIENT_PRODUCTS_CACHE_TTL_MS = 5 * 60_000;
 const CLIENT_PRODUCTS_CACHE_KEY = getCatalogProductsCacheKey();
+const SHOULD_CACHE_CLIENT_PRODUCTS = process.env.NODE_ENV !== "development";
 let cachedProducts: DTProduct[] | null = null;
 let cacheExpiresAt = 0;
 let pendingProductsRequest: Promise<DTProduct[]> | null = null;
@@ -30,6 +31,7 @@ function resetInMemoryProductsCache() {
 }
 
 function syncWithCatalogRevision() {
+  if (!SHOULD_CACHE_CLIENT_PRODUCTS) return;
   if (typeof window === "undefined") return;
 
   const revision = getCatalogProductsRevision();
@@ -46,6 +48,7 @@ function syncWithCatalogRevision() {
 }
 
 function readProductsFromSessionCache(): DTProduct[] | null {
+  if (!SHOULD_CACHE_CLIENT_PRODUCTS) return null;
   if (typeof window === "undefined") return null;
 
   try {
@@ -77,6 +80,7 @@ function readProductsFromSessionCache(): DTProduct[] | null {
 }
 
 function writeProductsToSessionCache(products: DTProduct[], expiresAt: number) {
+  if (!SHOULD_CACHE_CLIENT_PRODUCTS) return;
   if (typeof window === "undefined") return;
 
   try {
@@ -92,7 +96,30 @@ function writeProductsToSessionCache(products: DTProduct[], expiresAt: number) {
   }
 }
 
+async function fetchProductsFromApi(): Promise<DTProduct[]> {
+  const res = await fetch("/api/products", { cache: "no-store" });
+
+  if (!res.ok) {
+    throw new Error(`Failed to load products (${res.status})`);
+  }
+
+  const data = await res.json();
+  return Array.isArray(data) ? (data as DTProduct[]) : [];
+}
+
 async function loadProductsFromApi(): Promise<DTProduct[]> {
+  if (!SHOULD_CACHE_CLIENT_PRODUCTS) {
+    resetInMemoryProductsCache();
+
+    try {
+      window.sessionStorage.removeItem(CLIENT_PRODUCTS_CACHE_KEY);
+    } catch {
+      // ignore storage errors
+    }
+
+    return fetchProductsFromApi();
+  }
+
   syncWithCatalogRevision();
 
   const now = Date.now();
@@ -112,14 +139,7 @@ async function loadProductsFromApi(): Promise<DTProduct[]> {
     return pendingProductsRequest;
   }
 
-  pendingProductsRequest = fetch("/api/products", { cache: "no-store" })
-    .then(async (res) => {
-      if (!res.ok) {
-        throw new Error(`Failed to load products (${res.status})`);
-      }
-      const data = await res.json();
-      return Array.isArray(data) ? (data as DTProduct[]) : [];
-    })
+  pendingProductsRequest = fetchProductsFromApi()
     .then((products) => {
       const expiresAt = Date.now() + CLIENT_PRODUCTS_CACHE_TTL_MS;
       cachedProducts = products;
