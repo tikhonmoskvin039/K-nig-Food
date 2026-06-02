@@ -10,20 +10,42 @@ type AdminAuthResponse = {
   message?: string;
 };
 
+const LOGIN_NETWORK_ERROR_MESSAGE =
+  "Не удалось подключиться к серверу авторизации.";
+const LOGIN_OFFLINE_ERROR_MESSAGE =
+  "Нет соединения. Попробуйте войти после восстановления сети.";
+
 async function requestAdminSession(username: string, password: string) {
-  const response = await fetch("/api/admin/auth", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch("/api/admin/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-offline-queue": "skip",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+  } catch {
+    throw new Error(
+      typeof navigator !== "undefined" && !navigator.onLine
+        ? LOGIN_OFFLINE_ERROR_MESSAGE
+        : LOGIN_NETWORK_ERROR_MESSAGE,
+    );
+  }
+
   const data = (await response.json().catch(() => null)) as
     | AdminAuthResponse
     | null;
 
   if (!response.ok || !data?.authenticated) {
-    throw new Error(data?.message || "Не удалось выполнить вход.");
+    throw new Error(
+      data?.message ||
+        (response.ok
+          ? "Не удалось выполнить вход."
+          : `Ошибка сервера авторизации (${response.status}).`),
+    );
   }
 }
 
