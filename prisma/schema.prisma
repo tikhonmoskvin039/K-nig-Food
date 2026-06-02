@@ -22,6 +22,7 @@ model Product {
   manufactureDate     String   @default("")
   usageMethod         String   @default("")
   productCategories   String[] @default([])
+  recommendedProductIds String[] @default([])
   featureImageUrl     String
   productImageGallery String[] @default([])
   isNewArrival        Boolean  @default(false)

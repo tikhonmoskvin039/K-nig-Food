@@ -25,6 +25,7 @@ declare type DTProduct = {
   UsageMethod?: string;
 
   ProductCategories: string[];
+  RecommendedProductIds: string[];
 
   FeatureImageURL: string;
   ProductImageGallery: string[];

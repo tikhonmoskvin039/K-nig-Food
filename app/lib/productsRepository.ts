@@ -44,6 +44,16 @@ function parseDate(value: unknown): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function normalizeRecommendedProductIds(
+  productId: string,
+  recommendedProductIds: unknown,
+  validProductIds?: Set<string>,
+) {
+  return Array.from(new Set(toStringArray(recommendedProductIds))).filter(
+    (id) => id !== productId && (!validProductIds || validProductIds.has(id)),
+  );
+}
+
 function normalizeProduct(product: DTProduct): DTProduct {
   const now = new Date().toISOString();
   const regularPrice = toSafeString(product.RegularPrice).trim();
@@ -65,6 +75,10 @@ function normalizeProduct(product: DTProduct): DTProduct {
     ManufactureDate: toSafeString(product.ManufactureDate).trim(),
     UsageMethod: toSafeString(product.UsageMethod).trim(),
     ProductCategories: toStringArray(product.ProductCategories),
+    RecommendedProductIds: normalizeRecommendedProductIds(
+      toSafeString(product.ID).trim(),
+      product.RecommendedProductIds,
+    ),
     FeatureImageURL: toSafeString(product.FeatureImageURL).trim(),
     ProductImageGallery: toStringArray(product.ProductImageGallery),
     IsNewArrival: isNewArrival,
@@ -80,7 +94,19 @@ function normalizeProduct(product: DTProduct): DTProduct {
 }
 
 function normalizeProducts(products: DTProduct[]) {
-  return products.map(normalizeProduct);
+  const normalizedProducts = products.map(normalizeProduct);
+  const validProductIds = new Set(
+    normalizedProducts.map((product) => product.ID).filter(Boolean),
+  );
+
+  return normalizedProducts.map((product) => ({
+    ...product,
+    RecommendedProductIds: normalizeRecommendedProductIds(
+      product.ID,
+      product.RecommendedProductIds,
+      validProductIds,
+    ),
+  }));
 }
 
 function removeQueryAndHash(url: string) {
@@ -155,6 +181,7 @@ function mapDbProductToDto(product: DbProduct): DTProduct {
     ManufactureDate: product.manufactureDate,
     UsageMethod: product.usageMethod,
     ProductCategories: product.productCategories,
+    RecommendedProductIds: product.recommendedProductIds,
     FeatureImageURL: sanitizeImageUrl(product.featureImageUrl),
     ProductImageGallery: sanitizeImageGallery(product.productImageGallery),
     IsNewArrival: product.isNewArrival,
@@ -187,6 +214,7 @@ function mapDtoToDbProduct(product: DTProduct) {
     manufactureDate: normalized.ManufactureDate,
     usageMethod: normalized.UsageMethod,
     productCategories: normalized.ProductCategories,
+    recommendedProductIds: normalized.RecommendedProductIds,
     featureImageUrl: normalized.FeatureImageURL,
     productImageGallery: normalized.ProductImageGallery,
     isNewArrival: Boolean(normalized.IsNewArrival),
@@ -270,10 +298,10 @@ export function validateProductsPayload(products: DTProduct[]): string | null {
   const seenIds = new Set<string>();
   const seenSlugs = new Set<string>();
   const seenTitles = new Set<string>();
+  const normalizedProducts = normalizeProducts(products);
 
-  for (const [index, product] of products.entries()) {
+  for (const [index, normalized] of normalizedProducts.entries()) {
     const row = index + 1;
-    const normalized = normalizeProduct(product);
 
     if (!normalized.ID) {
       return `Товар #${row}: отсутствует ID.`;

@@ -21,6 +21,7 @@ interface LocalizationData {
     noProductsFound: string;
     noProductsHint: string;
     productDetails: string;
+    recommendedProducts: string;
     products: string;
     recentProducts: string;
     weeklyOffers: string;

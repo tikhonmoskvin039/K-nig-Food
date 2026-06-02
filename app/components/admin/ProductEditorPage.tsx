@@ -265,6 +265,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         product={product}
         isNew={mode === "create"}
         categories={categories}
+        products={products}
         canSave={mode === "create" || hasChanges}
         duplicateTitleError={
           isDuplicateTitle ? "Товар с таким названием уже есть." : undefined

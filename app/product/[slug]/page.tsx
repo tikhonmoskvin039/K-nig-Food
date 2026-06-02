@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductBySlug } from "../../utils/getProducts";
+import getProducts, { getProductBySlug } from "../../utils/getProducts";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import ProductLightbox from "../../components/products/ProductLightbox";
+import ProductCard from "../../components/products/ProductCard";
 import { getLocalization } from "../../utils/getLocalization";
 import AddToCartButtonWrapper from "../../components/products/AddToCartButtonWrapper";
 import ProductBackButton from "../../components/products/ProductBackButton";
@@ -63,11 +64,18 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
     return notFound();
   }
 
-  // Now do local file read
-  const product = await getProductBySlug(slug);
+  const products = await getProducts();
+  const product = products.find((item) => item.Slug === slug);
   if (!product) {
     return notFound();
   }
+
+  const productsById = new Map(products.map((item) => [item.ID, item]));
+  const recommendedProducts = (product.RecommendedProductIds || [])
+    .map((id) => productsById.get(id))
+    .filter(
+      (item): item is DTProduct => (item ? item.ID !== product.ID : false),
+    );
 
   const regularPrice = Number(product.RegularPrice);
   const salePrice = Number(product.SalePrice);
@@ -196,6 +204,23 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
             {product.LongDescription}
           </p>
         </div>
+
+        {recommendedProducts.length > 0 && (
+          <div className="mt-8">
+            <h2 className="section-title">
+              {localeData.labels.recommendedProducts ||
+                "С этим блюдом часто выбирают"}
+            </h2>
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {recommendedProducts.map((recommendedProduct) => (
+                <ProductCard
+                  key={recommendedProduct.ID}
+                  product={recommendedProduct}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

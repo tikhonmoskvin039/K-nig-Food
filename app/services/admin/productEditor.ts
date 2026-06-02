@@ -13,6 +13,7 @@ export function createEmptyProduct(): DTProduct {
     ManufactureDate: "",
     UsageMethod: "",
     ProductCategories: [],
+    RecommendedProductIds: [],
     FeatureImageURL: "",
     ProductImageGallery: [],
     IsNewArrival: false,
@@ -41,6 +42,7 @@ export function cloneProduct(product: DTProduct): DTProduct {
     ManufactureDate: product.ManufactureDate || "",
     UsageMethod: product.UsageMethod || "",
     ProductCategories: [...(product.ProductCategories || [])],
+    RecommendedProductIds: [...(product.RecommendedProductIds || [])],
     ProductImageGallery: [...(product.ProductImageGallery || [])],
     IsNewArrival:
       Boolean(product.IsNewArrival) ||

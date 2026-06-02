@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 import Image from "next/image";
+import { ArrowDown, ArrowUp, X } from "lucide-react";
 import ImageCropperModal from "./ImageCropperModal";
 import {
   IMAGE_ACCEPT_ATTRIBUTE,
@@ -14,7 +15,10 @@ import {
   uploadImageToAdmin,
   validateImageFile,
 } from "../../services/admin/productForm";
-import { cropImageFile, type CropPixels } from "../../services/admin/imageCropper";
+import {
+  cropImageFile,
+  type CropPixels,
+} from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
 import ConfirmModal from "../common/ConfirmModal";
 
@@ -22,6 +26,7 @@ type Props = {
   product: DTProduct;
   isNew: boolean;
   categories: string[];
+  products: DTProduct[];
   duplicateTitleError?: string;
   isSaving?: boolean;
   canSave?: boolean;
@@ -55,6 +60,7 @@ export default function ProductForm({
   product,
   isNew,
   categories,
+  products,
   duplicateTitleError,
   isSaving = false,
   canSave = true,
@@ -65,6 +71,7 @@ export default function ProductForm({
   const [fileErrors, setFileErrors] = useState<FileErrorState>({});
   const [categoryToAdd, setCategoryToAdd] = useState("");
   const [customCategoryInput, setCustomCategoryInput] = useState("");
+  const [recommendationSearch, setRecommendationSearch] = useState("");
   const [cropQueue, setCropQueue] = useState<CropQueueState | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isCancelCropConfirmOpen, setIsCancelCropConfirmOpen] = useState(false);
@@ -167,7 +174,9 @@ export default function ProductForm({
     if (!activeFile) return;
 
     const errorField =
-      cropQueue.target === "feature" ? "FeatureImageURL" : "ProductImageGallery";
+      cropQueue.target === "feature"
+        ? "FeatureImageURL"
+        : "ProductImageGallery";
 
     setCropQueue((prev) => (prev ? { ...prev, isSubmitting: true } : prev));
     setIsUploadingImage(true);
@@ -190,7 +199,10 @@ export default function ProductForm({
       if (cropQueue.target === "feature") {
         onChange("FeatureImageURL", imageUrl);
       } else {
-        onChange("ProductImageGallery", [...product.ProductImageGallery, imageUrl]);
+        onChange("ProductImageGallery", [
+          ...product.ProductImageGallery,
+          imageUrl,
+        ]);
       }
 
       setFileErrors((prev) => ({ ...prev, [errorField]: undefined }));
@@ -225,10 +237,7 @@ export default function ProductForm({
   };
 
   const normalizeCategory = (raw: string) =>
-    raw
-      .replace(/\s+/g, " ")
-      .replace(/[|]/g, "")
-      .trim();
+    raw.replace(/\s+/g, " ").replace(/[|]/g, "").trim();
 
   const addCategory = (rawCategory: string) => {
     const nextCategory = normalizeCategory(rawCategory);
@@ -276,6 +285,54 @@ export default function ProductForm({
       ).sort(),
     [categories, product.ProductCategories],
   );
+
+  const recommendedProductIds = useMemo(
+    () => product.RecommendedProductIds || [],
+    [product.RecommendedProductIds],
+  );
+
+  const productOptionsById = useMemo(
+    () => new Map(products.map((item) => [item.ID, item])),
+    [products],
+  );
+
+  const recommendedProductIdSet = useMemo(
+    () => new Set(recommendedProductIds),
+    [recommendedProductIds],
+  );
+
+  const selectedRecommendedProducts = useMemo(
+    () =>
+      recommendedProductIds
+        .map((id) => productOptionsById.get(id))
+        .filter((item): item is DTProduct => Boolean(item)),
+    [productOptionsById, recommendedProductIds],
+  );
+
+  const recommendationOptions = useMemo(() => {
+    const search = recommendationSearch.trim().toLowerCase();
+
+    return products
+      .filter(
+        (item) =>
+          item.ID !== product.ID && !recommendedProductIdSet.has(item.ID),
+      )
+      .filter((item) => {
+        if (!search) return true;
+
+        const searchable = [
+          item.Title,
+          item.ShortDescription,
+          ...(item.ProductCategories || []),
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return searchable.includes(search);
+      })
+      .sort((a, b) => a.Title.localeCompare(b.Title, "ru"))
+      .slice(0, 8);
+  }, [product.ID, products, recommendationSearch, recommendedProductIdSet]);
 
   const validationErrors = useMemo<FieldErrors>(() => {
     const errors: FieldErrors = {};
@@ -363,6 +420,38 @@ export default function ProductForm({
     }
   };
 
+  const addRecommendedProduct = (productId: string) => {
+    if (!productId || productId === product.ID) return;
+    if (recommendedProductIdSet.has(productId)) return;
+
+    onChange("RecommendedProductIds", [...recommendedProductIds, productId]);
+    setRecommendationSearch("");
+  };
+
+  const removeRecommendedProduct = (productId: string) => {
+    onChange(
+      "RecommendedProductIds",
+      recommendedProductIds.filter((id) => id !== productId),
+    );
+  };
+
+  const moveRecommendedProduct = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= recommendedProductIds.length) return;
+
+    const nextIds = [...recommendedProductIds];
+    const [movedId] = nextIds.splice(index, 1);
+    if (!movedId) return;
+    nextIds.splice(nextIndex, 0, movedId);
+    onChange("RecommendedProductIds", nextIds);
+  };
+
+  const getProductStatusLabel = (item: DTProduct) => {
+    if (!item.Enabled) return "Скрыт";
+    if (!item.CatalogVisible) return "Не в каталоге";
+    return "";
+  };
+
   const handleSave = () => {
     if (saveDisabled) return;
     onSave();
@@ -424,7 +513,10 @@ export default function ProductForm({
             <span className="font-medium select-none">Активен</span>
           </label>
 
-          <label className="checkbox-card" data-checked={product.CatalogVisible}>
+          <label
+            className="checkbox-card"
+            data-checked={product.CatalogVisible}
+          >
             <input
               type="checkbox"
               checked={product.CatalogVisible}
@@ -433,15 +525,14 @@ export default function ProductForm({
               }
               className="h-4 w-4 accent-amber-600 cursor-pointer"
             />
-            <span className="font-medium select-none">Показывать в каталоге</span>
+            <span className="font-medium select-none">
+              Показывать в каталоге
+            </span>
           </label>
         </div>
         <p className="text-xs text-slate-600">
-          Новинки и предложения недели настраиваются в табе
-          {" "}
-          <strong>«Управление витриной»</strong>
-          {" "}
-          в админке.
+          Новинки и предложения недели настраиваются в табе{" "}
+          <strong>«Управление витриной»</strong> в админке.
         </p>
       </div>
 
@@ -455,7 +546,10 @@ export default function ProductForm({
             inputMode="numeric"
             pattern="[0-9]*"
             onChange={(event) =>
-              onChange("RegularPrice", sanitizeNumericString(event.target.value))
+              onChange(
+                "RegularPrice",
+                sanitizeNumericString(event.target.value),
+              )
             }
           />
           {renderFieldError(mergedErrors.RegularPrice)}
@@ -669,6 +763,128 @@ export default function ProductForm({
         {renderFieldError(mergedErrors.ProductCategories)}
       </div>
 
+      <div className="space-y-3">
+        {renderFieldLabel("Рекомендации к товару")}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="space-y-2">
+            <input
+              type="search"
+              className="form-control"
+              value={recommendationSearch}
+              placeholder="Найти блюдо для рекомендации"
+              onChange={(event) => setRecommendationSearch(event.target.value)}
+            />
+
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+              {recommendationOptions.map((item) => {
+                const statusLabel = getProductStatusLabel(item);
+
+                return (
+                  <button
+                    key={item.ID}
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50"
+                    onClick={() => addRecommendedProduct(item.ID)}
+                  >
+                    <Image
+                      src={item.FeatureImageURL || "/placeholder.png"}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 shrink-0 rounded-md object-cover"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-slate-900">
+                        {item.Title}
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                        {item.RegularPrice}
+                        {item.Currency === "RUR" ? " ₽" : ` ${item.Currency}`}
+                      </span>
+                    </span>
+                    {statusLabel && (
+                      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        {statusLabel}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              {recommendationOptions.length === 0 && (
+                <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-500">
+                  Подходящих товаров нет
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+            {selectedRecommendedProducts.length === 0 ? (
+              <p className="py-6 text-center text-sm text-slate-500">
+                Рекомендации не выбраны
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {selectedRecommendedProducts.map((item, index) => (
+                  <article
+                    key={item.ID}
+                    className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-2"
+                  >
+                    <Image
+                      src={item.FeatureImageURL || "/placeholder.png"}
+                      alt=""
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 shrink-0 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {item.Title}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Позиция {index + 1}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => moveRecommendedProduct(index, -1)}
+                        disabled={index === 0}
+                        aria-label={`Поднять рекомендацию ${item.Title}`}
+                        title="Выше"
+                      >
+                        <ArrowUp size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => moveRecommendedProduct(index, 1)}
+                        disabled={index === selectedRecommendedProducts.length - 1}
+                        aria-label={`Опустить рекомендацию ${item.Title}`}
+                        title="Ниже"
+                      >
+                        <ArrowDown size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex size-9 items-center justify-center rounded-md border border-red-200 text-red-600 transition hover:bg-red-50"
+                        onClick={() => removeRecommendedProduct(item.ID)}
+                        aria-label={`Удалить рекомендацию ${item.Title}`}
+                        title="Удалить"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-1">
         {renderFieldLabel("Краткое описание", true)}
         <textarea
@@ -790,7 +1006,9 @@ export default function ProductForm({
               />
               <button
                 type="button"
-                onClick={() => setPendingImageDelete({ kind: "gallery", index })}
+                onClick={() =>
+                  setPendingImageDelete({ kind: "gallery", index })
+                }
                 className="absolute -top-2 -right-2 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
                 title="Удалить изображение"
               >
