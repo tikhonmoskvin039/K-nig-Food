@@ -269,6 +269,7 @@ export function hasBase64Images(products: DTProduct[]) {
 export function validateProductsPayload(products: DTProduct[]): string | null {
   const seenIds = new Set<string>();
   const seenSlugs = new Set<string>();
+  const seenTitles = new Set<string>();
 
   for (const [index, product] of products.entries()) {
     const row = index + 1;
@@ -280,6 +281,7 @@ export function validateProductsPayload(products: DTProduct[]): string | null {
     if (!normalized.Title) {
       return `Товар #${row}: отсутствует название.`;
     }
+    const normalizedTitle = normalized.Title.replace(/\s+/g, " ").toLowerCase();
     if (!normalized.Slug) {
       return `Товар #${row}: отсутствует slug.`;
     }
@@ -324,6 +326,11 @@ export function validateProductsPayload(products: DTProduct[]): string | null {
       return `Товар #${row}: дублируется slug "${normalized.Slug}".`;
     }
     seenSlugs.add(normalized.Slug);
+
+    if (seenTitles.has(normalizedTitle)) {
+      return `Товар #${row}: товар с названием "${normalized.Title}" уже есть.`;
+    }
+    seenTitles.add(normalizedTitle);
 
     if (
       hasSalePrice &&

@@ -110,6 +110,17 @@ export default function ProductEditorPage({ mode, productId }: Props) {
     });
   };
 
+  const normalizedProductTitle = product?.Title.trim().replace(/\s+/g, " ").toLowerCase();
+  const isDuplicateTitle = Boolean(
+    product &&
+      normalizedProductTitle &&
+      products.some(
+        (item) =>
+          item.ID !== product.ID &&
+          item.Title.trim().replace(/\s+/g, " ").toLowerCase() ===
+            normalizedProductTitle,
+      ),
+  );
   const hasChanges =
     mode === "create"
       ? true
@@ -255,6 +266,9 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         isNew={mode === "create"}
         categories={categories}
         canSave={mode === "create" || hasChanges}
+        duplicateTitleError={
+          isDuplicateTitle ? "Товар с таким названием уже есть." : undefined
+        }
         isSaving={isSaving}
         onChange={updateField}
         onSave={handleSave}

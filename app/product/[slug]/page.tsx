@@ -5,6 +5,13 @@ import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import ProductLightbox from "../../components/products/ProductLightbox";
 import { getLocalization } from "../../utils/getLocalization";
 import AddToCartButtonWrapper from "../../components/products/AddToCartButtonWrapper";
+import {
+  CalendarDays,
+  ClipboardList,
+  PackageCheck,
+  Thermometer,
+  Utensils,
+} from "lucide-react";
 
 // Define a type for route params as a Promise
 type AsyncParams = Promise<{ slug?: string }>;
@@ -69,6 +76,40 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
     salePrice > 0 &&
     salePrice < regularPrice;
   const currencySymbol = getCurrencySymbol(product.Currency);
+  const formatManufactureDate = (value?: string) => {
+    if (!value) return "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+    const [year, month, day] = value.split("-");
+    return `${day}.${month}.${year}`;
+  };
+  const productAttributes = [
+    {
+      label: "Состав",
+      value: product.Composition,
+      icon: ClipboardList,
+    },
+    {
+      label: "Условие хранения",
+      value: product.StorageCondition,
+      icon: Thermometer,
+    },
+    {
+      label: "Срок хранения",
+      value: product.StorageTerm,
+      icon: PackageCheck,
+    },
+    {
+      label: "Дата изготовления",
+      value: formatManufactureDate(product.ManufactureDate),
+      icon: CalendarDays,
+    },
+    {
+      label: "Способ употребления",
+      value: product.UsageMethod,
+      icon: Utensils,
+    },
+  ].filter((attribute) => attribute.value?.trim());
 
   // Build SSR UI
   const priceBlock = hasSalePrice ? (
@@ -109,6 +150,27 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
               <p className="mt-2 text-sm text-gray-500">
                 Выход: {product.PortionWeight} {product.PortionUnit}
               </p>
+            )}
+
+            {productAttributes.length > 0 && (
+              <dl className="mt-4 space-y-3">
+                {productAttributes.map(({ label, value, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="grid grid-cols-[1.5rem_1fr] gap-3 text-sm text-slate-700"
+                  >
+                    <Icon
+                      size={18}
+                      className="mt-0.5 text-amber-700"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <dt className="font-semibold text-slate-900">{label}</dt>
+                      <dd className="mt-0.5 leading-relaxed">{value}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
             )}
 
             <div className="mt-4">{priceBlock}</div>

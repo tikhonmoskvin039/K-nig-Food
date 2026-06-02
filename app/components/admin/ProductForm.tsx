@@ -22,6 +22,7 @@ type Props = {
   product: DTProduct;
   isNew: boolean;
   categories: string[];
+  duplicateTitleError?: string;
   isSaving?: boolean;
   canSave?: boolean;
   onChange: (field: keyof DTProduct, value: DTProduct[keyof DTProduct]) => void;
@@ -54,6 +55,7 @@ export default function ProductForm({
   product,
   isNew,
   categories,
+  duplicateTitleError,
   isSaving = false,
   canSave = true,
   onChange,
@@ -278,12 +280,12 @@ export default function ProductForm({
   const validationErrors = useMemo<FieldErrors>(() => {
     const errors: FieldErrors = {};
 
-    if (!product.Title.trim()) errors.Title = "Название обязательно.";
-    if (!product.Slug.trim()) {
-      errors.Slug = "Слаг обязателен.";
-    } else if (!/^[a-z0-9-]+$/.test(product.Slug)) {
-      errors.Slug =
-        "Слаг должен содержать только английские буквы, цифры и '-'.";
+    if (!product.Title.trim()) {
+      errors.Title = "Название обязательно.";
+    } else if (!product.Slug.trim() || !/^[a-z0-9-]+$/.test(product.Slug)) {
+      errors.Title = "Название должно содержать буквы или цифры.";
+    } else if (duplicateTitleError) {
+      errors.Title = duplicateTitleError;
     }
 
     if (!product.RegularPrice.trim()) errors.RegularPrice = "Цена обязательна.";
@@ -334,6 +336,7 @@ export default function ProductForm({
     product.ShortDescription,
     product.Slug,
     product.Title,
+    duplicateTitleError,
   ]);
 
   const mergedErrors: FieldErrors = {
@@ -398,17 +401,6 @@ export default function ProductForm({
           onChange={(event) => handleTitleChange(event.target.value)}
         />
         {renderFieldError(mergedErrors.Title)}
-      </div>
-
-      <div className="space-y-1">
-        {renderFieldLabel("Slug")}
-        <input
-          className="form-control"
-          placeholder="Слаг, например: borsch-domashniy"
-          value={product.Slug}
-          onChange={(event) => onChange("Slug", event.target.value.toLowerCase())}
-        />
-        {renderFieldError(mergedErrors.Slug)}
       </div>
 
       <div className="space-y-2">
@@ -549,14 +541,28 @@ export default function ProductForm({
 
         <div className="space-y-1">
           {renderFieldLabel("Дата изготовления")}
-          <input
-            type="date"
-            className="form-control"
-            value={product.ManufactureDate || ""}
-            onChange={(event) =>
-              onChange("ManufactureDate", event.target.value)
-            }
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+            <input
+              className="form-control"
+              placeholder="Например: 02.06.2026 или партия 12/А"
+              value={product.ManufactureDate || ""}
+              onChange={(event) =>
+                onChange("ManufactureDate", event.target.value)
+              }
+            />
+            <input
+              type="date"
+              className="form-control sm:w-40"
+              value={
+                /^\d{4}-\d{2}-\d{2}$/.test(product.ManufactureDate || "")
+                  ? product.ManufactureDate
+                  : ""
+              }
+              onChange={(event) =>
+                onChange("ManufactureDate", event.target.value)
+              }
+            />
+          </div>
           {renderFieldError(mergedErrors.ManufactureDate)}
         </div>
 
