@@ -882,10 +882,10 @@ export default function ProductForm({
                       className="h-16 w-16 shrink-0 rounded-md object-cover"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xl font-semibold text-slate-900 sm:text-md">
+                      <span className="block truncate text-md font-semibold text-slate-900 sm:text-xl">
                         {item.Title}
                       </span>
-                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                      <span className="mt-0.5 block truncate text-md text-slate-500">
                         {item.RegularPrice}
                         {item.Currency === "RUR" ? " ₽" : ` ${item.Currency}`}
                       </span>
