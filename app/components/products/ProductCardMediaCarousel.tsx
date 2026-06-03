@@ -50,13 +50,15 @@ export default function ProductCardMediaCarousel({
   arrowSize = 34,
 }: ProductCardMediaCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [trackIndex, setTrackIndex] = useState(1);
+  const [trackPosition, setTrackPosition] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [dotsVisible, setDotsVisible] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressNavigationRef = useRef(false);
   const dotsHideTimeoutRef = useRef<number | null>(null);
   const transitionResetFrameRef = useRef<number | null>(null);
+  const pendingActiveIndexRef = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
   const mediaUrls = useMemo(
     () => getProductMediaUrls(product),
     [product],
@@ -65,28 +67,26 @@ export default function ProductCardMediaCarousel({
   const safeActiveIndex = Math.min(activeIndex, mediaCount - 1);
   const canSlide = mediaCount > 1;
   const productHref = `/product/${product.Slug}`;
+  const getWrappedIndex = (index: number) =>
+    (index + mediaCount) % mediaCount;
+  const getCarouselSlide = (index: number, slot: string) => {
+    const realIndex = getWrappedIndex(index);
+    const src = mediaUrls[realIndex] || "/placeholder.png";
+
+    return {
+      src,
+      realIndex,
+      key: `${slot}-${realIndex}-${src}`,
+    };
+  };
   const carouselSlides = canSlide
     ? [
-        {
-          src: mediaUrls[mediaCount - 1],
-          key: `clone-last-${mediaUrls[mediaCount - 1]}`,
-        },
-        ...mediaUrls.map((src, index) => ({
-          src,
-          key: `media-${src}-${index}`,
-        })),
-        {
-          src: mediaUrls[0],
-          key: `clone-first-${mediaUrls[0]}`,
-        },
+        getCarouselSlide(safeActiveIndex - 1, "previous"),
+        getCarouselSlide(safeActiveIndex, "current"),
+        getCarouselSlide(safeActiveIndex + 1, "next"),
       ]
-    : [
-        {
-          src: mediaUrls[0],
-          key: `media-${mediaUrls[0]}-0`,
-        },
-      ];
-  const visibleTrackIndex = canSlide ? trackIndex : 0;
+    : [getCarouselSlide(0, "current")];
+  const visibleTrackIndex = canSlide ? trackPosition : 0;
 
   useEffect(
     () => () => {
@@ -124,25 +124,27 @@ export default function ProductCardMediaCarousel({
   };
 
   const showPrevious = () => {
-    if (!canSlide) return;
+    if (!canSlide || isAnimatingRef.current) return;
 
     const nextActiveIndex =
       safeActiveIndex <= 0 ? mediaCount - 1 : safeActiveIndex - 1;
 
+    pendingActiveIndexRef.current = nextActiveIndex;
+    isAnimatingRef.current = true;
     setIsTransitionEnabled(true);
-    setActiveIndex(nextActiveIndex);
-    setTrackIndex(safeActiveIndex);
+    setTrackPosition(0);
     showDotsTemporarily();
   };
 
   const showNext = () => {
-    if (!canSlide) return;
+    if (!canSlide || isAnimatingRef.current) return;
 
     const nextActiveIndex = (safeActiveIndex + 1) % mediaCount;
 
+    pendingActiveIndexRef.current = nextActiveIndex;
+    isAnimatingRef.current = true;
     setIsTransitionEnabled(true);
-    setActiveIndex(nextActiveIndex);
-    setTrackIndex(safeActiveIndex + 2);
+    setTrackPosition(2);
     showDotsTemporarily();
   };
 
@@ -212,15 +214,14 @@ export default function ProductCardMediaCarousel({
   ) => {
     if (!canSlide || event.target !== event.currentTarget) return;
 
-    if (trackIndex === 0) {
-      setIsTransitionEnabled(false);
-      setTrackIndex(mediaCount);
-    } else if (trackIndex === mediaCount + 1) {
-      setIsTransitionEnabled(false);
-      setTrackIndex(1);
-    } else {
-      return;
-    }
+    const pendingActiveIndex = pendingActiveIndexRef.current;
+    if (pendingActiveIndex === null || trackPosition === 1) return;
+
+    setIsTransitionEnabled(false);
+    setActiveIndex(pendingActiveIndex);
+    setTrackPosition(1);
+    pendingActiveIndexRef.current = null;
+    isAnimatingRef.current = false;
 
     if (transitionResetFrameRef.current !== null) {
       window.cancelAnimationFrame(transitionResetFrameRef.current);
