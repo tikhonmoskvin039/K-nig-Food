@@ -7,6 +7,7 @@ import {
   isNewArrivalProduct,
   isWeeklyOfferProduct,
 } from "../../../utils/productShowcase";
+import { MdDeleteForever } from "react-icons/md";
 
 type Props = {
   products: DTProduct[];
@@ -31,7 +32,7 @@ export default function ProductDesktopTable({
 }: Props) {
   return (
     <div className="hidden md:block overflow-x-auto table-shell">
-      <table className="w-full min-w-[1040px] table-fixed">
+      <table className="w-full min-w-260 table-fixed">
         <thead className="bg-gray-100">
           <tr>
             <th className="p-3 text-center w-12">
@@ -43,12 +44,24 @@ export default function ProductDesktopTable({
                 aria-label="Выбрать все товары на странице"
               />
             </th>
-            <th className="p-3 text-left text-sm lg:text-base w-[35%]">Название</th>
-            <th className="p-3 text-center text-sm lg:text-base w-[10%]">Цена</th>
-            <th className="p-3 text-center text-sm lg:text-base w-[12%]">Порция</th>
-            <th className="p-3 text-center text-sm lg:text-base w-[14%]">Создан</th>
-            <th className="p-3 text-center text-sm lg:text-base w-[14%]">Изменен</th>
-            <th className="p-3 text-center text-sm lg:text-base w-[15%]">Действия</th>
+            <th className="p-3 text-left text-sm lg:text-base w-[35%]">
+              Название
+            </th>
+            <th className="p-3 text-center text-sm lg:text-base w-[10%]">
+              Цена
+            </th>
+            <th className="p-3 text-center text-sm lg:text-base w-[12%]">
+              Порция
+            </th>
+            <th className="p-3 text-center text-sm lg:text-base w-[14%]">
+              Создан
+            </th>
+            <th className="p-3 text-center text-sm lg:text-base w-[14%]">
+              Изменен
+            </th>
+            <th className="p-3 text-center text-sm lg:text-base w-[15%]">
+              Действия
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +71,7 @@ export default function ProductDesktopTable({
             const hasDiscount = hasDiscountPrice(product);
 
             return (
-              <tr key={product.ID} className="border-t h-[58px] admin-table-row">
+              <tr key={product.ID} className="border-t h-14.5 admin-table-row">
                 <td className="p-3 text-center">
                   <input
                     type="checkbox"
@@ -123,7 +136,7 @@ export default function ProductDesktopTable({
                       disabled={isSaving}
                       className="btn-danger px-3 py-1.5"
                     >
-                      Удалить
+                      <MdDeleteForever size={24} />
                     </button>
                   </div>
                 </td>
@@ -135,7 +148,7 @@ export default function ProductDesktopTable({
             <tr
               key={`desktop-empty-row-${index}`}
               aria-hidden="true"
-              className="border-t h-[58px]"
+              className="border-t h-14.5"
             >
               <td className="p-3">&nbsp;</td>
               <td className="p-3">&nbsp;</td>

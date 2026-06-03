@@ -111,9 +111,5 @@ declare type DTOrderBody = {
 };
 
 declare type DTSocialIcon =
-  | "SiFacebook"
   | "SiTelegram"
-  | "SiX"
   | "SiInstagram"
-  | "SiLinkedin"
-  | "SiYoutube";

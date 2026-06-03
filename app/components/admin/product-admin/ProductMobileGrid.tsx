@@ -2,6 +2,7 @@
 
 import ProductEditControl from "../ProductEditControl";
 import { formatProductDate } from "../../../services/admin/productAdminTable";
+import { MdDeleteForever } from "react-icons/md";
 import {
   hasDiscountPrice,
   isNewArrivalProduct,
@@ -28,7 +29,10 @@ export default function ProductMobileGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
       {products.map((product) => (
-        <article key={product.ID} className="rounded-xl bg-gray-50 p-4 shadow-sm">
+        <article
+          key={product.ID}
+          className="rounded-xl bg-gray-50 p-4 shadow-sm"
+        >
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-semibold text-gray-900 line-clamp-2">
               {product.Title}
@@ -63,18 +67,18 @@ export default function ProductMobileGrid({
             <p>Изменен: {formatProductDate(product.UpdatedAt)}</p>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-4 flex flex-row gap-2">
             <ProductEditControl
               productId={product.ID}
-              className="w-full btn-secondary text-center"
+              className="w-[50%] btn-secondary text-center"
             />
             <button
               type="button"
               onClick={() => onDeleteRequest(product)}
               disabled={isSaving}
-              className="w-full btn-danger"
+              className="w-[50%] btn-danger"
             >
-              Удалить
+              <MdDeleteForever size={24} />
             </button>
           </div>
         </article>
@@ -86,7 +90,7 @@ export default function ProductMobileGrid({
           aria-hidden="true"
           className="rounded-xl p-4 shadow-sm invisible pointer-events-none select-none"
         >
-          <div className="h-[210px]" />
+          <div className="h-52.5" />
         </article>
       ))}
     </div>

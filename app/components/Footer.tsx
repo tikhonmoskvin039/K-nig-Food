@@ -1,23 +1,15 @@
 import Link from "next/link";
 import {
-  SiFacebook,
   SiInstagram,
-  SiLinkedin,
-  SiTelegram,
-  SiX,
-  SiYoutube,
+  SiTelegram
 } from "react-icons/si";
 import ScrollToTopButton from "./ScrollToTopButton";
 import { getLocalization } from "../utils/getLocalization";
 
 // Map icon strings to components
 const iconMap: Record<DTSocialIcon, React.ElementType> = {
-  SiFacebook: SiFacebook,
   SiTelegram: SiTelegram,
-  SiX: SiX,
-  SiInstagram: SiInstagram,
-  SiLinkedin: SiLinkedin,
-  SiYoutube: SiYoutube,
+  SiInstagram: SiInstagram
 };
 
 export default function Footer() {
