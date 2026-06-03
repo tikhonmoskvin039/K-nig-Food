@@ -57,6 +57,26 @@ export async function POST(req: Request) {
       );
     }
 
+    const contactRecipientEmail =
+      process.env.CONTACT_RECIPIENT_EMAIL || process.env.GMAIL_USER;
+
+    if (!contactRecipientEmail) {
+      const responseBody = {
+        success: false,
+        message: "Сервисный email для контактной формы не настроен.",
+      };
+      const statusCode = 500;
+      await storeIdempotentResponse({
+        key: idempotency.key,
+        endpoint,
+        requestHash,
+        statusCode,
+        responseBody,
+      });
+
+      return NextResponse.json(responseBody, { status: statusCode });
+    }
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
@@ -69,7 +89,8 @@ export async function POST(req: Request) {
 
     await transporter.sendMail({
       from: `"König Food" <${process.env.GMAIL_USER}>`,
-      to: email,
+      to: contactRecipientEmail,
+      replyTo: email,
       subject: `Контактная форма от ${name}`,
       html: `
         <p><strong>Имя:</strong> ${name}</p>
