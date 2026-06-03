@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import GlobalLoader from "../GlobalLoader";
@@ -30,6 +30,19 @@ type Props = {
   productId?: string;
 };
 
+function getInternalNavigationPath(href: string) {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const url = new URL(href, window.location.href);
+    if (url.origin !== window.location.origin) return null;
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 export default function ProductEditorPage({ mode, productId }: Props) {
   const router = useRouter();
   const [products, setProducts] = useState<DTProduct[]>([]);
@@ -39,6 +52,11 @@ export default function ProductEditorPage({ mode, productId }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false);
+  const [pendingNavigationPath, setPendingNavigationPath] = useState<string | null>(
+    null,
+  );
+  const allowNavigationRef = useRef(false);
+  const currentHrefRef = useRef("");
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -61,7 +79,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         if (mode === "create") {
           const nextProduct = createEmptyProduct();
           setProduct(nextProduct);
-          setInitialProduct(null);
+          setInitialProduct(cloneProduct(nextProduct));
           return;
         }
 
@@ -122,17 +140,115 @@ export default function ProductEditorPage({ mode, productId }: Props) {
             normalizedProductTitle,
       ),
   );
-  const hasChanges =
-    mode === "create"
-      ? true
-      : Boolean(
-          product &&
-          initialProduct &&
-          JSON.stringify(product) !== JSON.stringify(initialProduct),
-        );
+  const hasChanges = Boolean(
+    product &&
+      initialProduct &&
+      JSON.stringify(product) !== JSON.stringify(initialProduct),
+  );
+
+  const requestNavigation = (path: string) => {
+    if (!hasChanges || allowNavigationRef.current) {
+      allowNavigationRef.current = true;
+      router.push(path);
+      return;
+    }
+
+    setPendingNavigationPath(path);
+    setIsExitConfirmOpen(true);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    currentHrefRef.current = window.location.href;
+  }, []);
+
+  useEffect(() => {
+    if (!hasChanges) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowNavigationRef.current) return;
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasChanges]);
+
+  useEffect(() => {
+    if (!hasChanges) return;
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (allowNavigationRef.current) return;
+      if (event.defaultPrevented) return;
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      if (anchor.target && anchor.target !== "_self") return;
+      if (anchor.hasAttribute("download")) return;
+
+      const nextPath = getInternalNavigationPath(anchor.href);
+      if (!nextPath) return;
+
+      const currentPath = getInternalNavigationPath(window.location.href);
+      if (nextPath === currentPath) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingNavigationPath(nextPath);
+      setIsExitConfirmOpen(true);
+    };
+
+    document.addEventListener("click", handleDocumentClick, true);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
+  }, [hasChanges]);
+
+  useEffect(() => {
+    if (!hasChanges) {
+      if (typeof window !== "undefined") {
+        currentHrefRef.current = window.location.href;
+      }
+      return;
+    }
+
+    const handlePopState = () => {
+      if (allowNavigationRef.current) return;
+
+      const targetHref = window.location.href;
+      const previousHref = currentHrefRef.current || targetHref;
+      const nextPath = getInternalNavigationPath(targetHref);
+
+      window.history.pushState(null, "", previousHref);
+
+      if (!nextPath) return;
+
+      setPendingNavigationPath(nextPath);
+      setIsExitConfirmOpen(true);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [hasChanges]);
 
   const handleSave = async () => {
-    if (!product || isSaving || (mode === "edit" && !hasChanges)) return;
+    if (!product || isSaving || !hasChanges) return;
 
     const now = new Date().toISOString();
     const productWithDates: DTProduct = {
@@ -200,6 +316,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
           description: "Они отправятся автоматически при восстановлении сети.",
           delayMs: 500,
         });
+        allowNavigationRef.current = true;
         router.push("/admin");
         router.refresh();
         return;
@@ -217,6 +334,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         delayMs: 500,
       });
 
+      allowNavigationRef.current = true;
       router.push("/admin");
       router.refresh();
     } catch (error) {
@@ -276,7 +394,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         isSaving={isSaving}
         onChange={updateField}
         onSave={handleSave}
-        onCancel={() => setIsExitConfirmOpen(true)}
+        onCancel={() => requestNavigation("/admin")}
       />
 
       <ConfirmModal
@@ -286,10 +404,16 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         confirmText={isLoading ? <ButtonSpinner /> : "Выйти"}
         cancelText="Остаться"
         onConfirm={() => {
+          const nextPath = pendingNavigationPath || "/admin";
+          allowNavigationRef.current = true;
           setIsExitConfirmOpen(false);
-          router.push("/admin");
+          setPendingNavigationPath(null);
+          router.push(nextPath);
         }}
-        onCancel={() => setIsExitConfirmOpen(false)}
+        onCancel={() => {
+          setIsExitConfirmOpen(false);
+          setPendingNavigationPath(null);
+        }}
       />
     </div>
   );
