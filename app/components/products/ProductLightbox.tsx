@@ -91,10 +91,10 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-                Фото и видео
+                ГАЛЕРЕЯ
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
-                {images.length} в галерее
+                {images.length} элемента
               </p>
             </div>
 
