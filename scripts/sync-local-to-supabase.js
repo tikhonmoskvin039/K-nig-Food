@@ -148,7 +148,7 @@ async function ensureRemoteSchemaIsCurrent(remoteUrl) {
 
   if (missing.length > 0) {
     throw new Error(
-      `Supabase schema is missing migrations: ${missing.join(", ")}`,
+      `Supabase schema is missing migrations: ${missing.join(", ")}. Run pnpm run db:migrate:supabase first.`,
     );
   }
 }

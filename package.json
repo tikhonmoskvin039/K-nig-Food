@@ -15,6 +15,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
+    "db:migrate:supabase": "node scripts/apply-supabase-migrations.js",
     "db:sync:supabase": "node scripts/sync-local-to-supabase.js"
   },
   "dependencies": {
