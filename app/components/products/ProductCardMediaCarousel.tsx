@@ -163,7 +163,7 @@ export default function ProductCardMediaCarousel({
           <Link
             key={`${mediaUrl}-${index}`}
             href={productHref}
-            className="relative block h-full w-full shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
+            className="relative block h-full w-full shrink-0 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
             aria-label={`Открыть ${product.Title}`}
             draggable={false}
             onClick={handleLinkClick}

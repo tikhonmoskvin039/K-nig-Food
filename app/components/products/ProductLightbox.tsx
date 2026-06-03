@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -19,16 +19,69 @@ interface ProductLightboxProps {
 const LIGHTBOX_WHEEL_ZOOM_DISTANCE_FACTOR = 260;
 const LIGHTBOX_ZOOM_IN_MULTIPLIER = 1.35;
 
+function getGalleryItemsLabel(count: number) {
+  const lastTwoDigits = count % 100;
+  const lastDigit = count % 10;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return `${count} элементов`;
+  }
+
+  if (lastDigit === 1) {
+    return `${count} элемент`;
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return `${count} элемента`;
+  }
+
+  return `${count} элементов`;
+}
+
 export default function ProductLightbox({ images }: ProductLightboxProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [galleryCanScroll, setGalleryCanScroll] = useState(false);
   const galleryScrollerRef = useRef<HTMLDivElement | null>(null);
+
+  const updateGalleryOverflow = useCallback(() => {
+    const scroller = galleryScrollerRef.current;
+    const canScroll = scroller
+      ? scroller.scrollWidth > scroller.clientWidth + 1
+      : false;
+
+    setGalleryCanScroll((currentValue) =>
+      currentValue === canScroll ? currentValue : canScroll,
+    );
+  }, []);
 
   useEffect(() => {
     if (!lightboxOpen) {
       document.body.style.overflow = "";
     }
   }, [lightboxOpen]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const scroller = galleryScrollerRef.current;
+    if (!scroller) return;
+
+    const animationFrameId = window.requestAnimationFrame(updateGalleryOverflow);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateGalleryOverflow);
+
+    resizeObserver?.observe(scroller);
+    window.addEventListener("resize", updateGalleryOverflow);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateGalleryOverflow);
+    };
+  }, [images.length, updateGalleryOverflow]);
 
   if (!images || images.length === 0) return null;
 
@@ -94,28 +147,30 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
                 ГАЛЕРЕЯ
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
-                {images.length} элемента
+                {getGalleryItemsLabel(images.length)}
               </p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1">
-              <button
-                type="button"
-                className={galleryArrowClass}
-                aria-label="Предыдущие фото и видео"
-                onClick={() => scrollGallery("previous")}
-              >
-                <IoChevronBack size={28} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className={galleryArrowClass}
-                aria-label="Следующие фото и видео"
-                onClick={() => scrollGallery("next")}
-              >
-                <IoChevronForward size={28} aria-hidden="true" />
-              </button>
-            </div>
+            {galleryCanScroll && (
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  className={galleryArrowClass}
+                  aria-label="Предыдущие фото и видео"
+                  onClick={() => scrollGallery("previous")}
+                >
+                  <IoChevronBack size={28} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={galleryArrowClass}
+                  aria-label="Следующие фото и видео"
+                  onClick={() => scrollGallery("next")}
+                >
+                  <IoChevronForward size={28} aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </div>
 
           <div
