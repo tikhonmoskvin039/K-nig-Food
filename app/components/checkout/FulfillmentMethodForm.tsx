@@ -148,12 +148,20 @@ export default function FulfillmentMethodForm() {
   const isStreetMissing = checkout.deliveryAddress.street.trim().length === 0;
   const isHouseMissing = checkout.deliveryAddress.house.trim().length === 0;
 
-  useEffect(() => {
-    if (isDeliveryAddressRequiredFilled) {
+  const clearAddressValidationIfComplete = (address: {
+    city?: string;
+    street?: string;
+    house?: string;
+  }) => {
+    if (
+      address.city?.trim() &&
+      address.street?.trim() &&
+      address.house?.trim()
+    ) {
       setShowAddressFieldErrors(false);
       setAddressValidationError("");
     }
-  }, [isDeliveryAddressRequiredFilled]);
+  };
 
   const handleMethodChange = (method: "pickup" | "delivery") => {
     if (method === "delivery" && !deliveryEnabled) {
@@ -365,6 +373,8 @@ export default function FulfillmentMethodForm() {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
+    const nextAddress = { ...checkout.deliveryAddress, [name]: value };
+
     if (geoAutofillMessage) {
       setGeoAutofillMessage(null);
     }
@@ -380,6 +390,7 @@ export default function FulfillmentMethodForm() {
     }
     if (name === "city" || name === "street" || name === "house") {
       setDeliveryMapTarget(null);
+      clearAddressValidationIfComplete(nextAddress);
     }
     dispatch(setDeliveryAddress({ [name]: value }));
   };
@@ -561,16 +572,26 @@ export default function FulfillmentMethodForm() {
   };
 
   const applyCitySuggestion = (cityName: string) => {
+    const nextAddress = { ...checkout.deliveryAddress, city: cityName };
+
     if (checkout.deliveryAddressConfirmed) {
       dispatch(setDeliveryAddressConfirmed(false));
     }
     setDeliveryMapTarget(null);
     dispatch(setDeliveryAddress({ city: cityName }));
+    clearAddressValidationIfComplete(nextAddress);
     setCitySuggestions([]);
     setIsCityFocused(false);
   };
 
   const applyStreetSuggestion = (suggestion: AddressSuggestion) => {
+    const nextAddress = {
+      ...checkout.deliveryAddress,
+      city: suggestion.city || checkout.deliveryAddress.city,
+      street: suggestion.street,
+      house: suggestion.house || checkout.deliveryAddress.house,
+    };
+
     if (checkout.deliveryAddressConfirmed) {
       dispatch(setDeliveryAddressConfirmed(false));
     }
@@ -582,6 +603,7 @@ export default function FulfillmentMethodForm() {
         house: suggestion.house || checkout.deliveryAddress.house,
       }),
     );
+    clearAddressValidationIfComplete(nextAddress);
     setStreetSuggestions([]);
     setIsStreetFocused(false);
   };

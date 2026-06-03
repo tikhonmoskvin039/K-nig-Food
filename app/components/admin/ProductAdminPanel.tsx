@@ -145,7 +145,13 @@ export default function ProductAdminPanel() {
   };
 
   useEffect(() => {
-    loadProducts();
+    const timeoutId = window.setTimeout(() => {
+      void loadProducts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   const loadHomepageVisibility = async ({ silent = false } = {}) => {
@@ -195,7 +201,14 @@ export default function ProductAdminPanel() {
   useEffect(() => {
     if (activeTab !== "showcase") return;
     if (homepageVisibility) return;
-    loadHomepageVisibility();
+
+    const timeoutId = window.setTimeout(() => {
+      void loadHomepageVisibility();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [activeTab, homepageVisibility]);
 
   const loadCheckoutSettings = async ({ silent = false } = {}) => {
@@ -238,7 +251,14 @@ export default function ProductAdminPanel() {
   useEffect(() => {
     if (activeTab !== "delivery") return;
     if (checkoutSettings) return;
-    loadCheckoutSettings();
+
+    const timeoutId = window.setTimeout(() => {
+      void loadCheckoutSettings();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [activeTab, checkoutSettings]);
 
   const saveHomepageVisibility = async () => {
@@ -450,12 +470,6 @@ export default function ProductAdminPanel() {
   );
   const currentPageProductIds = paginatedProducts.map((product) => product.ID);
   const emptyRowsCount = Math.max(PAGE_SIZE - paginatedProducts.length, 0);
-
-  useEffect(() => {
-    if (tableState.currentPage !== currentPage) {
-      setTableState((prev) => ({ ...prev, currentPage }));
-    }
-  }, [currentPage, tableState.currentPage]);
 
   const allVisibleSelected =
     currentPageProductIds.length > 0 &&
