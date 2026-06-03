@@ -327,7 +327,7 @@ export default function ProductAdminPanel() {
       const saved = (await response.json()) as CheckoutSettings;
       setCheckoutSettings(saved);
       toast.dismiss(loadingToastId);
-      toast.success("Checkout-настройки сохранены");
+      toast.success("Настройки сохранены");
       return true;
     } catch (error) {
       console.error(error);

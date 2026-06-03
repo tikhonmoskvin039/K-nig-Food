@@ -24,7 +24,7 @@ export default function ContactUsForm() {
   const reasons = Array.isArray(contactForm.reasons) && contactForm.reasons.length > 0
     ? contactForm.reasons
     : [
-        "Уточнить состав блюд, аллергены и рекомендации по хранению.",
+        "Уточнить состав товара, аллергены и рекомендации по хранению.",
         "Обсудить индивидуальный заказ под мероприятие или корпоратив.",
         "Получить помощь по заказу, оплате, доставке и работе сайта.",
       ];

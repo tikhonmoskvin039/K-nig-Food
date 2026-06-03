@@ -818,7 +818,7 @@ export default function ProductForm({
                 type="search"
                 className="form-control pl-10 pr-10"
                 value={recommendationSearch}
-                placeholder="Найти блюдо для рекомендации"
+                placeholder="Найти товар для рекомендации"
                 onChange={(event) =>
                   setRecommendationSearch(event.target.value)
                 }

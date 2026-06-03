@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmModal from "../common/ConfirmModal";
 import ButtonSpinner from "../common/ButtonSpinner";
+import { CiLogout } from "react-icons/ci";
+
 
 export function AdminLogoutButton() {
   const router = useRouter();
@@ -28,7 +30,7 @@ export function AdminLogoutButton() {
   return (
     <>
       <button onClick={() => setConfirmOpen(true)} className="btn-danger px-6">
-        Выйти
+        <CiLogout size={24} />
       </button>
 
       <ConfirmModal
