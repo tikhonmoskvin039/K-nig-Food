@@ -149,6 +149,7 @@ function CartContent() {
   const [catalogProducts, setCatalogProducts] = useState<DTProduct[]>([]);
   const checkoutCtaRef = useRef<HTMLDivElement | null>(null);
   const emptyCartCtaRef = useRef<HTMLAnchorElement | null>(null);
+  const previousItemsCountRef = useRef(items.length);
 
   const expiresAt = useMemo(() => {
     if (typeof window === "undefined" || items.length === 0) {
@@ -174,6 +175,24 @@ function CartContent() {
     () => new Map(catalogProducts.map((product) => [product.ID, product])),
     [catalogProducts],
   );
+
+  useEffect(() => {
+    const previousItemsCount = previousItemsCountRef.current;
+    previousItemsCountRef.current = items.length;
+
+    if (previousItemsCount === 0 || items.length > 0) return;
+
+    window.requestAnimationFrame(() => {
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+    });
+  }, [items.length]);
 
   useEffect(() => {
     if (items.length === 0) return;
