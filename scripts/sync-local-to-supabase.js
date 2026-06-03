@@ -12,6 +12,10 @@ const TABLES = [
 ];
 
 const shouldApply = process.argv.includes("--apply");
+const DEFAULT_INSERT_BATCH_SIZE = 10;
+const INSERT_BATCH_SIZE_BY_TABLE = {
+  uploaded_images: 1,
+};
 
 function readEnv() {
   const env = { ...process.env };
@@ -177,10 +181,11 @@ async function insertRows(connectionString, table, rows) {
   if (rows.length === 0) return 0;
 
   const columns = Object.keys(rows[0]);
+  const batchSize = INSERT_BATCH_SIZE_BY_TABLE[table] || DEFAULT_INSERT_BATCH_SIZE;
   let inserted = 0;
 
-  for (let start = 0; start < rows.length; start += 10) {
-    const chunk = rows.slice(start, start + 10);
+  for (let start = 0; start < rows.length; start += batchSize) {
+    const chunk = rows.slice(start, start + batchSize);
     const { sql, values } = buildInsert(table, columns, chunk);
 
     inserted += await withClient(connectionString, async (client) => {
