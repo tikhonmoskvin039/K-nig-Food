@@ -38,6 +38,20 @@ function expandEnvVariables(value, env) {
   );
 }
 
+function canExpandEnvVariables(value, env) {
+  const references = String(value || "").matchAll(
+    /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g,
+  );
+
+  for (const reference of references) {
+    if (!env[reference[1]]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function normalizeRemoteUrl(url) {
   if (!/[?&]sslmode=/.test(url)) {
     return `${url}${url.includes("?") ? "&" : "?"}sslmode=no-verify`;
@@ -46,19 +60,28 @@ function normalizeRemoteUrl(url) {
   return url.replace(/([?&])sslmode=[^&]*/, "$1sslmode=no-verify");
 }
 
-function buildRemoteUrl(env) {
-  const url =
-    env.SUPABASE_DATABASE_URL ||
-    env.DIRECT_URL_PROD ||
-    env.DATABASE_URL_PROD ||
-    env.DIRECT_URL ||
-    env.DATABASE_URL;
+function isLocalDatabaseUrl(url) {
+  return /@(localhost|127\.0\.0\.1)(:|\/)/i.test(url);
+}
 
-  if (!url) {
-    throw new Error("Supabase database URL is not configured");
+function buildRemoteUrl(env) {
+  const candidates = [
+    env.SUPABASE_DATABASE_URL,
+    env.DIRECT_URL_PROD,
+    env.DATABASE_URL_PROD,
+    env.DIRECT_URL,
+    env.DATABASE_URL,
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    if (!canExpandEnvVariables(candidate, env)) continue;
+
+    const url = expandEnvVariables(candidate, env);
+    if (!isLocalDatabaseUrl(url)) {
+      return normalizeRemoteUrl(url);
+    }
   }
 
-  return normalizeRemoteUrl(expandEnvVariables(url, env));
+  throw new Error("Supabase database URL is not configured");
 }
 
 function getLocalMigrations() {

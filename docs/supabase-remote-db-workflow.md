@@ -13,3 +13,4 @@ pnpm run db:sync:supabase -- --apply
 `db:migrate:supabase` применяет недостающие SQL-миграции. `db:sync:supabase -- --apply` добавляет только отсутствующие локальные строки и не удаляет/не перезаписывает данные на Supabase.
 
 Vercel build тоже запускает `db:migrate:supabase`, а не `prisma migrate deploy`.
+В Vercel храни готовые `DATABASE_URL`/`DIRECT_URL` без `${CLOUD_DB_PASS}`.
