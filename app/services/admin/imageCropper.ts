@@ -5,6 +5,11 @@ export type CropPixels = {
   height: number;
 };
 
+export type VideoTrimSeconds = {
+  startSeconds: number;
+  endSeconds: number;
+};
+
 const MAX_VIDEO_CROP_DURATION_SECONDS = 15;
 const VIDEO_RECORDER_MIME_TYPES = [
   "video/webm;codecs=vp9",
@@ -79,6 +84,37 @@ function normalizeCropPixels(
   return { x, y, width, height };
 }
 
+function seekVideo(video: HTMLVideoElement, timeSeconds: number) {
+  return new Promise<void>((resolve, reject) => {
+    const clampedTime = Math.min(
+      Math.max(0, timeSeconds),
+      Math.max(video.duration || 0, 0),
+    );
+
+    if (Math.abs(video.currentTime - clampedTime) < 0.05) {
+      resolve();
+      return;
+    }
+
+    const cleanup = () => {
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("error", handleError);
+    };
+    const handleSeeked = () => {
+      cleanup();
+      resolve();
+    };
+    const handleError = () => {
+      cleanup();
+      reject(new Error("Не удалось перейти к выбранному фрагменту видео"));
+    };
+
+    video.addEventListener("seeked", handleSeeked, { once: true });
+    video.addEventListener("error", handleError, { once: true });
+    video.currentTime = clampedTime;
+  });
+}
+
 export async function cropImageFile(
   file: File,
   croppedAreaPixels: CropPixels | null,
@@ -133,8 +169,9 @@ export async function cropImageFile(
 export async function cropVideoFile(
   file: File,
   croppedAreaPixels: CropPixels | null,
+  trim?: VideoTrimSeconds,
 ): Promise<Blob> {
-  if (!croppedAreaPixels) {
+  if (!croppedAreaPixels && !trim) {
     return file;
   }
 
@@ -157,10 +194,27 @@ export async function cropVideoFile(
       throw new Error("Не удалось определить размер видео");
     }
 
-    const crop = normalizeCropPixels(
-      croppedAreaPixels,
-      sourceWidth,
-      sourceHeight,
+    const sourceDuration =
+      Number.isFinite(video.duration) && video.duration > 0
+        ? video.duration
+        : MAX_VIDEO_CROP_DURATION_SECONDS;
+    const crop = croppedAreaPixels
+      ? normalizeCropPixels(croppedAreaPixels, sourceWidth, sourceHeight)
+      : { x: 0, y: 0, width: sourceWidth, height: sourceHeight };
+    const trimStartSeconds = Math.min(
+      Math.max(0, trim?.startSeconds ?? 0),
+      Math.max(sourceDuration - 0.1, 0),
+    );
+    const trimEndSeconds = Math.min(
+      Math.max(trimStartSeconds + 0.1, trim?.endSeconds ?? sourceDuration),
+      Math.min(
+        sourceDuration,
+        trimStartSeconds + MAX_VIDEO_CROP_DURATION_SECONDS,
+      ),
+    );
+    const trimDurationSeconds = Math.max(
+      0.1,
+      trimEndSeconds - trimStartSeconds,
     );
     const canvas = document.createElement("canvas");
     canvas.width = crop.width;
@@ -237,6 +291,11 @@ export async function cropVideoFile(
     };
 
     const drawFrame = () => {
+      if (video.currentTime >= trimEndSeconds) {
+        stopRecording();
+        return;
+      }
+
       context.drawImage(
         video,
         crop.x,
@@ -254,7 +313,7 @@ export async function cropVideoFile(
       }
     };
 
-    video.currentTime = 0;
+    await seekVideo(video, trimStartSeconds);
     context.drawImage(
       video,
       crop.x,
@@ -270,10 +329,7 @@ export async function cropVideoFile(
     recorder.start(100);
     drawFrame();
 
-    const maxDurationMs =
-      Math.min(video.duration || MAX_VIDEO_CROP_DURATION_SECONDS, MAX_VIDEO_CROP_DURATION_SECONDS) *
-        1000 +
-      250;
+    const maxDurationMs = trimDurationSeconds * 1000 + 250;
 
     video.addEventListener("ended", stopRecording, { once: true });
     stopTimerId = window.setTimeout(stopRecording, maxDurationMs);
@@ -301,6 +357,7 @@ export async function cropVideoFile(
 export async function cropMediaFile(
   file: File,
   croppedAreaPixels: CropPixels | null,
+  trim?: VideoTrimSeconds,
 ): Promise<Blob> {
   const fileName = file.name.toLowerCase();
   const looksLikeVideo =
@@ -310,7 +367,7 @@ export async function cropMediaFile(
     );
 
   if (looksLikeVideo) {
-    return cropVideoFile(file, croppedAreaPixels);
+    return cropVideoFile(file, croppedAreaPixels, trim);
   }
 
   return cropImageFile(file, croppedAreaPixels);

@@ -23,6 +23,8 @@ const CROP_PRESET_OPTIONS: Array<{
   { id: "free", label: "Произвольный" },
 ];
 
+const MAX_VIDEO_DURATION_SECONDS = 15;
+
 type Props = {
   open: boolean;
   mediaUrl: string;
@@ -34,6 +36,8 @@ type Props = {
   onConfirm: (result: {
     croppedAreaPixels: CropPixels | null;
     preset: CropAspectPreset;
+    trimStartSeconds?: number;
+    trimEndSeconds?: number;
   }) => void;
 };
 
@@ -131,6 +135,11 @@ function toCropPixels(
   };
 }
 
+function formatSeconds(value: number) {
+  if (!Number.isFinite(value)) return "0.0";
+  return value.toFixed(1);
+}
+
 export default function ImageCropperModal({
   open,
   mediaUrl,
@@ -150,9 +159,28 @@ export default function ImageCropperModal({
     width: number;
     height: number;
   } | null>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [trimStartSeconds, setTrimStartSeconds] = useState(0);
+  const [trimEndSeconds, setTrimEndSeconds] = useState(MAX_VIDEO_DURATION_SECONDS);
 
   const activeAspect =
     preset === "free" ? undefined : PRESET_ASPECTS[preset];
+  const safeVideoDuration = Math.max(0, videoDuration);
+  const safeTrimStartSeconds = Math.min(
+    Math.max(0, trimStartSeconds),
+    Math.max(safeVideoDuration - 0.1, 0),
+  );
+  const safeTrimEndSeconds = Math.min(
+    Math.max(safeTrimStartSeconds + 0.1, trimEndSeconds),
+    Math.min(
+      safeVideoDuration || MAX_VIDEO_DURATION_SECONDS,
+      safeTrimStartSeconds + MAX_VIDEO_DURATION_SECONDS,
+    ),
+  );
+  const selectedVideoDuration = Math.max(
+    0,
+    safeTrimEndSeconds - safeTrimStartSeconds,
+  );
 
   const applyCropForPreset = (
     nextPreset: CropAspectPreset,
@@ -173,6 +201,33 @@ export default function ImageCropperModal({
         ? createCenteredAspectCrop(size.width, size.height, nextAspect)
         : createDefaultFreeCrop(size.width, size.height),
     );
+  };
+
+  const updateTrimStart = (nextStart: number) => {
+    if (!safeVideoDuration) return;
+
+    const maxStart = Math.max(safeVideoDuration - 0.1, 0);
+    const clampedStart = Math.min(Math.max(0, nextStart), maxStart);
+    const currentEnd = Math.max(trimEndSeconds, clampedStart + 0.1);
+    const nextEnd = Math.min(
+      Math.max(currentEnd, clampedStart + 0.1),
+      Math.min(safeVideoDuration, clampedStart + MAX_VIDEO_DURATION_SECONDS),
+    );
+
+    setTrimStartSeconds(clampedStart);
+    setTrimEndSeconds(nextEnd);
+  };
+
+  const updateTrimEnd = (nextEnd: number) => {
+    if (!safeVideoDuration) return;
+
+    const minEnd = safeTrimStartSeconds + 0.1;
+    const maxEnd = Math.min(
+      safeVideoDuration,
+      safeTrimStartSeconds + MAX_VIDEO_DURATION_SECONDS,
+    );
+
+    setTrimEndSeconds(Math.min(Math.max(nextEnd, minEnd), maxEnd));
   };
 
   useEffect(() => {
@@ -239,11 +294,93 @@ export default function ImageCropperModal({
 
           <p className="text-xs text-slate-600">
             {mediaKind === "video"
-              ? "Для главного экрана рекомендуем 16:9, но можно выбрать другой пресет или произвольную рамку."
+              ? "Для главного экрана рекомендуем 16:9. Выберите рамку и фрагмент видео до 15 секунд."
               : preset === "free"
               ? "Свободный режим: тяните стороны/углы рамки для изменения пропорций."
               : "Рамка фиксирует выбранные пропорции. Можно двигать и масштабировать её углами."}
           </p>
+
+          {mediaKind === "video" && safeVideoDuration > 0 && (
+            <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-3">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-semibold text-slate-900">
+                  Фрагмент видео
+                </p>
+                <p className="text-xs text-slate-500">
+                  Выбрано {formatSeconds(selectedVideoDuration)} сек. из{" "}
+                  {formatSeconds(safeVideoDuration)} сек.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="space-y-1">
+                  <span className="text-xs font-semibold text-slate-600">
+                    Начало, сек.
+                  </span>
+                  <input
+                    type="number"
+                    className="form-control"
+                    min={0}
+                    max={Math.max(safeVideoDuration - 0.1, 0)}
+                    step={0.1}
+                    value={formatSeconds(safeTrimStartSeconds)}
+                    disabled={isSubmitting}
+                    onChange={(event) =>
+                      updateTrimStart(Number(event.target.value))
+                    }
+                  />
+                  <input
+                    type="range"
+                    className="w-full accent-amber-600"
+                    min={0}
+                    max={Math.max(safeVideoDuration - 0.1, 0)}
+                    step={0.1}
+                    value={safeTrimStartSeconds}
+                    disabled={isSubmitting}
+                    onChange={(event) =>
+                      updateTrimStart(Number(event.target.value))
+                    }
+                  />
+                </label>
+
+                <label className="space-y-1">
+                  <span className="text-xs font-semibold text-slate-600">
+                    Конец, сек.
+                  </span>
+                  <input
+                    type="number"
+                    className="form-control"
+                    min={safeTrimStartSeconds + 0.1}
+                    max={Math.min(
+                      safeVideoDuration,
+                      safeTrimStartSeconds + MAX_VIDEO_DURATION_SECONDS,
+                    )}
+                    step={0.1}
+                    value={formatSeconds(safeTrimEndSeconds)}
+                    disabled={isSubmitting}
+                    onChange={(event) =>
+                      updateTrimEnd(Number(event.target.value))
+                    }
+                  />
+                  <input
+                    type="range"
+                    className="w-full accent-amber-600"
+                    min={safeTrimStartSeconds + 0.1}
+                    max={Math.min(
+                      safeVideoDuration,
+                      safeTrimStartSeconds + MAX_VIDEO_DURATION_SECONDS,
+                    )}
+                    step={0.1}
+                    value={safeTrimEndSeconds}
+                    disabled={isSubmitting}
+                    onChange={(event) =>
+                      updateTrimEnd(Number(event.target.value))
+                    }
+                  />
+                </label>
+              </div>
+            </div>
+          )}
 
           <div className="relative rounded-xl overflow-auto border bg-slate-900/10 p-2">
             <ReactCrop
@@ -266,6 +403,9 @@ export default function ImageCropperModal({
                   className="max-h-[70vh] w-auto max-w-full object-contain select-none touch-none"
                   onLoadedMetadata={(event) => {
                     const target = event.currentTarget;
+                    const duration = Number.isFinite(target.duration)
+                      ? target.duration
+                      : 0;
                     const size = {
                       naturalWidth: target.videoWidth,
                       naturalHeight: target.videoHeight,
@@ -275,6 +415,11 @@ export default function ImageCropperModal({
                     setImageSize(size);
                     applyCropForPreset(preset, size);
                     setCompletedCrop(null);
+                    setVideoDuration(duration);
+                    setTrimStartSeconds(0);
+                    setTrimEndSeconds(
+                      Math.min(duration || MAX_VIDEO_DURATION_SECONDS, MAX_VIDEO_DURATION_SECONDS),
+                    );
                   }}
                 />
               ) : (
@@ -317,6 +462,12 @@ export default function ImageCropperModal({
               onConfirm({
                 croppedAreaPixels: toCropPixels(completedCrop ?? crop, imageSize),
                 preset,
+                ...(mediaKind === "video"
+                  ? {
+                      trimStartSeconds: safeTrimStartSeconds,
+                      trimEndSeconds: safeTrimEndSeconds,
+                    }
+                  : {}),
               })
             }
             className="btn-primary min-w-36"

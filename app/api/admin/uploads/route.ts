@@ -12,7 +12,7 @@ import {
 import { withProductMediaKind } from "../../../utils/productMedia";
 
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-const MAX_VIDEO_FILE_SIZE_BYTES = 30 * 1024 * 1024;
+const MAX_VIDEO_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 const MAX_VIDEO_DURATION_SECONDS = 15;
 const IMAGE_SUPPORTED_EXTENSIONS = new Set([
   "jpg",
@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
       const responseBody = {
         error: "Upload failed",
         message:
-          mediaKind === "video" ? "Видео больше 30 МБ" : "Файл больше 5 МБ",
+          mediaKind === "video" ? "Видео больше 100 МБ" : "Файл больше 5 МБ",
       };
       const statusCode = 400;
       await storeIdempotentResponse({

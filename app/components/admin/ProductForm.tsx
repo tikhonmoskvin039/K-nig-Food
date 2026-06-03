@@ -7,6 +7,7 @@ import ImageCropperModal from "./ImageCropperModal";
 import {
   IMAGE_SUPPORTED_FORMATS_LABEL,
   MAX_GALLERY_IMAGES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
   MAX_VIDEO_DURATION_SECONDS,
   PRODUCT_MEDIA_ACCEPT_ATTRIBUTE,
   VIDEO_SUPPORTED_FORMATS_LABEL,
@@ -177,8 +178,12 @@ export default function ProductForm({
 
   const handleCropConfirm = async ({
     croppedAreaPixels,
+    trimStartSeconds,
+    trimEndSeconds,
   }: {
     croppedAreaPixels: CropPixels | null;
+    trimStartSeconds?: number;
+    trimEndSeconds?: number;
   }) => {
     if (!cropQueue) return;
 
@@ -197,12 +202,43 @@ export default function ProductForm({
     try {
       const videoMetadata =
         mediaKind === "video" ? await getVideoMetadata(activeFile) : null;
-      const croppedBlob = await cropMediaFile(activeFile, croppedAreaPixels);
+      const selectedVideoDuration =
+        mediaKind === "video"
+          ? Math.max(
+              0.1,
+              Math.min(
+                MAX_VIDEO_DURATION_SECONDS,
+                (trimEndSeconds ?? videoMetadata?.durationSeconds ?? 0) -
+                  (trimStartSeconds ?? 0),
+              ),
+            )
+          : undefined;
+      const croppedBlob = await cropMediaFile(
+        activeFile,
+        croppedAreaPixels,
+        mediaKind === "video"
+          ? {
+              startSeconds: trimStartSeconds ?? 0,
+              endSeconds:
+                trimEndSeconds ??
+                Math.min(
+                  videoMetadata?.durationSeconds ?? MAX_VIDEO_DURATION_SECONDS,
+                  MAX_VIDEO_DURATION_SECONDS,
+                ),
+            }
+          : undefined,
+      );
       const preparedFile = createUploadFileFromBlob(
         croppedBlob,
         activeFile,
         `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
       );
+      if (
+        mediaKind === "video" &&
+        preparedFile.size > MAX_VIDEO_FILE_SIZE_BYTES
+      ) {
+        throw new Error("Итоговое видео больше 100 МБ");
+      }
       const croppedVideoWidth =
         mediaKind === "video" && croppedAreaPixels
           ? Math.round(croppedAreaPixels.width)
@@ -218,7 +254,7 @@ export default function ProductForm({
         slug: uploadSlug,
         type: cropQueue.target,
         mediaKind,
-        durationSeconds: videoMetadata?.durationSeconds,
+        durationSeconds: selectedVideoDuration,
         videoWidth: croppedVideoWidth,
         videoHeight: croppedVideoHeight,
       });
@@ -986,10 +1022,10 @@ export default function ProductForm({
       <div className="space-y-2">
         {renderFieldLabel("Главное медиа", true)}
         <p className="text-xs text-gray-500">
-          Изображения до 5 МБ: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до 30 МБ
-          и {MAX_VIDEO_DURATION_SECONDS} секунд:{" "}
-          {VIDEO_SUPPORTED_FORMATS_LABEL}. Для главного экрана рекомендуем
-          16:9, но это не обязательно.
+          Изображения до 5 МБ: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до 100
+          МБ: выберите фрагмент до {MAX_VIDEO_DURATION_SECONDS} секунд в
+          кроппере. Форматы: {VIDEO_SUPPORTED_FORMATS_LABEL}. Для главного
+          экрана рекомендуем 16:9, но это не обязательно.
         </p>
         <p className="text-xs text-gray-500">
           {product.FeatureImageURL
@@ -1039,8 +1075,9 @@ export default function ProductForm({
           `Галерея (максимум ${MAX_GALLERY_IMAGES} медиафайлов)`,
         )}
         <p className="text-xs text-gray-500">
-          Изображения: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до{" "}
-          {MAX_VIDEO_DURATION_SECONDS} секунд: {VIDEO_SUPPORTED_FORMATS_LABEL}.
+          Изображения: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до 100 МБ:
+          выберите фрагмент до {MAX_VIDEO_DURATION_SECONDS} секунд в кроппере.
+          Форматы: {VIDEO_SUPPORTED_FORMATS_LABEL}.
         </p>
         <p className="text-xs text-gray-500">
           Загружено {product.ProductImageGallery.length} из {MAX_GALLERY_IMAGES}.

@@ -53,7 +53,7 @@ export const sanitizeNumericString = (value: string) =>
   value.replace(/[^\d]/g, "");
 
 export const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-export const MAX_VIDEO_FILE_SIZE_BYTES = 30 * 1024 * 1024;
+export const MAX_VIDEO_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEO_DURATION_SECONDS = 15;
 export const MAX_GALLERY_IMAGES = 5;
 
@@ -206,7 +206,7 @@ export async function validateProductMediaFile(
 
   if (file.size > MAX_VIDEO_FILE_SIZE_BYTES) {
     return {
-      error: `Видео "${file.name}" больше 30 МБ`,
+      error: `Видео "${file.name}" больше 100 МБ`,
       mediaKind,
     };
   }
@@ -218,14 +218,6 @@ export async function validateProductMediaFile(
     return {
       error: error instanceof Error ? error.message : "Не удалось проверить видео",
       mediaKind,
-    };
-  }
-
-  if (metadata.durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
-    return {
-      error: `Видео "${file.name}" длиннее ${MAX_VIDEO_DURATION_SECONDS} секунд`,
-      mediaKind,
-      durationSeconds: metadata.durationSeconds,
     };
   }
 
