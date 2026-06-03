@@ -6,7 +6,6 @@ import ConfirmModal from "../common/ConfirmModal";
 import ButtonSpinner from "../common/ButtonSpinner";
 import { CiLogout } from "react-icons/ci";
 
-
 export function AdminLogoutButton() {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -29,8 +28,14 @@ export function AdminLogoutButton() {
 
   return (
     <>
-      <button onClick={() => setConfirmOpen(true)} className="btn-danger px-6">
+      <button
+        type="button"
+        aria-label="Выход"
+        onClick={() => setConfirmOpen(true)}
+        className="btn-danger px-6"
+      >
         <CiLogout size={24} />
+        <span className="hidden md:inline">Выход</span>
       </button>
 
       <ConfirmModal
