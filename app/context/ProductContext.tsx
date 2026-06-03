@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useMemo,
+  useCallback,
   ReactNode,
 } from "react";
 import {
@@ -19,11 +20,63 @@ import {
 
 const CLIENT_PRODUCTS_CACHE_TTL_MS = 5 * 60_000;
 const CLIENT_PRODUCTS_CACHE_KEY = getCatalogProductsCacheKey();
+const PRODUCT_FILTERS_STORAGE_KEY = "catalog_product_filters_v1";
 const SHOULD_CACHE_CLIENT_PRODUCTS = process.env.NODE_ENV !== "development";
 let cachedProducts: DTProduct[] | null = null;
 let cacheExpiresAt = 0;
 let pendingProductsRequest: Promise<DTProduct[]> | null = null;
 let knownCatalogRevision = 0;
+
+type CatalogSpecialFilter = "all" | "new" | "promo";
+
+type CatalogFiltersState = {
+  searchQuery: string;
+  categoryFilter: string;
+  specialFilter: CatalogSpecialFilter;
+  sortBy: string;
+};
+
+const DEFAULT_CATALOG_FILTERS: CatalogFiltersState = {
+  searchQuery: "",
+  categoryFilter: "",
+  specialFilter: "all",
+  sortBy: "name",
+};
+
+function isCatalogSpecialFilter(value: unknown): value is CatalogSpecialFilter {
+  return value === "all" || value === "new" || value === "promo";
+}
+
+function readCatalogFilters(): CatalogFiltersState {
+  if (typeof window === "undefined") return DEFAULT_CATALOG_FILTERS;
+
+  try {
+    const raw = window.localStorage.getItem(PRODUCT_FILTERS_STORAGE_KEY);
+    if (!raw) return DEFAULT_CATALOG_FILTERS;
+
+    const parsed = JSON.parse(raw) as Partial<CatalogFiltersState>;
+
+    return {
+      searchQuery:
+        typeof parsed.searchQuery === "string"
+          ? parsed.searchQuery
+          : DEFAULT_CATALOG_FILTERS.searchQuery,
+      categoryFilter:
+        typeof parsed.categoryFilter === "string"
+          ? parsed.categoryFilter
+          : DEFAULT_CATALOG_FILTERS.categoryFilter,
+      specialFilter: isCatalogSpecialFilter(parsed.specialFilter)
+        ? parsed.specialFilter
+        : DEFAULT_CATALOG_FILTERS.specialFilter,
+      sortBy:
+        typeof parsed.sortBy === "string"
+          ? parsed.sortBy
+          : DEFAULT_CATALOG_FILTERS.sortBy,
+    };
+  } catch {
+    return DEFAULT_CATALOG_FILTERS;
+  }
+}
 
 function resetInMemoryProductsCache() {
   cachedProducts = null;
@@ -165,9 +218,12 @@ interface ProductContextType {
   isLoading: boolean;
   categories: string[];
   searchQuery: string;
+  categoryFilter: string;
+  specialFilter: CatalogSpecialFilter;
+  sortBy: string;
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: string) => void;
-  setSpecialFilter: (filter: "all" | "new" | "promo") => void;
+  setSpecialFilter: (filter: CatalogSpecialFilter) => void;
   setSortBy: (sort: string) => void;
 }
 
@@ -178,12 +234,37 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<DTProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [specialFilter, setSpecialFilter] = useState<"all" | "new" | "promo">(
-    "all",
+  const [filters, setFilters] = useState<CatalogFiltersState>(
+    readCatalogFilters,
   );
-  const [sortBy, setSortBy] = useState<string>("name");
+  const { searchQuery, categoryFilter, specialFilter, sortBy } = filters;
+
+  const setSearchQuery = useCallback((query: string) => {
+    setFilters((prev) => ({ ...prev, searchQuery: query }));
+  }, []);
+
+  const setCategoryFilter = useCallback((category: string) => {
+    setFilters((prev) => ({ ...prev, categoryFilter: category }));
+  }, []);
+
+  const setSpecialFilter = useCallback((filter: CatalogSpecialFilter) => {
+    setFilters((prev) => ({ ...prev, specialFilter: filter }));
+  }, []);
+
+  const setSortBy = useCallback((sort: string) => {
+    setFilters((prev) => ({ ...prev, sortBy: sort }));
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        PRODUCT_FILTERS_STORAGE_KEY,
+        JSON.stringify(filters),
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [filters]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -275,6 +356,9 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         isLoading,
         categories,
         searchQuery,
+        categoryFilter,
+        specialFilter,
+        sortBy,
         setSearchQuery,
         setCategoryFilter,
         setSpecialFilter,

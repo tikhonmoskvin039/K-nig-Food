@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { sanitizeNumericString } from "../../../services/admin/productForm";
 import {
@@ -29,6 +29,53 @@ type Props = {
 type BlockKind = "new_arrivals" | "weekly_offers";
 
 const slots = Array.from({ length: SHOWCASE_MAX_ITEMS }, (_, index) => index + 1);
+const SHOWCASE_FILTERS_STORAGE_KEY = "admin_product_showcase_filters_v1";
+
+type ShowcaseFiltersState = {
+  newCategoryFilter: string;
+  weeklyCategoryFilter: string;
+  newSearchQuery: string;
+  weeklySearchQuery: string;
+};
+
+const DEFAULT_SHOWCASE_FILTERS: ShowcaseFiltersState = {
+  newCategoryFilter: "all",
+  weeklyCategoryFilter: "all",
+  newSearchQuery: "",
+  weeklySearchQuery: "",
+};
+
+function readShowcaseFilters(): ShowcaseFiltersState {
+  if (typeof window === "undefined") return DEFAULT_SHOWCASE_FILTERS;
+
+  try {
+    const raw = window.localStorage.getItem(SHOWCASE_FILTERS_STORAGE_KEY);
+    if (!raw) return DEFAULT_SHOWCASE_FILTERS;
+
+    const parsed = JSON.parse(raw) as Partial<ShowcaseFiltersState>;
+
+    return {
+      newCategoryFilter:
+        typeof parsed.newCategoryFilter === "string"
+          ? parsed.newCategoryFilter
+          : DEFAULT_SHOWCASE_FILTERS.newCategoryFilter,
+      weeklyCategoryFilter:
+        typeof parsed.weeklyCategoryFilter === "string"
+          ? parsed.weeklyCategoryFilter
+          : DEFAULT_SHOWCASE_FILTERS.weeklyCategoryFilter,
+      newSearchQuery:
+        typeof parsed.newSearchQuery === "string"
+          ? parsed.newSearchQuery
+          : DEFAULT_SHOWCASE_FILTERS.newSearchQuery,
+      weeklySearchQuery:
+        typeof parsed.weeklySearchQuery === "string"
+          ? parsed.weeklySearchQuery
+          : DEFAULT_SHOWCASE_FILTERS.weeklySearchQuery,
+    };
+  } catch {
+    return DEFAULT_SHOWCASE_FILTERS;
+  }
+}
 
 const isAssigned = (product: DTProduct, block: BlockKind) =>
   block === "new_arrivals"
@@ -474,12 +521,44 @@ export default function ProductShowcaseManager({
   onProductsChange,
   onSaveProducts,
 }: Props) {
-  const [newCategoryFilter, setNewCategoryFilter] = useState("all");
-  const [weeklyCategoryFilter, setWeeklyCategoryFilter] = useState("all");
-  const [newSearchQuery, setNewSearchQuery] = useState("");
-  const [weeklySearchQuery, setWeeklySearchQuery] = useState("");
+  const [showcaseFilters, setShowcaseFilters] = useState<ShowcaseFiltersState>(
+    readShowcaseFilters,
+  );
   const [newProductToAdd, setNewProductToAdd] = useState("");
   const [weeklyProductToAdd, setWeeklyProductToAdd] = useState("");
+  const {
+    newCategoryFilter,
+    weeklyCategoryFilter,
+    newSearchQuery,
+    weeklySearchQuery,
+  } = showcaseFilters;
+
+  const setNewCategoryFilter = (value: string) => {
+    setShowcaseFilters((prev) => ({ ...prev, newCategoryFilter: value }));
+  };
+
+  const setWeeklyCategoryFilter = (value: string) => {
+    setShowcaseFilters((prev) => ({ ...prev, weeklyCategoryFilter: value }));
+  };
+
+  const setNewSearchQuery = (value: string) => {
+    setShowcaseFilters((prev) => ({ ...prev, newSearchQuery: value }));
+  };
+
+  const setWeeklySearchQuery = (value: string) => {
+    setShowcaseFilters((prev) => ({ ...prev, weeklySearchQuery: value }));
+  };
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        SHOWCASE_FILTERS_STORAGE_KEY,
+        JSON.stringify(showcaseFilters),
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [showcaseFilters]);
 
   const handleSave = async () => {
     const normalizedNew = normalizeBlock(products, "new_arrivals");

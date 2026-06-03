@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useLocalization } from "../../context/LocalizationContext";
 import ClearFilterButton from "../common/ClearFilterButton";
 
 interface ProductFiltersProps {
+  searchQuery: string;
+  categoryFilter: string;
+  specialFilter: "all" | "new" | "promo";
+  sortBy: string;
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: string) => void;
   setSpecialFilter: (filter: "all" | "new" | "promo") => void;
@@ -13,6 +16,10 @@ interface ProductFiltersProps {
 }
 
 export default function ProductFilters({
+  searchQuery,
+  categoryFilter,
+  specialFilter,
+  sortBy,
   setSearchQuery,
   setCategoryFilter,
   setSpecialFilter,
@@ -20,31 +27,21 @@ export default function ProductFilters({
   categories,
 }: ProductFiltersProps) {
   const { labels } = useLocalization();
-  const [searchInput, setSearchInput] = useState(""); // Controlled search state
-  const [categoryInput, setCategoryInput] = useState("");
-  const [specialInput, setSpecialInput] = useState<"all" | "new" | "promo">(
-    "all",
-  );
-  const [sortInput, setSortInput] = useState("name");
 
   // Handle search input change
   const handleSearchChange = (query: string) => {
-    setSearchInput(query); // Update local state
     setSearchQuery(query); // Update global search state in ProductContext
   };
 
   const handleCategoryChange = (category: string) => {
-    setCategoryInput(category);
     setCategoryFilter(category);
   };
 
   const handleSpecialChange = (filter: "all" | "new" | "promo") => {
-    setSpecialInput(filter);
     setSpecialFilter(filter);
   };
 
   const handleSortChange = (sort: string) => {
-    setSortInput(sort);
     setSortBy(sort);
   };
 
@@ -58,12 +55,12 @@ export default function ProductFilters({
           <div className="relative">
             <input
               type="text"
-              value={searchInput}
+              value={searchQuery}
               onChange={(event) => handleSearchChange(event.target.value)}
               placeholder={labels.searchPlaceholder}
               className="form-control pr-10"
             />
-            {searchInput && (
+            {searchQuery && (
               <ClearFilterButton
                 label="Очистить поиск"
                 onClick={() => handleSearchChange("")}
@@ -78,7 +75,7 @@ export default function ProductFilters({
           </label>
           <div className="relative">
             <select
-              value={categoryInput}
+              value={categoryFilter}
               onChange={(event) => handleCategoryChange(event.target.value)}
               className="form-control pr-16"
             >
@@ -89,7 +86,7 @@ export default function ProductFilters({
                 </option>
               ))}
             </select>
-            {categoryInput && (
+            {categoryFilter && (
               <ClearFilterButton
                 label="Очистить категорию"
                 className="right-8"
@@ -105,7 +102,7 @@ export default function ProductFilters({
           </label>
           <div className="relative">
             <select
-              value={specialInput}
+              value={specialFilter}
               onChange={(event) =>
                 handleSpecialChange(event.target.value as "all" | "new" | "promo")
               }
@@ -121,7 +118,7 @@ export default function ProductFilters({
                 {labels.promoProductsFilter || "Только акции"}
               </option>
             </select>
-            {specialInput !== "all" && (
+            {specialFilter !== "all" && (
               <ClearFilterButton
                 label="Очистить подборку"
                 className="right-8"
@@ -137,7 +134,7 @@ export default function ProductFilters({
           </label>
           <div className="relative">
             <select
-              value={sortInput}
+              value={sortBy}
               onChange={(event) => handleSortChange(event.target.value)}
               className="form-control pr-16"
             >
@@ -145,7 +142,7 @@ export default function ProductFilters({
               <option value="price">{labels.sortByPrice}</option>
               <option value="newest">{labels.sortByNewest}</option>
             </select>
-            {sortInput !== "name" && (
+            {sortBy !== "name" && (
               <ClearFilterButton
                 label="Очистить сортировку"
                 className="right-8"

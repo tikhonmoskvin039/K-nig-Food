@@ -18,6 +18,9 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
     isLoading,
     categories,
     searchQuery,
+    categoryFilter,
+    specialFilter,
+    sortBy,
     setSearchQuery,
     setCategoryFilter,
     setSpecialFilter,
@@ -44,6 +47,10 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
     <div>
       {/* Product Filters */}
       <ProductFilters
+        searchQuery={searchQuery}
+        categoryFilter={categoryFilter}
+        specialFilter={specialFilter}
+        sortBy={sortBy}
         setSearchQuery={setSearchQuery}
         setCategoryFilter={setCategoryFilter}
         setSpecialFilter={setSpecialFilter}

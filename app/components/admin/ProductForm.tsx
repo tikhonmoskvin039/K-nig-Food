@@ -50,6 +50,19 @@ type FileErrorState = {
   ProductImageGallery?: string;
 };
 
+const RECOMMENDATION_SEARCH_STORAGE_KEY =
+  "admin_product_form_recommendation_search_v1";
+
+function readRecommendationSearch() {
+  if (typeof window === "undefined") return "";
+
+  try {
+    return window.localStorage.getItem(RECOMMENDATION_SEARCH_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
 type CropTarget = "feature" | "gallery";
 
 type CropQueueState = {
@@ -79,7 +92,9 @@ export default function ProductForm({
   const [fileErrors, setFileErrors] = useState<FileErrorState>({});
   const [categoryToAdd, setCategoryToAdd] = useState("");
   const [customCategoryInput, setCustomCategoryInput] = useState("");
-  const [recommendationSearch, setRecommendationSearch] = useState("");
+  const [recommendationSearch, setRecommendationSearch] = useState(
+    readRecommendationSearch,
+  );
   const [cropQueue, setCropQueue] = useState<CropQueueState | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isCancelCropConfirmOpen, setIsCancelCropConfirmOpen] = useState(false);
@@ -97,6 +112,17 @@ export default function ProductForm({
       }
     };
   }, [cropQueue?.previewUrl]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        RECOMMENDATION_SEARCH_STORAGE_KEY,
+        recommendationSearch,
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [recommendationSearch]);
 
   const startCropFlow = (target: CropTarget, files: File[]) => {
     if (files.length === 0) return;
