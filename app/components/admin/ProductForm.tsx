@@ -552,10 +552,6 @@ export default function ProductForm({
 
   return (
     <div className="surface-card p-4 sm:p-5 space-y-3">
-      <h3 className="text-xl font-semibold">
-        {isNew ? "Добавление товара" : "Редактирование товара"}
-      </h3>
-
       <div className="space-y-1">
         {renderFieldLabel("Название", true)}
         <input

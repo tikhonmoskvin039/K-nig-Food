@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ShoppingCart } from "lucide-react";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { ReduxProvider } from "../../providers";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
@@ -19,6 +20,7 @@ type Props = {
 function ProductRecommendationsContent({ products, title }: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cartItems = useAppSelector((state) => state.cart.items);
   const isHydrated = useSyncExternalStore(
     () => () => {},
@@ -29,6 +31,18 @@ function ProductRecommendationsContent({ products, title }: Props) {
     () => new Map(cartItems.map((item) => [item.ID, item.quantity])),
     [cartItems],
   );
+  const canScrollRecommendations = products.length > 1;
+
+  const scrollRecommendations = (direction: "previous" | "next") => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const distance = Math.max(scroller.clientWidth * 0.85, 220);
+    scroller.scrollBy({
+      left: direction === "next" ? distance : -distance,
+      behavior: "smooth",
+    });
+  };
 
   const handleAddToCart = (product: DTProduct) => {
     dispatch(addToCart(product));
@@ -37,6 +51,9 @@ function ProductRecommendationsContent({ products, title }: Props) {
 
   if (products.length === 0) return null;
 
+  const recommendationArrowClass =
+    "inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-slate-600 transition hover:scale-110 hover:text-amber-700 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500";
+
   return (
     <section
       className="mt-8 overflow-hidden"
@@ -44,13 +61,35 @@ function ProductRecommendationsContent({ products, title }: Props) {
     >
       <div className="mb-4 flex justify-between gap-4">
         <div className="w-full">
-          <div className="flex justify-between items-center min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-amber-700">
               РЕКОМЕНДАЦИИ ДЛЯ ВАС
             </p>
-            <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-              {products.length} в подборке
-            </span>
+            <div className="flex shrink-0 items-center gap-0.5">
+              <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
+                {products.length} в подборке
+              </span>
+              {canScrollRecommendations && (
+                <div className="flex items-center gap-1 md:hidden">
+                  <button
+                    type="button"
+                    className={recommendationArrowClass}
+                    aria-label="Предыдущие рекомендации"
+                    onClick={() => scrollRecommendations("previous")}
+                  >
+                    <IoChevronBack size={28} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={recommendationArrowClass}
+                    aria-label="Следующие рекомендации"
+                    onClick={() => scrollRecommendations("next")}
+                  >
+                    <IoChevronForward size={28} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <h2
             id="recommended-products-title"
@@ -61,7 +100,10 @@ function ProductRecommendationsContent({ products, title }: Props) {
         </div>
       </div>
 
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
+      <div
+        ref={scrollerRef}
+        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 scroll-smooth sm:mx-0 sm:px-0 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3"
+      >
         {products.map((product) => {
           const currencySymbol = getCurrencySymbol(product.Currency);
           const regularPrice = Number(product.RegularPrice);

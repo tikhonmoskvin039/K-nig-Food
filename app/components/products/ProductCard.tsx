@@ -162,7 +162,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-auto flex flex-col gap-2 pt-4">
           {/* Main action buttons row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-stretch">
+          <div className="grid grid-cols-2 gap-2 items-stretch">
             <Link
               href={`/product/${product.Slug}`}
               className="btn-secondary w-full h-full min-h-11 justify-center text-center px-3 whitespace-normal leading-tight"

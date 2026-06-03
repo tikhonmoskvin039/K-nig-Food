@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import {
   getVideoMimeTypeFromUrl,
   isVideoMediaUrl,
@@ -21,6 +22,7 @@ const LIGHTBOX_ZOOM_IN_MULTIPLIER = 1.35;
 export default function ProductLightbox({ images }: ProductLightboxProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const galleryScrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!lightboxOpen) {
@@ -30,6 +32,7 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
 
   if (!images || images.length === 0) return null;
 
+  const hasGallery = images.length > 1;
   const slides = images.map((src) =>
     isVideoMediaUrl(src)
       ? {
@@ -45,6 +48,20 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
         }
       : { src },
   );
+
+  const scrollGallery = (direction: "previous" | "next") => {
+    const scroller = galleryScrollerRef.current;
+    if (!scroller) return;
+
+    const distance = Math.max(scroller.clientWidth * 0.78, 120);
+    scroller.scrollBy({
+      left: direction === "next" ? distance : -distance,
+      behavior: "smooth",
+    });
+  };
+
+  const galleryArrowClass =
+    "inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-slate-600 transition hover:scale-110 hover:text-amber-700 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500";
 
   return (
     <div>
@@ -69,27 +86,66 @@ export default function ProductLightbox({ images }: ProductLightboxProps) {
       </div>
 
       {/* IMAGE GALLERY (Below Main Image) */}
-      <div className="flex gap-2 mt-4 flex-wrap">
-        {images.slice(1).map((image, index) => (
-          <div
-            key={index}
-            className="relative w-24 h-24 cursor-pointer border rounded-md overflow-hidden"
-            onClick={() => {
-              setLightboxIndex(index + 1);
-              setLightboxOpen(true);
-            }}
-          >
-            <ProductMedia
-              src={image}
-              alt={`Gallery image ${index + 1}`}
-              width={96}
-              height={96}
-              className="object-contain w-full h-full"
-              unoptimized
-            />
+      {hasGallery && (
+        <div className="mt-4 border-t border-slate-200 pt-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                Фото и видео
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">
+                {images.length} в галерее
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                className={galleryArrowClass}
+                aria-label="Предыдущие фото и видео"
+                onClick={() => scrollGallery("previous")}
+              >
+                <IoChevronBack size={28} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={galleryArrowClass}
+                aria-label="Следующие фото и видео"
+                onClick={() => scrollGallery("next")}
+              >
+                <IoChevronForward size={28} aria-hidden="true" />
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+
+          <div
+            ref={galleryScrollerRef}
+            className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 scroll-smooth sm:mx-0 sm:px-0"
+          >
+            {images.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                type="button"
+                className="relative h-24 w-24 shrink-0 snap-start cursor-pointer overflow-hidden rounded-md border border-slate-200 bg-slate-50 transition hover:border-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500 sm:h-28 sm:w-28"
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setLightboxOpen(true);
+                }}
+              >
+                <ProductMedia
+                  src={image}
+                  alt={`Gallery image ${index + 1}`}
+                  width={112}
+                  height={112}
+                  className="h-full w-full object-contain"
+                  unoptimized
+                  autoPlay={false}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* LIGHTBOX MODAL */}
       {lightboxOpen && (

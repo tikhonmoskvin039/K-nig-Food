@@ -24,7 +24,7 @@ export default function AdminPageFrame({
     <div className="p-4 md:p-6 min-h-[calc(100vh-var(--header-height))] flex flex-col gap-5">
       <div className="surface-card-soft p-4 md:p-5">
         <div className="flex flex-row justify-between gap-4">
-          <h1 className="flex items-center text-xl sm:text-3xl font-bold text-center sm:text-left text-slate-900">
+          <h1 className="flex items-center text-md sm:text-3xl font-bold text-center sm:text-left text-slate-900">
             {title}
           </h1>
 
