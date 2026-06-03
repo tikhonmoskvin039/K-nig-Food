@@ -11,6 +11,7 @@ import {
   sortByShowcaseOrder,
 } from "../../../utils/productShowcase";
 import ButtonSpinner from "../../common/ButtonSpinner";
+import ClearFilterButton from "../../common/ClearFilterButton";
 import ConfirmModal from "../../common/ConfirmModal";
 
 type SaveProducts = (
@@ -304,48 +305,79 @@ function BlockEditor({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(180px,1fr)_minmax(180px,1fr)_minmax(220px,2fr)_auto] gap-3">
-        <input
-          type="text"
-          className="form-control"
-          value={searchQuery}
-          onChange={(event) => onSearchQueryChange(event.target.value)}
-          placeholder="Живой поиск: название, slug, категория..."
-          disabled={isSaving}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            className="form-control pr-10"
+            value={searchQuery}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
+            placeholder="Живой поиск: название, slug, категория..."
+            disabled={isSaving}
+          />
+          {searchQuery && (
+            <ClearFilterButton
+              label="Очистить поиск"
+              disabled={isSaving}
+              onClick={() => onSearchQueryChange("")}
+            />
+          )}
+        </div>
 
-        <select
-          className="form-control"
-          value={categoryFilter}
-          onChange={(event) => onCategoryFilterChange(event.target.value)}
-          disabled={isSaving}
-        >
-          <option value="all">Все категории</option>
-          {categories.map((category) => (
-            <option key={`${block}-category-${category}`} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            className="form-control pr-16"
+            value={categoryFilter}
+            onChange={(event) => onCategoryFilterChange(event.target.value)}
+            disabled={isSaving}
+          >
+            <option value="all">Все категории</option>
+            {categories.map((category) => (
+              <option key={`${block}-category-${category}`} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          {categoryFilter !== "all" && (
+            <ClearFilterButton
+              label="Очистить категорию"
+              className="right-8"
+              disabled={isSaving}
+              onClick={() => onCategoryFilterChange("all")}
+            />
+          )}
+        </div>
 
-        <select
-          className="form-control"
-          value={selectedProductId}
-          onChange={(event) => onSelectedProductIdChange(event.target.value)}
-          disabled={isSaving || addableProducts.length === 0 || addDisabledByLimit}
-        >
-          <option value="">
-            {addableProducts.length > 0
-              ? "Выберите товар"
-              : normalizedSearch
-                ? "По запросу ничего не найдено"
-                : "Нет доступных товаров для добавления"}
-          </option>
-          {addableProducts.map((product) => (
-            <option key={`${block}-product-${product.ID}`} value={product.ID}>
-              {product.Title}
+        <div className="relative">
+          <select
+            className="form-control pr-16"
+            value={selectedProductId}
+            onChange={(event) => onSelectedProductIdChange(event.target.value)}
+            disabled={
+              isSaving || addableProducts.length === 0 || addDisabledByLimit
+            }
+          >
+            <option value="">
+              {addableProducts.length > 0
+                ? "Выберите товар"
+                : normalizedSearch
+                  ? "По запросу ничего не найдено"
+                  : "Нет доступных товаров для добавления"}
             </option>
-          ))}
-        </select>
+            {addableProducts.map((product) => (
+              <option key={`${block}-product-${product.ID}`} value={product.ID}>
+                {product.Title}
+              </option>
+            ))}
+          </select>
+          {selectedProductId && (
+            <ClearFilterButton
+              label="Очистить выбранный товар"
+              className="right-8"
+              disabled={isSaving}
+              onClick={() => onSelectedProductIdChange("")}
+            />
+          )}
+        </div>
 
         <button
           type="button"

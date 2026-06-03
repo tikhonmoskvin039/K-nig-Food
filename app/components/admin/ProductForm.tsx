@@ -20,6 +20,7 @@ import {
   type CropPixels,
 } from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
+import ClearFilterButton from "../common/ClearFilterButton";
 import ConfirmModal from "../common/ConfirmModal";
 
 type Props = {
@@ -789,13 +790,19 @@ export default function ProductForm({
               />
               <input
                 type="search"
-                className="form-control pl-10"
+                className="form-control pl-10 pr-10"
                 value={recommendationSearch}
                 placeholder="Найти блюдо для рекомендации"
                 onChange={(event) =>
                   setRecommendationSearch(event.target.value)
                 }
               />
+              {recommendationSearch && (
+                <ClearFilterButton
+                  label="Очистить поиск рекомендаций"
+                  onClick={() => setRecommendationSearch("")}
+                />
+              )}
             </div>
 
             <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
