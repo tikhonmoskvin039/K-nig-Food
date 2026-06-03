@@ -871,7 +871,7 @@ export default function ProductForm({
                   <button
                     key={item.ID}
                     type="button"
-                    className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-amber-500 еуче"
+                    className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-amber-500"
                     onClick={() => addRecommendedProduct(item.ID)}
                   >
                     <ProductMedia
@@ -882,7 +882,7 @@ export default function ProductForm({
                       className="h-16 w-16 shrink-0 rounded-md object-cover"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-slate-900">
+                      <span className="block truncate text-sm font-semibold text-slate-900  text-xl">
                         {item.Title}
                       </span>
                       <span className="mt-0.5 block truncate text-xs text-slate-500">
