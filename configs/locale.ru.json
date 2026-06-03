@@ -164,7 +164,7 @@
     "emailLabel": "Email",
     "messageLabel": "Сообщение",
     "namePlaceholder": "Ваше имя",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "Введите@ваш.имейл",
     "messagePlaceholder": "Ваше сообщение",
     "buttonText": "Отправить сообщение",
     "successMessage": "Ваше сообщение успешно отправлено!",

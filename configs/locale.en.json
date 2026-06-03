@@ -158,7 +158,7 @@
     "emailLabel": "Email",
     "messageLabel": "Message",
     "namePlaceholder": "Your Name",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "Enter@your.email",
     "messagePlaceholder": "Your Message",
     "buttonText": "Send Message",
     "successMessage": "Your message has been sent successfully!",
