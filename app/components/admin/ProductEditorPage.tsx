@@ -18,6 +18,7 @@ import {
 import {
   cloneProduct,
   createEmptyProduct,
+  normalizeProductRecommendations,
 } from "../../services/admin/productEditor";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
@@ -153,8 +154,10 @@ export default function ProductEditorPage({ mode, productId }: Props) {
                 }
               : item,
           );
+    const normalizedProducts =
+      normalizeProductRecommendations(updatedProducts);
 
-    const payloadBytes = getJsonPayloadSizeBytes(updatedProducts);
+    const payloadBytes = getJsonPayloadSizeBytes(normalizedProducts);
     if (payloadBytes > SAFE_FUNCTION_BODY_LIMIT_BYTES) {
       toast.error("Слишком большой объем данных для публикации", {
         description: `Размер запроса: ${formatBytes(payloadBytes)}. Лимит Vercel: ${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}. Уменьшите размер/количество изображений.`,
@@ -173,7 +176,7 @@ export default function ProductEditorPage({ mode, productId }: Props) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedProducts),
+        body: JSON.stringify(normalizedProducts),
       });
 
       if (!res.ok) {

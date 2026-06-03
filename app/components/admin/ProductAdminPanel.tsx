@@ -33,6 +33,7 @@ import {
   type VisibleFilter,
 } from "../../services/admin/productAdminTable";
 import { sanitizeNumericString } from "../../services/admin/productForm";
+import { normalizeProductRecommendations } from "../../services/admin/productEditor";
 import { readApiErrorMessage } from "../../services/shared/http";
 import ButtonSpinner from "../common/ButtonSpinner";
 import { invalidateCatalogProductsCache } from "../../utils/catalogProductsCache";
@@ -348,7 +349,9 @@ export default function ProductAdminPanel() {
       error: string;
     },
   ) => {
-    const payloadBytes = getJsonPayloadSizeBytes(updatedProducts);
+    const normalizedProducts =
+      normalizeProductRecommendations(updatedProducts);
+    const payloadBytes = getJsonPayloadSizeBytes(normalizedProducts);
     if (payloadBytes > SAFE_FUNCTION_BODY_LIMIT_BYTES) {
       toast.error("Слишком большой объем данных для сохранения", {
         description: `Размер запроса: ${formatBytes(payloadBytes)}. Лимит Vercel: ${formatBytes(VERCEL_FUNCTION_BODY_LIMIT_BYTES)}. Уменьшите размер/количество изображений.`,
@@ -366,7 +369,7 @@ export default function ProductAdminPanel() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedProducts),
+        body: JSON.stringify(normalizedProducts),
       });
 
       if (!response.ok) {

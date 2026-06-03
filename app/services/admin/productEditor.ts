@@ -57,3 +57,25 @@ export function cloneProduct(product: DTProduct): DTProduct {
       typeof product.WeeklyOfferOrder === "number" ? product.WeeklyOfferOrder : 0,
   };
 }
+
+export function normalizeProductRecommendations(
+  products: DTProduct[],
+): DTProduct[] {
+  const validProductIds = new Set(
+    products.map((product) => product.ID).filter(Boolean),
+  );
+
+  return products.map((product) => {
+    const recommendedProductIds = Array.from(
+      new Set(product.RecommendedProductIds || []),
+    ).filter(
+      (recommendedId) =>
+        recommendedId !== product.ID && validProductIds.has(recommendedId),
+    );
+
+    return {
+      ...product,
+      RecommendedProductIds: recommendedProductIds,
+    };
+  });
+}
