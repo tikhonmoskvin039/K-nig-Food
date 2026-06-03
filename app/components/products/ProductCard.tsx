@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -14,6 +13,7 @@ import {
   isNewArrivalProduct,
   isWeeklyOfferProduct,
 } from "../../utils/productShowcase";
+import ProductMedia from "./ProductMedia";
 
 interface ProductCardProps {
   product: DTProduct;
@@ -66,10 +66,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="absolute inset-0 z-0"
           aria-label={`Открыть ${product.Title}`}
         >
-          <Image
+          <ProductMedia
             src={product.FeatureImageURL}
             alt={product.Title}
             fill
+            sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover rounded-t-lg transition group-hover:scale-105"
           />
         </Link>

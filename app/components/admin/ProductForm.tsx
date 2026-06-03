@@ -2,18 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
-import Image from "next/image";
 import { ArrowDown, ArrowUp, Plus, Search, X } from "lucide-react";
 import ImageCropperModal from "./ImageCropperModal";
 import {
-  IMAGE_ACCEPT_ATTRIBUTE,
   IMAGE_SUPPORTED_FORMATS_LABEL,
   MAX_GALLERY_IMAGES,
+  MAX_VIDEO_DURATION_SECONDS,
+  PRODUCT_MEDIA_ACCEPT_ATTRIBUTE,
+  VIDEO_SUPPORTED_FORMATS_LABEL,
   createUploadFileFromBlob,
+  getProductMediaKindFromFile,
+  getVideoMetadata,
   sanitizeNumericString,
   slugifyProductTitle,
-  uploadImageToAdmin,
-  validateImageFile,
+  uploadMediaToAdmin,
+  validateProductMediaFile,
 } from "../../services/admin/productForm";
 import {
   cropImageFile,
@@ -22,6 +25,9 @@ import {
 import ButtonSpinner from "../common/ButtonSpinner";
 import ClearFilterButton from "../common/ClearFilterButton";
 import ConfirmModal from "../common/ConfirmModal";
+import ProductMedia from "../products/ProductMedia";
+import type { ProductMediaKind } from "../../utils/productMedia";
+import { getProductMediaKind } from "../../utils/productMedia";
 
 type Props = {
   product: DTProduct;
@@ -103,6 +109,11 @@ export default function ProductForm({
     });
   };
 
+  const activeCropFile = cropQueue?.files[cropQueue.currentIndex] || null;
+  const activeCropMediaKind: ProductMediaKind = activeCropFile
+    ? getProductMediaKindFromFile(activeCropFile) || "image"
+    : "image";
+
   const moveToNextCropImage = () => {
     setCropQueue((prev) => {
       if (!prev) return prev;
@@ -121,13 +132,13 @@ export default function ProductForm({
     });
   };
 
-  const handleFeatureImage = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
     if (!file) return;
 
-    const error = validateImageFile(file);
+    const { error } = await validateProductMediaFile(file, "feature");
     if (error) {
       setFileErrors((prev) => ({ ...prev, FeatureImageURL: error }));
       return;
@@ -137,14 +148,14 @@ export default function ProductForm({
     startCropFlow("feature", [file]);
   };
 
-  const handleGalleryImages = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryImages = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     event.target.value = "";
 
     if (files.length === 0) return;
 
     for (const file of files) {
-      const error = validateImageFile(file);
+      const { error } = await validateProductMediaFile(file, "gallery");
       if (error) {
         setFileErrors((prev) => ({ ...prev, ProductImageGallery: error }));
         return;
@@ -155,7 +166,7 @@ export default function ProductForm({
     if (totalCount > MAX_GALLERY_IMAGES) {
       setFileErrors((prev) => ({
         ...prev,
-        ProductImageGallery: `В галерее может быть максимум ${MAX_GALLERY_IMAGES} изображений (включая уже добавленные).`,
+        ProductImageGallery: `В галерее может быть максимум ${MAX_GALLERY_IMAGES} медиафайлов (включая уже добавленные).`,
       }));
       return;
     }
@@ -173,6 +184,7 @@ export default function ProductForm({
 
     const activeFile = cropQueue.files[cropQueue.currentIndex];
     if (!activeFile) return;
+    const mediaKind = getProductMediaKindFromFile(activeFile) || "image";
 
     const errorField =
       cropQueue.target === "feature"
@@ -183,26 +195,34 @@ export default function ProductForm({
     setIsUploadingImage(true);
 
     try {
-      const croppedBlob = await cropImageFile(activeFile, croppedAreaPixels);
-      const preparedFile = createUploadFileFromBlob(
-        croppedBlob,
-        activeFile,
-        `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
-      );
+      const videoMetadata =
+        mediaKind === "video" ? await getVideoMetadata(activeFile) : null;
+      const preparedFile =
+        mediaKind === "image"
+          ? createUploadFileFromBlob(
+              await cropImageFile(activeFile, croppedAreaPixels),
+              activeFile,
+              `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
+            )
+          : activeFile;
       const uploadSlug =
         product.Slug.trim() || slugifyProductTitle(product.Title) || "product";
-      const imageUrl = await uploadImageToAdmin({
+      const mediaUrl = await uploadMediaToAdmin({
         file: preparedFile,
         slug: uploadSlug,
         type: cropQueue.target,
+        mediaKind,
+        durationSeconds: videoMetadata?.durationSeconds,
+        videoWidth: videoMetadata?.width,
+        videoHeight: videoMetadata?.height,
       });
 
       if (cropQueue.target === "feature") {
-        onChange("FeatureImageURL", imageUrl);
+        onChange("FeatureImageURL", mediaUrl);
       } else {
         onChange("ProductImageGallery", [
           ...product.ProductImageGallery,
-          imageUrl,
+          mediaUrl,
         ]);
       }
 
@@ -214,7 +234,7 @@ export default function ProductForm({
         [errorField]:
           error instanceof Error
             ? error.message
-            : "Не удалось обработать изображение",
+            : "Не удалось обработать медиа",
       }));
       setCropQueue((prev) => (prev ? { ...prev, isSubmitting: false } : prev));
     } finally {
@@ -379,7 +399,7 @@ export default function ProductForm({
       errors.LongDescription = "Полное описание обязательно.";
     }
     if (!product.FeatureImageURL.trim()) {
-      errors.FeatureImageURL = "Главное изображение обязательно.";
+      errors.FeatureImageURL = "Главное медиа обязательно.";
     }
 
     return errors;
@@ -816,7 +836,7 @@ export default function ProductForm({
                     className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
                     onClick={() => addRecommendedProduct(item.ID)}
                   >
-                    <Image
+                    <ProductMedia
                       src={item.FeatureImageURL || "/placeholder.png"}
                       alt=""
                       width={64}
@@ -879,7 +899,7 @@ export default function ProductForm({
                     key={item.ID}
                     className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-2"
                   >
-                    <Image
+                    <ProductMedia
                       src={item.FeatureImageURL || "/placeholder.png"}
                       alt=""
                       width={56}
@@ -958,24 +978,25 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        {renderFieldLabel("Главное изображение (до 5 МБ)", true)}
+        {renderFieldLabel("Главное медиа", true)}
         <p className="text-xs text-gray-500">
-          Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
-          качества: 1200x1200 px (квадрат 1:1).
+          Изображения до 5 МБ: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до 30 МБ
+          и {MAX_VIDEO_DURATION_SECONDS} секунд:{" "}
+          {VIDEO_SUPPORTED_FORMATS_LABEL}. Основное видео должно быть 16:9.
         </p>
         <p className="text-xs text-gray-500">
           {product.FeatureImageURL
-            ? "Главное изображение уже загружено. Вы можете заменить его новым."
-            : "Главное изображение пока не загружено."}
+            ? "Главное медиа уже загружено. Вы можете заменить его новым."
+            : "Главное медиа пока не загружено."}
         </p>
 
         <label className="btn-secondary cursor-pointer">
           {product.FeatureImageURL
-            ? "Заменить главное изображение"
-            : "Загрузить главное изображение"}
+            ? "Заменить главное медиа"
+            : "Загрузить главное медиа"}
           <input
             type="file"
-            accept={IMAGE_ACCEPT_ATTRIBUTE}
+            accept={PRODUCT_MEDIA_ACCEPT_ATTRIBUTE}
             onChange={handleFeatureImage}
             className="hidden"
           />
@@ -983,19 +1004,20 @@ export default function ProductForm({
 
         {product.FeatureImageURL && (
           <div className="relative inline-block">
-            <Image
+            <ProductMedia
               src={product.FeatureImageURL}
-              alt="Главное изображение"
+              alt="Главное медиа"
               width={160}
               height={160}
               className="w-40 h-40 object-cover rounded border"
+              controls={getProductMediaKind(product.FeatureImageURL) === "video"}
             />
             <button
               type="button"
               onClick={() => setPendingImageDelete({ kind: "feature" })}
               className="absolute -top-2 -right-2 bg-black/75 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center hover:bg-black"
-              title="Удалить главное изображение"
-              aria-label="Удалить главное изображение"
+              title="Удалить главное медиа"
+              aria-label="Удалить главное медиа"
             >
               x
             </button>
@@ -1007,11 +1029,11 @@ export default function ProductForm({
 
       <div className="space-y-2">
         {renderFieldLabel(
-          `Галерея (до 5 МБ на файл, максимум ${MAX_GALLERY_IMAGES})`,
+          `Галерея (максимум ${MAX_GALLERY_IMAGES} медиафайлов)`,
         )}
         <p className="text-xs text-gray-500">
-          Форматы: {IMAGE_SUPPORTED_FORMATS_LABEL}. Рекомендуемый размер для
-          качества: 1600x900 px (16:9) или минимум 1200 px по длинной стороне.
+          Изображения: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до{" "}
+          {MAX_VIDEO_DURATION_SECONDS} секунд: {VIDEO_SUPPORTED_FORMATS_LABEL}.
         </p>
         <p className="text-xs text-gray-500">
           Загружено {product.ProductImageGallery.length} из {MAX_GALLERY_IMAGES}.
@@ -1021,10 +1043,10 @@ export default function ProductForm({
         </p>
 
         <label className="btn-secondary cursor-pointer">
-          Загрузить изображения галереи
+          Загрузить медиа галереи
           <input
             type="file"
-            accept={IMAGE_ACCEPT_ATTRIBUTE}
+            accept={PRODUCT_MEDIA_ACCEPT_ATTRIBUTE}
             multiple
             onChange={handleGalleryImages}
             className="hidden"
@@ -1047,12 +1069,13 @@ export default function ProductForm({
               }}
               onDragEnd={() => setDraggedGalleryIndex(null)}
             >
-              <Image
+              <ProductMedia
                 src={url}
                 alt={`Галерея ${index + 1}`}
                 width={96}
                 height={96}
                 className="w-24 h-24 object-cover rounded border"
+                controls={getProductMediaKind(url) === "video"}
               />
               <button
                 type="button"
@@ -1060,7 +1083,7 @@ export default function ProductForm({
                   setPendingImageDelete({ kind: "gallery", index })
                 }
                 className="absolute -top-2 -right-2 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-                title="Удалить изображение"
+                title="Удалить медиа"
               >
                 x
               </button>
@@ -1101,14 +1124,14 @@ export default function ProductForm({
         open={!!pendingImageDelete}
         title={
           pendingImageDelete?.kind === "feature"
-            ? "Удалить главное изображение?"
-            : "Удалить изображение из галереи?"
+            ? "Удалить главное медиа?"
+            : "Удалить медиа из галереи?"
         }
         description={
           pendingImageDelete?.kind === "feature"
-            ? "Главное изображение будет удалено. Вы сможете загрузить новое позже."
+            ? "Главное медиа будет удалено. Вы сможете загрузить новое позже."
             : pendingImageDelete
-              ? `Изображение №${pendingImageDelete.index + 1} будет удалено из галереи.`
+              ? `Медиа №${pendingImageDelete.index + 1} будет удалено из галереи.`
               : undefined
         }
         confirmText="Удалить"
@@ -1120,7 +1143,14 @@ export default function ProductForm({
         <ImageCropperModal
           key={cropQueue.previewUrl}
           open
-          imageUrl={cropQueue.previewUrl}
+          mediaUrl={cropQueue.previewUrl}
+          mediaKind={activeCropMediaKind}
+          initialPreset={activeCropMediaKind === "video" ? "landscape" : "square"}
+          lockedPreset={
+            cropQueue.target === "feature" && activeCropMediaKind === "video"
+              ? "landscape"
+              : undefined
+          }
           fileName={
             cropQueue.files[cropQueue.currentIndex]
               ? `${cropQueue.currentIndex + 1}/${cropQueue.files.length} - ${cropQueue.files[cropQueue.currentIndex].name}`
@@ -1135,7 +1165,7 @@ export default function ProductForm({
       <ConfirmModal
         open={isCancelCropConfirmOpen}
         title="Выйти из кадрирования?"
-        description="Текущее изображение не будет сохранено. Продолжить?"
+        description="Текущий медиафайл не будет сохранен. Продолжить?"
         confirmText="Выйти"
         cancelText="Остаться"
         onConfirm={() => {

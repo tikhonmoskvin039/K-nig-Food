@@ -96,7 +96,7 @@ export async function PUT(req: NextRequest) {
         {
           error: "Update failed",
           message:
-            "Обнаружены изображения в формате base64. Сначала загрузите изображения как файлы.",
+            "Обнаружены медиафайлы в формате base64. Сначала загрузите их как файлы.",
         },
         { status: 400 },
       );

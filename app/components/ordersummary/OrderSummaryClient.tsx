@@ -6,7 +6,7 @@ import { useLocalization } from "../../context/LocalizationContext";
 import { useProductContext } from "../../context/ProductContext";
 import { useAppDispatch } from "../../store/hooks";
 import { clearCart } from "../../store/slices/cartSlice";
-import Image from "next/image";
+import ProductMedia from "../products/ProductMedia";
 
 const readRecentOrder = (): DTOrderData | null => {
   if (typeof window === "undefined") return null;
@@ -103,7 +103,7 @@ export default function OrderSummaryClient() {
                 className="flex items-center justify-between text-sm"
               >
                 <div className="flex items-center gap-4">
-                  <Image
+                  <ProductMedia
                     src={imageUrl}
                     alt={item.Title}
                     width={60}

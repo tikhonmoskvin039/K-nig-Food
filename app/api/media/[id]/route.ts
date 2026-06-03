@@ -28,7 +28,7 @@ export async function GET(
     });
 
     if (!image) {
-      return NextResponse.json({ error: "Image not found" }, { status: 404 });
+      return NextResponse.json({ error: "Media not found" }, { status: 404 });
     }
 
     return new NextResponse(Buffer.from(image.bytes), {

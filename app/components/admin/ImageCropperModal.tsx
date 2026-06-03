@@ -8,6 +8,7 @@ import ReactCrop, {
   type PixelCrop,
 } from "react-image-crop";
 import type { CropPixels } from "../../services/admin/imageCropper";
+import type { ProductMediaKind } from "../../utils/productMedia";
 import ButtonSpinner from "../common/ButtonSpinner";
 
 export type CropAspectPreset = "square" | "portrait" | "landscape" | "free";
@@ -24,9 +25,12 @@ const CROP_PRESET_OPTIONS: Array<{
 
 type Props = {
   open: boolean;
-  imageUrl: string;
+  mediaUrl: string;
+  mediaKind?: ProductMediaKind;
   fileName: string;
   isSubmitting?: boolean;
+  initialPreset?: CropAspectPreset;
+  lockedPreset?: CropAspectPreset;
   onCancel: () => void;
   onConfirm: (result: {
     croppedAreaPixels: CropPixels | null;
@@ -108,13 +112,18 @@ function toCropPixels(
 
 export default function ImageCropperModal({
   open,
-  imageUrl,
+  mediaUrl,
+  mediaKind = "image",
   fileName,
   isSubmitting = false,
+  initialPreset = "square",
+  lockedPreset,
   onCancel,
   onConfirm,
 }: Props) {
-  const [preset, setPreset] = useState<CropAspectPreset>("square");
+  const [preset, setPreset] = useState<CropAspectPreset>(
+    lockedPreset || initialPreset,
+  );
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [imageSize, setImageSize] = useState<{
@@ -169,7 +178,9 @@ export default function ImageCropperModal({
         <div className="px-4 sm:px-6 py-4 border-b flex items-start justify-between gap-4">
           <div>
             <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
-              Кадрирование изображения
+              {mediaKind === "video"
+                ? "Кадрирование видео"
+                : "Кадрирование изображения"}
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 break-all">
               {fileName}
@@ -193,10 +204,11 @@ export default function ImageCropperModal({
                 key={option.id}
                 type="button"
                 onClick={() => {
+                  if (lockedPreset) return;
                   setPreset(option.id);
                   applyCropForPreset(option.id, imageSize);
                 }}
-                disabled={isSubmitting}
+                disabled={isSubmitting || Boolean(lockedPreset)}
                 className={
                   preset === option.id
                     ? "btn-primary px-3 py-2"
@@ -209,7 +221,9 @@ export default function ImageCropperModal({
           </div>
 
           <p className="text-xs text-slate-600">
-            {preset === "free"
+            {mediaKind === "video"
+              ? "Видео проходит через предпросмотр с рамкой кадрирования. Для основного видео доступно только 16:9."
+              : preset === "free"
               ? "Свободный режим: тяните стороны/углы рамки для изменения пропорций."
               : "Рамка фиксирует выбранные пропорции. Можно двигать и масштабировать её углами."}
           </p>
@@ -225,24 +239,47 @@ export default function ImageCropperModal({
               minWidth={40}
               minHeight={40}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt="Кадрирование"
-                className="max-h-[70vh] w-auto max-w-full object-contain select-none touch-none"
-                onLoad={(event) => {
-                  const target = event.currentTarget;
-                  const size = {
-                    naturalWidth: target.naturalWidth,
-                    naturalHeight: target.naturalHeight,
-                    width: target.width,
-                    height: target.height,
-                  };
-                  setImageSize(size);
-                  applyCropForPreset(preset, size);
-                  setCompletedCrop(null);
-                }}
-              />
+              {mediaKind === "video" ? (
+                <video
+                  src={mediaUrl}
+                  controls
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="max-h-[70vh] w-auto max-w-full object-contain select-none touch-none"
+                  onLoadedMetadata={(event) => {
+                    const target = event.currentTarget;
+                    const size = {
+                      naturalWidth: target.videoWidth,
+                      naturalHeight: target.videoHeight,
+                      width: target.clientWidth || target.videoWidth,
+                      height: target.clientHeight || target.videoHeight,
+                    };
+                    setImageSize(size);
+                    applyCropForPreset(preset, size);
+                    setCompletedCrop(null);
+                  }}
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={mediaUrl}
+                  alt="Кадрирование"
+                  className="max-h-[70vh] w-auto max-w-full object-contain select-none touch-none"
+                  onLoad={(event) => {
+                    const target = event.currentTarget;
+                    const size = {
+                      naturalWidth: target.naturalWidth,
+                      naturalHeight: target.naturalHeight,
+                      width: target.width,
+                      height: target.height,
+                    };
+                    setImageSize(size);
+                    applyCropForPreset(preset, size);
+                    setCompletedCrop(null);
+                  }}
+                />
+              )}
             </ReactCrop>
           </div>
         </div>

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useLocalization } from "../../context/LocalizationContext";
-import Image from "next/image";
 import Link from "next/link";
 import ConfirmModal from "../common/ConfirmModal";
 import { clearDeliveryQuote, setFulfillmentMethod } from "../../store/slices/checkoutSlice";
+import ProductMedia from "../products/ProductMedia";
 
 export default function OrderSummary() {
   const dispatch = useAppDispatch();
@@ -86,7 +86,7 @@ export default function OrderSummary() {
       <div className="space-y-4">
         {cartItems.map((item) => (
           <div key={item.ID} className="flex items-center gap-4">
-            <Image
+            <ProductMedia
               src={item.FeatureImageURL}
               alt={item.Title}
               width={60}

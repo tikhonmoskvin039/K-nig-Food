@@ -284,12 +284,15 @@ export async function replaceAllProductsInDatabase(products: DTProduct[]) {
 export function hasBase64Images(products: DTProduct[]) {
   return products.some((product) => {
     const featureImage = product.FeatureImageURL || "";
-    if (featureImage.startsWith("data:image/")) {
+    if (
+      featureImage.startsWith("data:image/") ||
+      featureImage.startsWith("data:video/")
+    ) {
       return true;
     }
 
     return (product.ProductImageGallery || []).some((url) =>
-      String(url || "").startsWith("data:image/"),
+      /^data:(image|video)\//.test(String(url || "")),
     );
   });
 }

@@ -1,4 +1,5 @@
 import { isOfflineQueuedResponse } from "../../lib/offlineRequestQueue";
+import type { ProductMediaKind } from "../../utils/productMedia";
 
 export const slugifyProductTitle = (value: string) => {
   const map: Record<string, string> = {
@@ -52,9 +53,13 @@ export const sanitizeNumericString = (value: string) =>
   value.replace(/[^\d]/g, "");
 
 export const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+export const MAX_VIDEO_FILE_SIZE_BYTES = 30 * 1024 * 1024;
+export const MAX_VIDEO_DURATION_SECONDS = 15;
 export const MAX_GALLERY_IMAGES = 5;
 
-export const IMAGE_ACCEPT_ATTRIBUTE = "image/*";
+export const PRODUCT_MEDIA_ACCEPT_ATTRIBUTE =
+  "image/*,video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg";
+export const IMAGE_ACCEPT_ATTRIBUTE = PRODUCT_MEDIA_ACCEPT_ATTRIBUTE;
 
 export const IMAGE_SUPPORTED_EXTENSIONS = [
   ".jpg",
@@ -72,6 +77,91 @@ export const IMAGE_SUPPORTED_EXTENSIONS = [
 ];
 
 export const IMAGE_SUPPORTED_FORMATS_LABEL = "JPG, JPEG, PNG, WEBP, AVIF, GIF, BMP, TIFF, HEIC, HEIF, SVG";
+
+export const VIDEO_SUPPORTED_EXTENSIONS = [
+  ".mp4",
+  ".m4v",
+  ".mov",
+  ".webm",
+  ".ogv",
+  ".ogg",
+];
+
+export const VIDEO_SUPPORTED_FORMATS_LABEL = "MP4, M4V, MOV, WEBM, OGV, OGG";
+
+const FEATURE_VIDEO_ASPECT = 16 / 9;
+const FEATURE_VIDEO_ASPECT_TOLERANCE = 0.03;
+
+function getFileExtension(file: File) {
+  return file.name.toLowerCase().match(/\.[^.]+$/)?.[0] || "";
+}
+
+export function getProductMediaKindFromFile(
+  file: File,
+): ProductMediaKind | null {
+  const extension = getFileExtension(file);
+  const mimeType = file.type.toLowerCase();
+
+  if (
+    mimeType.startsWith("image/") ||
+    IMAGE_SUPPORTED_EXTENSIONS.includes(extension)
+  ) {
+    return "image";
+  }
+
+  if (
+    mimeType.startsWith("video/") ||
+    VIDEO_SUPPORTED_EXTENSIONS.includes(extension)
+  ) {
+    return "video";
+  }
+
+  return null;
+}
+
+export function getVideoMetadata(file: File) {
+  return new Promise<{
+    durationSeconds: number;
+    width: number;
+    height: number;
+  }>((resolve, reject) => {
+    const video = document.createElement("video");
+    const objectUrl = URL.createObjectURL(file);
+
+    const cleanup = () => {
+      video.removeAttribute("src");
+      video.load();
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+    video.onloadedmetadata = () => {
+      const durationSeconds = video.duration;
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      cleanup();
+
+      if (
+        !Number.isFinite(durationSeconds) ||
+        durationSeconds <= 0 ||
+        width <= 0 ||
+        height <= 0
+      ) {
+        reject(new Error("Не удалось прочитать параметры видео"));
+        return;
+      }
+
+      resolve({ durationSeconds, width, height });
+    };
+    video.onerror = () => {
+      cleanup();
+      reject(new Error("Не удалось прочитать видеофайл"));
+    };
+    video.src = objectUrl;
+  });
+}
 
 export const validateImageFile = (file: File): string | null => {
   const fileName = file.name.toLowerCase();
@@ -91,6 +181,73 @@ export const validateImageFile = (file: File): string | null => {
   return null;
 };
 
+export async function validateProductMediaFile(
+  file: File,
+  target: "feature" | "gallery",
+): Promise<{
+  error: string | null;
+  mediaKind: ProductMediaKind | null;
+  durationSeconds?: number;
+}> {
+  const mediaKind = getProductMediaKindFromFile(file);
+
+  if (!mediaKind) {
+    return {
+      error: `Файл "${file.name}" должен быть изображением или видео. Изображения: ${IMAGE_SUPPORTED_FORMATS_LABEL}. Видео: ${VIDEO_SUPPORTED_FORMATS_LABEL}.`,
+      mediaKind: null,
+    };
+  }
+
+  if (mediaKind === "image") {
+    return {
+      error: validateImageFile(file),
+      mediaKind,
+    };
+  }
+
+  if (file.size > MAX_VIDEO_FILE_SIZE_BYTES) {
+    return {
+      error: `Видео "${file.name}" больше 30 МБ`,
+      mediaKind,
+    };
+  }
+
+  let metadata: Awaited<ReturnType<typeof getVideoMetadata>>;
+  try {
+    metadata = await getVideoMetadata(file);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Не удалось проверить видео",
+      mediaKind,
+    };
+  }
+
+  if (metadata.durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
+    return {
+      error: `Видео "${file.name}" длиннее ${MAX_VIDEO_DURATION_SECONDS} секунд`,
+      mediaKind,
+      durationSeconds: metadata.durationSeconds,
+    };
+  }
+
+  if (target === "feature") {
+    const aspect = metadata.width / metadata.height;
+    if (Math.abs(aspect - FEATURE_VIDEO_ASPECT) > FEATURE_VIDEO_ASPECT_TOLERANCE) {
+      return {
+        error: `Основное видео должно быть 16:9. Текущий размер: ${metadata.width}x${metadata.height}.`,
+        mediaKind,
+        durationSeconds: metadata.durationSeconds,
+      };
+    }
+  }
+
+  return {
+    error: null,
+    mediaKind,
+    durationSeconds: metadata.durationSeconds,
+  };
+}
+
 export const sanitizeImageBaseName = (value: string) =>
   value
     .trim()
@@ -101,9 +258,10 @@ export const sanitizeImageBaseName = (value: string) =>
 
 export const getImageFileExtension = (file: File) => {
   const fileName = file.name.toLowerCase();
-  const matchedByName = IMAGE_SUPPORTED_EXTENSIONS.find((extension) =>
-    fileName.endsWith(extension),
-  );
+  const matchedByName = [
+    ...IMAGE_SUPPORTED_EXTENSIONS,
+    ...VIDEO_SUPPORTED_EXTENSIONS,
+  ].find((extension) => fileName.endsWith(extension));
 
   if (matchedByName) {
     return matchedByName.replace(".", "");
@@ -135,17 +293,35 @@ type UploadImageParams = {
   file: File;
   slug: string;
   type: "feature" | "gallery";
+  mediaKind?: ProductMediaKind;
+  durationSeconds?: number;
+  videoWidth?: number;
+  videoHeight?: number;
 };
 
-export async function uploadImageToAdmin({
+export async function uploadMediaToAdmin({
   file,
   slug,
   type,
+  mediaKind,
+  durationSeconds,
+  videoWidth,
+  videoHeight,
 }: UploadImageParams): Promise<string> {
   const formData = new FormData();
   formData.set("file", file);
   formData.set("slug", slug || "product");
   formData.set("type", type);
+  formData.set("mediaKind", mediaKind || getProductMediaKindFromFile(file) || "image");
+
+  if (typeof durationSeconds === "number") {
+    formData.set("durationSeconds", String(durationSeconds));
+  }
+
+  if (typeof videoWidth === "number" && typeof videoHeight === "number") {
+    formData.set("videoWidth", String(videoWidth));
+    formData.set("videoHeight", String(videoHeight));
+  }
 
   const response = await fetch("/api/admin/uploads", {
     method: "POST",
@@ -185,7 +361,7 @@ export async function uploadImageToAdmin({
     });
 
     if (!replayResponse.ok) {
-      let replayErrorMessage = "Не удалось загрузить изображение после восстановления сети";
+      let replayErrorMessage = "Не удалось загрузить медиа после восстановления сети";
 
       try {
         const replayErrorData = (await replayResponse.json()) as { message?: string };
@@ -201,14 +377,14 @@ export async function uploadImageToAdmin({
 
     const replayData = (await replayResponse.json()) as { url?: string };
     if (!replayData.url) {
-      throw new Error("Сервер вернул пустой путь изображения после повторной отправки");
+      throw new Error("Сервер вернул пустой путь медиа после повторной отправки");
     }
 
     return replayData.url;
   }
 
   if (!response.ok) {
-    let message = "Не удалось загрузить изображение";
+    let message = "Не удалось загрузить медиа";
 
     try {
       const errorData = (await response.json()) as { message?: string };
@@ -224,8 +400,10 @@ export async function uploadImageToAdmin({
 
   const data = (await response.json()) as { url?: string };
   if (!data.url) {
-    throw new Error("Сервер вернул пустой путь изображения");
+    throw new Error("Сервер вернул пустой путь медиа");
   }
 
   return data.url;
 }
+
+export const uploadImageToAdmin = uploadMediaToAdmin;

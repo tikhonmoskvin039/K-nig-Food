@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ReduxProvider } from "../providers";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useLocalization } from "../context/LocalizationContext";
-import Image from "next/image";
 import Link from "next/link";
 import {
   clearCart,
@@ -25,6 +24,7 @@ import {
 } from "lucide-react";
 import ProceedToCheckoutButton from "../components/cart/ProceedToCheckoutButton";
 import ConfirmModal from "../components/common/ConfirmModal";
+import ProductMedia from "../components/products/ProductMedia";
 import { isTouchLikeDevice, triggerHapticFeedback } from "../utils/haptics";
 
 const CART_UPDATED_AT_KEY = "cart_updated_at";
@@ -90,7 +90,7 @@ function CartItemGallery({ images, title, className }: CartItemGalleryProps) {
             key={`${imageUrl}-${index}`}
             className="relative h-full min-w-full"
           >
-            <Image
+            <ProductMedia
               src={imageUrl}
               alt={`${title} (${index + 1})`}
               fill

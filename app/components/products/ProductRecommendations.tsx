@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ShoppingCart } from "lucide-react";
@@ -10,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { showAddedToCartToast } from "../../utils/cartToasts";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
+import ProductMedia from "./ProductMedia";
 
 type Props = {
   products: DTProduct[];
@@ -42,21 +42,23 @@ function ProductRecommendationsContent({ products, title }: Props) {
       className="mt-8 overflow-hidden"
       aria-labelledby="recommended-products-title"
     >
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-            Подбор к блюду
-          </p>
+      <div className="mb-4 flex justify-between gap-4">
+        <div className="w-full">
+          <div className="flex justify-between items-center min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+              РЕКОМЕНДАЦИИ ДЛЯ ВАС
+            </p>
+            <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+              {products.length} в подборке
+            </span>
+          </div>
           <h2
             id="recommended-products-title"
-            className="section-title mt-1 min-w-0"
+            className="section-title text-xl mt-1 min-w-0"
           >
             {title}
           </h2>
         </div>
-        <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-          {products.length} в подборке
-        </span>
       </div>
 
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
@@ -91,7 +93,7 @@ function ProductRecommendationsContent({ products, title }: Props) {
                 className="relative aspect-square overflow-hidden rounded-md bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
                 aria-label={`Открыть ${product.Title}`}
               >
-                <Image
+                <ProductMedia
                   src={product.FeatureImageURL}
                   alt={product.Title}
                   fill

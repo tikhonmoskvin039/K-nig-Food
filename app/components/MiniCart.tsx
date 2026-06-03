@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useLocalization } from "../context/LocalizationContext";
 import { ShoppingCart, X } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { removeFromCart } from "../store/slices/cartSlice";
 import { registerMiniCartTrigger } from "../utils/MiniCartController";
+import ProductMedia from "./products/ProductMedia";
 
 type MiniCartProps = {
   onNavigate?: () => void;
@@ -175,7 +175,7 @@ export default function MiniCart({ onNavigate }: MiniCartProps) {
 
                 return (
                   <div key={item.ID} className="flex items-start gap-4">
-                    <Image
+                    <ProductMedia
                       src={item.FeatureImageURL}
                       alt={item.Title}
                       width={60}
