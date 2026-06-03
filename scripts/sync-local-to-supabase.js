@@ -13,9 +13,13 @@ const TABLES = [
 
 const shouldApply = process.argv.includes("--apply");
 
-function readEnvFile() {
+function readEnv() {
+  const env = { ...process.env };
   const envPath = path.join(process.cwd(), ".env");
-  const env = {};
+
+  if (!fs.existsSync(envPath)) {
+    return env;
+  }
 
   for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
     if (!/^\s*[^#][^=]+=/.test(line)) continue;
@@ -28,16 +32,40 @@ function readEnvFile() {
   return env;
 }
 
-function buildRemoteUrl(env) {
-  if (!env.DATABASE_URL_PROD || !env.CLOUD_DB_PASS) {
-    throw new Error("DATABASE_URL_PROD and CLOUD_DB_PASS must exist in .env");
+function expandEnvVariables(value, env) {
+  return String(value || "").replace(
+    /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g,
+    (_, key) => {
+      if (!env[key]) {
+        throw new Error(`${key} must exist to expand the database URL`);
+      }
+
+      return encodeURIComponent(env[key]);
+    },
+  );
+}
+
+function normalizeRemoteUrl(url) {
+  if (!/[?&]sslmode=/.test(url)) {
+    return `${url}${url.includes("?") ? "&" : "?"}sslmode=no-verify`;
   }
 
-  const password = encodeURIComponent(env.CLOUD_DB_PASS);
-  return env.DATABASE_URL_PROD.replace("${CLOUD_DB_PASS}", password).replace(
-    /([?&])sslmode=[^&]*/,
-    "$1sslmode=no-verify",
-  );
+  return url.replace(/([?&])sslmode=[^&]*/, "$1sslmode=no-verify");
+}
+
+function buildRemoteUrl(env) {
+  const url =
+    env.SUPABASE_DATABASE_URL ||
+    env.DIRECT_URL_PROD ||
+    env.DATABASE_URL_PROD ||
+    env.DIRECT_URL ||
+    env.DATABASE_URL;
+
+  if (!url) {
+    throw new Error("Supabase database URL is not configured");
+  }
+
+  return normalizeRemoteUrl(expandEnvVariables(url, env));
 }
 
 function quoteIdentifier(value) {
@@ -45,15 +73,42 @@ function quoteIdentifier(value) {
 }
 
 async function withClient(connectionString, callback) {
-  const client = new Client({ connectionString });
-  client.on("error", () => {});
+  const transientMessages = [
+    "Connection terminated unexpectedly",
+    "Connection terminated",
+    "Query read timeout",
+    "read ECONNRESET",
+  ];
 
-  try {
-    await client.connect();
-    return await callback(client);
-  } finally {
-    await client.end().catch(() => {});
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const client = new Client({
+      connectionString,
+      connectionTimeoutMillis: 30000,
+    });
+    client.on("error", () => {});
+
+    try {
+      await client.connect();
+      return await callback(client);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isTransient = transientMessages.some((item) =>
+        message.includes(item),
+      );
+
+      if (!isTransient || attempt === 3) {
+        throw error;
+      }
+
+      console.warn(
+        `Retrying database request after connection reset (${attempt}/3)`,
+      );
+    } finally {
+      await client.end().catch(() => {});
+    }
   }
+
+  throw new Error("Database request failed.");
 }
 
 async function getRows(connectionString, table) {
@@ -62,6 +117,16 @@ async function getRows(connectionString, table) {
       `SELECT * FROM ${quoteIdentifier(table)} ORDER BY 1`,
     );
     return result.rows;
+  });
+}
+
+async function getRemoteIds(connectionString, table) {
+  return withClient(connectionString, async (client) => {
+    const result = await client.query(
+      `SELECT "id" FROM ${quoteIdentifier(table)}`,
+    );
+
+    return new Set(result.rows.map((row) => String(row.id)));
   });
 }
 
@@ -85,7 +150,7 @@ function buildInsert(table, columns, rows) {
   return { sql, values };
 }
 
-async function insertRows(connectionString, table, rows, dryRun = false) {
+async function insertRows(connectionString, table, rows) {
   if (rows.length === 0) return 0;
 
   const columns = Object.keys(rows[0]);
@@ -96,16 +161,8 @@ async function insertRows(connectionString, table, rows, dryRun = false) {
     const { sql, values } = buildInsert(table, columns, chunk);
 
     inserted += await withClient(connectionString, async (client) => {
-      if (dryRun) await client.query("BEGIN");
-
-      try {
-        const result = await client.query(sql, values);
-        if (dryRun) await client.query("ROLLBACK");
-        return result.rowCount;
-      } catch (error) {
-        if (dryRun) await client.query("ROLLBACK").catch(() => {});
-        throw error;
-      }
+      const result = await client.query(sql, values);
+      return result.rowCount;
     });
   }
 
@@ -154,7 +211,7 @@ async function ensureRemoteSchemaIsCurrent(remoteUrl) {
 }
 
 async function main() {
-  const env = readEnvFile();
+  const env = readEnv();
   const localUrl = env.DATABASE_URL_DEV;
   const remoteUrl = buildRemoteUrl(env);
 
@@ -164,13 +221,14 @@ async function main() {
 
   for (const table of TABLES) {
     const rows = await getRows(localUrl, table);
+    const remoteIds = await getRemoteIds(remoteUrl, table);
+    const missingRows = rows.filter((row) => !remoteIds.has(String(row.id)));
 
-    const inserted = await insertRows(remoteUrl, table, rows, !shouldApply);
-
-    if (shouldApply) {
-      console.log(`${table}: inserted ${inserted}, kept remote conflicts`);
+    if (!shouldApply) {
+      console.log(`${table}: would insert ${missingRows.length}`);
     } else {
-      console.log(`${table}: would insert ${inserted}`);
+      const inserted = await insertRows(remoteUrl, table, missingRows);
+      console.log(`${table}: inserted ${inserted}, kept remote conflicts`);
     }
   }
 

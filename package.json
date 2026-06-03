@@ -6,7 +6,7 @@
     "dev": "node server.mjs",
     "prebuild": "prisma generate",
     "build": "next build",
-    "build:vercel": "prisma generate && prisma migrate deploy && next build",
+    "build:vercel": "prisma generate && pnpm run db:migrate:supabase && next build",
     "start": "node server.mjs --production",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
