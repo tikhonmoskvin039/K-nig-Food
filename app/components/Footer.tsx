@@ -25,7 +25,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-950 text-slate-200 pt-12 pb-10 relative">
+    <footer className="bg-slate-950 text-slate-200 py-6 relative">
       <div className="app-shell grid grid-cols-1 items-center justify-items-center gap-10 text-center md:grid-cols-2">
         <div className="flex max-w-md flex-col items-center justify-center text-center">
           <h3 className="text-xl font-semibold mb-4 text-white">
@@ -61,7 +61,7 @@ export default function Footer() {
           <h3 className="text-xl font-semibold mb-4 text-white">
             {content.labels.followUs}
           </h3>
-          <div className="flex justify-center space-x-4">
+          <div className="flex mt-4 justify-center space-x-4">
             {content.socialLinks.map((social) => {
               const IconComponent = iconMap[social.icon as DTSocialIcon];
               return (
