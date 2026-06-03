@@ -4,6 +4,7 @@ import { useLocalization } from "../../context/LocalizationContext";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setBillingForm } from "../../store/slices/checkoutSlice";
 import { useState } from "react";
+import ProductBackButton from "../products/ProductBackButton";
 
 export default function BillingForm() {
   const { labels } = useLocalization();
@@ -38,9 +39,12 @@ export default function BillingForm() {
 
   return (
     <div className="surface-card p-5 md:p-6 space-y-4">
-      <h3 className="section-title text-xl md:text-2xl">
-        {labels.billingInformation || "Платежная информация"}
-      </h3>
+      <div className="flex items-center gap-3">
+        <ProductBackButton />
+        <h3 className="section-title min-w-0 text-xl md:text-2xl">
+          {labels.billingInformation || "Платежная информация"}
+        </h3>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <label className="space-y-1">
