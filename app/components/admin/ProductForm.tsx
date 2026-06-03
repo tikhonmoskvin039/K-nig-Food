@@ -839,8 +839,8 @@ export default function ProductForm({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)]">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)] lg:items-stretch">
+          <div className="flex min-h-0 flex-col gap-2 lg:h-96">
             <div className="relative">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
@@ -863,7 +863,7 @@ export default function ProductForm({
               )}
             </div>
 
-            <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+            <div className="min-h-0 max-h-80 space-y-2 overflow-y-auto overscroll-contain pr-1 lg:max-h-none lg:flex-1">
               {recommendationOptions.map((item) => {
                 const statusLabel = getProductStatusLabel(item);
 
@@ -910,7 +910,7 @@ export default function ProductForm({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex min-h-0 flex-col gap-2 lg:h-96">
             <div className="flex min-h-9 items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-900">
                 Выбранная подборка
@@ -927,11 +927,11 @@ export default function ProductForm({
             </div>
 
             {selectedRecommendedProducts.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-500">
-                Рекомендации не выбраны
-              </p>
+              <div className="flex min-h-32 items-center justify-center rounded-lg border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-500 lg:min-h-0 lg:flex-1">
+                <p>Рекомендации не выбраны</p>
+              </div>
             ) : (
-              <div className="space-y-2">
+              <div className="min-h-0 max-h-80 space-y-2 overflow-y-auto overscroll-contain pr-1 lg:max-h-none lg:flex-1">
                 {selectedRecommendedProducts.map((item, index) => (
                   <article
                     key={item.ID}
