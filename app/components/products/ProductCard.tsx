@@ -13,7 +13,7 @@ import {
   isNewArrivalProduct,
   isWeeklyOfferProduct,
 } from "../../utils/productShowcase";
-import ProductMedia from "./ProductMedia";
+import ProductCardMediaCarousel from "./ProductCardMediaCarousel";
 
 interface ProductCardProps {
   product: DTProduct;
@@ -61,19 +61,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Product Image with Link to Product Page */}
       {/* Product Image with Overlay Portion Info */}
       <div className="relative w-full aspect-4/3 group">
-        <Link
-          href={`/product/${product.Slug}`}
-          className="absolute inset-0 z-0"
-          aria-label={`Открыть ${product.Title}`}
-        >
-          <ProductMedia
-            src={product.FeatureImageURL}
-            alt={product.Title}
-            fill
-            sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover rounded-t-lg transition group-hover:scale-105"
-          />
-        </Link>
+        <ProductCardMediaCarousel
+          product={product}
+          sizes="(min-width: 1536px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+          mediaClassName="object-cover rounded-t-lg transition group-hover:scale-105"
+        />
 
         {/* Portion + Unit Badge */}
         {product.PortionUnit && (

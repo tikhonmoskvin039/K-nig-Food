@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { addToCart } from "../../store/slices/cartSlice";
 import { showAddedToCartToast } from "../../utils/cartToasts";
 import { getCurrencySymbol } from "../../utils/getCurrencySymbol";
-import ProductMedia from "./ProductMedia";
+import ProductCardMediaCarousel from "./ProductCardMediaCarousel";
 
 type Props = {
   products: DTProduct[];
@@ -88,19 +88,13 @@ function ProductRecommendationsContent({ products, title }: Props) {
               key={product.ID}
               className="grid min-w-[min(86vw,23rem)] snap-start grid-cols-[6.5rem_minmax(0,1fr)] gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md sm:grid-cols-[7rem_minmax(0,1fr)] md:min-w-0"
             >
-              <Link
-                href={`/product/${product.Slug}`}
-                className="relative aspect-square overflow-hidden rounded-md bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
-                aria-label={`Открыть ${product.Title}`}
-              >
-                <ProductMedia
-                  src={product.FeatureImageURL}
-                  alt={product.Title}
-                  fill
-                  sizes="112px"
-                  className="object-cover transition hover:scale-105"
-                />
-              </Link>
+              <ProductCardMediaCarousel
+                product={product}
+                sizes="112px"
+                className="aspect-square rounded-md bg-slate-100"
+                mediaClassName="object-cover transition hover:scale-105"
+                arrowSize={24}
+              />
 
               <div className="flex min-w-0 flex-col">
                 <div className="min-w-0">

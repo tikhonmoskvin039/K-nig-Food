@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { isVideoMediaUrl } from "../../utils/productMedia";
 
@@ -38,10 +39,25 @@ export default function ProductMedia({
 }: Props) {
   const safeSrc = src || "/placeholder.png";
   const isVideo = isVideoMediaUrl(safeSrc);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!isVideo || controls) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (autoPlay) {
+      void video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [autoPlay, controls, isVideo, safeSrc]);
 
   if (isVideo) {
     return (
       <video
+        ref={videoRef}
         src={safeSrc}
         className={fill ? `absolute inset-0 h-full w-full ${className}` : className}
         width={fill ? undefined : width}
