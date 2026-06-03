@@ -50,13 +50,14 @@ export default function ProductCardMediaCarousel({
   arrowSize = 34,
 }: ProductCardMediaCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [trackPosition, setTrackPosition] = useState(1);
+  const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [dotsVisible, setDotsVisible] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressNavigationRef = useRef(false);
   const dotsHideTimeoutRef = useRef<number | null>(null);
   const transitionResetFrameRef = useRef<number | null>(null);
+  const secondTransitionResetFrameRef = useRef<number | null>(null);
   const pendingActiveIndexRef = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
   const mediaUrls = useMemo(
@@ -67,26 +68,28 @@ export default function ProductCardMediaCarousel({
   const safeActiveIndex = Math.min(activeIndex, mediaCount - 1);
   const canSlide = mediaCount > 1;
   const productHref = `/product/${product.Slug}`;
-  const getWrappedIndex = (index: number) =>
-    (index + mediaCount) % mediaCount;
-  const getCarouselSlide = (index: number, slot: string) => {
-    const realIndex = getWrappedIndex(index);
-    const src = mediaUrls[realIndex] || "/placeholder.png";
-
-    return {
-      src,
-      realIndex,
-      key: `${slot}-${realIndex}-${src}`,
-    };
-  };
   const carouselSlides = canSlide
     ? [
-        getCarouselSlide(safeActiveIndex - 1, "previous"),
-        getCarouselSlide(safeActiveIndex, "current"),
-        getCarouselSlide(safeActiveIndex + 1, "next"),
+        {
+          src: mediaUrls[mediaCount - 1],
+          key: `clone-last-${mediaUrls[mediaCount - 1]}`,
+        },
+        ...mediaUrls.map((src, index) => ({
+          src,
+          key: `media-${src}-${index}`,
+        })),
+        {
+          src: mediaUrls[0],
+          key: `clone-first-${mediaUrls[0]}`,
+        },
       ]
-    : [getCarouselSlide(0, "current")];
-  const visibleTrackIndex = canSlide ? trackPosition : 0;
+    : [
+        {
+          src: mediaUrls[0],
+          key: `media-${mediaUrls[0]}-0`,
+        },
+      ];
+  const visibleTrackIndex = canSlide ? trackIndex : 0;
 
   useEffect(
     () => () => {
@@ -96,6 +99,10 @@ export default function ProductCardMediaCarousel({
 
       if (transitionResetFrameRef.current !== null) {
         window.cancelAnimationFrame(transitionResetFrameRef.current);
+      }
+
+      if (secondTransitionResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(secondTransitionResetFrameRef.current);
       }
     },
     [],
@@ -132,7 +139,8 @@ export default function ProductCardMediaCarousel({
     pendingActiveIndexRef.current = nextActiveIndex;
     isAnimatingRef.current = true;
     setIsTransitionEnabled(true);
-    setTrackPosition(0);
+    setActiveIndex(nextActiveIndex);
+    setTrackIndex(safeActiveIndex);
     showDotsTemporarily();
   };
 
@@ -144,7 +152,8 @@ export default function ProductCardMediaCarousel({
     pendingActiveIndexRef.current = nextActiveIndex;
     isAnimatingRef.current = true;
     setIsTransitionEnabled(true);
-    setTrackPosition(2);
+    setActiveIndex(nextActiveIndex);
+    setTrackIndex(safeActiveIndex + 2);
     showDotsTemporarily();
   };
 
@@ -215,21 +224,40 @@ export default function ProductCardMediaCarousel({
     if (!canSlide || event.target !== event.currentTarget) return;
 
     const pendingActiveIndex = pendingActiveIndexRef.current;
-    if (pendingActiveIndex === null || trackPosition === 1) return;
+    if (pendingActiveIndex === null) return;
+
+    const resetTrackIndex =
+      trackIndex === 0
+        ? mediaCount
+        : trackIndex === mediaCount + 1
+          ? 1
+          : null;
+
+    pendingActiveIndexRef.current = null;
+
+    if (resetTrackIndex === null) {
+      isAnimatingRef.current = false;
+      return;
+    }
 
     setIsTransitionEnabled(false);
-    setActiveIndex(pendingActiveIndex);
-    setTrackPosition(1);
-    pendingActiveIndexRef.current = null;
-    isAnimatingRef.current = false;
+    setTrackIndex(resetTrackIndex);
 
     if (transitionResetFrameRef.current !== null) {
       window.cancelAnimationFrame(transitionResetFrameRef.current);
     }
 
+    if (secondTransitionResetFrameRef.current !== null) {
+      window.cancelAnimationFrame(secondTransitionResetFrameRef.current);
+    }
+
     transitionResetFrameRef.current = window.requestAnimationFrame(() => {
-      setIsTransitionEnabled(true);
-      transitionResetFrameRef.current = null;
+      secondTransitionResetFrameRef.current = window.requestAnimationFrame(() => {
+        setIsTransitionEnabled(true);
+        isAnimatingRef.current = false;
+        transitionResetFrameRef.current = null;
+        secondTransitionResetFrameRef.current = null;
+      });
     });
   };
 
