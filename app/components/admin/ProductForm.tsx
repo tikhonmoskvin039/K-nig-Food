@@ -871,7 +871,7 @@ export default function ProductForm({
                   <button
                     key={item.ID}
                     type="button"
-                    className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
+                    className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-amber-500 еуче"
                     onClick={() => addRecommendedProduct(item.ID)}
                   >
                     <ProductMedia
