@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowUp, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Search, X } from "lucide-react";
 import ImageCropperModal from "./ImageCropperModal";
 import {
   IMAGE_ACCEPT_ATTRIBUTE,
@@ -435,6 +435,10 @@ export default function ProductForm({
     );
   };
 
+  const clearRecommendedProducts = () => {
+    onChange("RecommendedProductIds", []);
+  };
+
   const moveRecommendedProduct = (index: number, direction: -1 | 1) => {
     const nextIndex = index + direction;
     if (nextIndex < 0 || nextIndex >= recommendedProductIds.length) return;
@@ -764,18 +768,37 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-3">
-        {renderFieldLabel("Рекомендации к товару")}
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="space-y-2">
-            <input
-              type="search"
-              className="form-control"
-              value={recommendationSearch}
-              placeholder="Найти блюдо для рекомендации"
-              onChange={(event) => setRecommendationSearch(event.target.value)}
-            />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            {renderFieldLabel("Рекомендации к товару")}
+            <p className="text-xs text-slate-500">
+              Необязательно. Порядок здесь повторится в карточке товара.
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+            Выбрано: {selectedRecommendedProducts.length}
+          </span>
+        </div>
 
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)]">
+          <div className="space-y-2">
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                className="form-control pl-10"
+                value={recommendationSearch}
+                placeholder="Найти блюдо для рекомендации"
+                onChange={(event) =>
+                  setRecommendationSearch(event.target.value)
+                }
+              />
+            </div>
+
+            <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
               {recommendationOptions.map((item) => {
                 const statusLabel = getProductStatusLabel(item);
 
@@ -783,15 +806,15 @@ export default function ProductForm({
                   <button
                     key={item.ID}
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50"
+                    className="group flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-amber-300 hover:bg-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
                     onClick={() => addRecommendedProduct(item.ID)}
                   >
                     <Image
                       src={item.FeatureImageURL || "/placeholder.png"}
                       alt=""
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 shrink-0 rounded-md object-cover"
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 shrink-0 rounded-md object-cover"
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-slate-900">
@@ -801,12 +824,15 @@ export default function ProductForm({
                         {item.RegularPrice}
                         {item.Currency === "RUR" ? " ₽" : ` ${item.Currency}`}
                       </span>
+                      {statusLabel && (
+                        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                          {statusLabel}
+                        </span>
+                      )}
                     </span>
-                    {statusLabel && (
-                      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                        {statusLabel}
-                      </span>
-                    )}
+                    <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-600 text-white transition group-hover:bg-amber-700">
+                      <Plus size={16} aria-hidden="true" />
+                    </span>
                   </button>
                 );
               })}
@@ -819,9 +845,24 @@ export default function ProductForm({
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+          <div className="space-y-2">
+            <div className="flex min-h-9 items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-900">
+                Выбранная подборка
+              </p>
+              {selectedRecommendedProducts.length > 0 && (
+                <button
+                  type="button"
+                  className="text-sm font-semibold text-slate-600 transition hover:text-red-600"
+                  onClick={clearRecommendedProducts}
+                >
+                  Очистить
+                </button>
+              )}
+            </div>
+
             {selectedRecommendedProducts.length === 0 ? (
-              <p className="py-6 text-center text-sm text-slate-500">
+              <p className="rounded-lg border border-dashed border-slate-200 px-3 py-6 text-center text-sm text-slate-500">
                 Рекомендации не выбраны
               </p>
             ) : (
@@ -834,9 +875,9 @@ export default function ProductForm({
                     <Image
                       src={item.FeatureImageURL || "/placeholder.png"}
                       alt=""
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 shrink-0 rounded-md object-cover"
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 shrink-0 rounded-md object-cover"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-900">
@@ -861,7 +902,9 @@ export default function ProductForm({
                         type="button"
                         className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                         onClick={() => moveRecommendedProduct(index, 1)}
-                        disabled={index === selectedRecommendedProducts.length - 1}
+                        disabled={
+                          index === selectedRecommendedProducts.length - 1
+                        }
                         aria-label={`Опустить рекомендацию ${item.Title}`}
                         title="Ниже"
                       >

@@ -210,7 +210,7 @@ export default async function ProductPage({ params }: { params: AsyncParams }) {
             products={recommendedProducts}
             title={
               localeData.labels.recommendedProducts ||
-              "С этим блюдом часто выбирают"
+              "Вместе с этим товаром покупают"
             }
           />
         )}

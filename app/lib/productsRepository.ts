@@ -299,6 +299,9 @@ export function validateProductsPayload(products: DTProduct[]): string | null {
   const seenSlugs = new Set<string>();
   const seenTitles = new Set<string>();
   const normalizedProducts = normalizeProducts(products);
+  const validProductIds = new Set(
+    normalizedProducts.map((product) => product.ID).filter(Boolean),
+  );
 
   for (const [index, normalized] of normalizedProducts.entries()) {
     const row = index + 1;
@@ -359,6 +362,26 @@ export function validateProductsPayload(products: DTProduct[]): string | null {
       return `Товар #${row}: товар с названием "${normalized.Title}" уже есть.`;
     }
     seenTitles.add(normalizedTitle);
+
+    const recommendationIds = toStringArray(
+      products[index]?.RecommendedProductIds,
+    );
+    const seenRecommendationIds = new Set<string>();
+
+    for (const recommendedId of recommendationIds) {
+      if (recommendedId === normalized.ID) {
+        return `Товар #${row}: нельзя рекомендовать этот же товар.`;
+      }
+
+      if (seenRecommendationIds.has(recommendedId)) {
+        return `Товар #${row}: рекомендация "${recommendedId}" выбрана повторно.`;
+      }
+      seenRecommendationIds.add(recommendedId);
+
+      if (!validProductIds.has(recommendedId)) {
+        return `Товар #${row}: рекомендация "${recommendedId}" не найдена в каталоге.`;
+      }
+    }
 
     if (
       hasSalePrice &&
