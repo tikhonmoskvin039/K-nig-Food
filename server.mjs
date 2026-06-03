@@ -20,14 +20,26 @@ const dev = process.env.NODE_ENV !== "production";
 const configuredHostname = process.env.HOSTNAME;
 const displayHostname = configuredHostname || "localhost";
 const port = Number.parseInt(process.env.PORT || "3000", 10);
+let handleRequest;
+const server = createServer((req, res) => {
+  if (!handleRequest) {
+    res.statusCode = 503;
+    res.end("Server is starting");
+    return;
+  }
+
+  handleRequest(req, res).catch((error) => {
+    console.error("NEXT REQUEST ERROR:", error);
+    res.statusCode = 500;
+    res.end("Internal server error");
+  });
+});
 const app = next({
   dev,
   dir: process.cwd(),
   hostname: configuredHostname || "localhost",
   port,
-  httpServer: {
-    on() {},
-  },
+  httpServer: server,
 });
 const prisma = new PrismaClient();
 const authSocketPath = "/api/admin/auth/ws";
@@ -172,15 +184,7 @@ async function handleLoginMessage(socket, req, rawMessage) {
 
 await app.prepare();
 
-const handleRequest = app.getRequestHandler();
-const handleUpgrade = app.getUpgradeHandler();
-const server = createServer((req, res) => {
-  handleRequest(req, res).catch((error) => {
-    console.error("NEXT REQUEST ERROR:", error);
-    res.statusCode = 500;
-    res.end("Internal server error");
-  });
-});
+handleRequest = app.getRequestHandler();
 const authSocketServer = new WebSocketServer({ noServer: true });
 
 authSocketServer.on("connection", (socket, req) => {
@@ -205,11 +209,6 @@ server.on("upgrade", (req, socket, head) => {
     });
     return;
   }
-
-  handleUpgrade(req, socket, head).catch((error) => {
-    console.error("NEXT UPGRADE ERROR:", error);
-    socket.destroy();
-  });
 });
 
 const listenArgs = configuredHostname ? [port, configuredHostname] : [port];
