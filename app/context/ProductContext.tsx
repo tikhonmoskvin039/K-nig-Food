@@ -164,6 +164,7 @@ interface ProductContextType {
   filteredProducts: DTProduct[];
   isLoading: boolean;
   categories: string[];
+  searchQuery: string;
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: string) => void;
   setSpecialFilter: (filter: "all" | "new" | "promo") => void;
@@ -273,6 +274,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         filteredProducts,
         isLoading,
         categories,
+        searchQuery,
         setSearchQuery,
         setCategoryFilter,
         setSpecialFilter,

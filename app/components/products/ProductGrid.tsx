@@ -17,12 +17,14 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
     filteredProducts,
     isLoading,
     categories,
+    searchQuery,
     setSearchQuery,
     setCategoryFilter,
     setSpecialFilter,
     setSortBy,
   } = useProductContext();
   const { labels } = useLocalization();
+  const hasSearchQuery = searchQuery.trim().length > 0;
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +60,12 @@ export default function ProductGrid({ pageSize = 18 }: ProductGridProps) {
             {displayedProducts.map((product) => (
               <ProductCard key={product.ID} product={product} />
             ))}
+          </div>
+        ) : hasSearchQuery ? (
+          <div className="flex min-h-[320px] items-center justify-center px-4 text-center">
+            <p className="text-xl font-semibold text-slate-700 md:text-2xl">
+              {labels.noSearchResults || "По вашему запросу ничего не найдено"}
+            </p>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-center px-4">

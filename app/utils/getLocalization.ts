@@ -20,6 +20,7 @@ interface LocalizationData {
     loadingProducts: string;
     noProductsFound: string;
     noProductsHint: string;
+    noSearchResults: string;
     productDetails: string;
     recommendedProducts: string;
     products: string;
