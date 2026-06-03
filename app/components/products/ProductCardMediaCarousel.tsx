@@ -2,17 +2,20 @@
 
 import Link from "next/link";
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
   type MouseEvent,
   type PointerEvent,
+  type TransitionEvent,
 } from "react";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import ProductMedia from "./ProductMedia";
 
 const SWIPE_THRESHOLD_PX = 42;
 const HORIZONTAL_INTENT_RATIO = 1.15;
+const DOTS_HIDE_DELAY_MS = 1200;
 
 type ProductCardMediaCarouselProps = {
   product: Pick<
@@ -47,8 +50,13 @@ export default function ProductCardMediaCarousel({
   arrowSize = 34,
 }: ProductCardMediaCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [trackIndex, setTrackIndex] = useState(1);
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+  const [dotsVisible, setDotsVisible] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const suppressNavigationRef = useRef(false);
+  const dotsHideTimeoutRef = useRef<number | null>(null);
+  const transitionResetFrameRef = useRef<number | null>(null);
   const mediaUrls = useMemo(
     () => getProductMediaUrls(product),
     [product],
@@ -57,6 +65,41 @@ export default function ProductCardMediaCarousel({
   const safeActiveIndex = Math.min(activeIndex, mediaCount - 1);
   const canSlide = mediaCount > 1;
   const productHref = `/product/${product.Slug}`;
+  const carouselSlides = canSlide
+    ? [
+        {
+          src: mediaUrls[mediaCount - 1],
+          key: `clone-last-${mediaUrls[mediaCount - 1]}`,
+        },
+        ...mediaUrls.map((src, index) => ({
+          src,
+          key: `media-${src}-${index}`,
+        })),
+        {
+          src: mediaUrls[0],
+          key: `clone-first-${mediaUrls[0]}`,
+        },
+      ]
+    : [
+        {
+          src: mediaUrls[0],
+          key: `media-${mediaUrls[0]}-0`,
+        },
+      ];
+  const visibleTrackIndex = canSlide ? trackIndex : 0;
+
+  useEffect(
+    () => () => {
+      if (dotsHideTimeoutRef.current !== null) {
+        window.clearTimeout(dotsHideTimeoutRef.current);
+      }
+
+      if (transitionResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(transitionResetFrameRef.current);
+      }
+    },
+    [],
+  );
 
   const suppressNavigationBriefly = () => {
     suppressNavigationRef.current = true;
@@ -65,22 +108,42 @@ export default function ProductCardMediaCarousel({
     }, 160);
   };
 
+  const showDotsTemporarily = () => {
+    if (!canSlide) return;
+
+    setDotsVisible(true);
+
+    if (dotsHideTimeoutRef.current !== null) {
+      window.clearTimeout(dotsHideTimeoutRef.current);
+    }
+
+    dotsHideTimeoutRef.current = window.setTimeout(() => {
+      setDotsVisible(false);
+      dotsHideTimeoutRef.current = null;
+    }, DOTS_HIDE_DELAY_MS);
+  };
+
   const showPrevious = () => {
     if (!canSlide) return;
 
-    setActiveIndex((currentIndex) => {
-      const safeIndex = Math.min(currentIndex, mediaCount - 1);
-      return safeIndex <= 0 ? mediaCount - 1 : safeIndex - 1;
-    });
+    const nextActiveIndex =
+      safeActiveIndex <= 0 ? mediaCount - 1 : safeActiveIndex - 1;
+
+    setIsTransitionEnabled(true);
+    setActiveIndex(nextActiveIndex);
+    setTrackIndex(safeActiveIndex);
+    showDotsTemporarily();
   };
 
   const showNext = () => {
     if (!canSlide) return;
 
-    setActiveIndex((currentIndex) => {
-      const safeIndex = Math.min(currentIndex, mediaCount - 1);
-      return (safeIndex + 1) % mediaCount;
-    });
+    const nextActiveIndex = (safeActiveIndex + 1) % mediaCount;
+
+    setIsTransitionEnabled(true);
+    setActiveIndex(nextActiveIndex);
+    setTrackIndex(safeActiveIndex + 2);
+    showDotsTemporarily();
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -144,6 +207,31 @@ export default function ProductCardMediaCarousel({
     }
   };
 
+  const handleTrackTransitionEnd = (
+    event: TransitionEvent<HTMLDivElement>,
+  ) => {
+    if (!canSlide || event.target !== event.currentTarget) return;
+
+    if (trackIndex === 0) {
+      setIsTransitionEnabled(false);
+      setTrackIndex(mediaCount);
+    } else if (trackIndex === mediaCount + 1) {
+      setIsTransitionEnabled(false);
+      setTrackIndex(1);
+    } else {
+      return;
+    }
+
+    if (transitionResetFrameRef.current !== null) {
+      window.cancelAnimationFrame(transitionResetFrameRef.current);
+    }
+
+    transitionResetFrameRef.current = window.requestAnimationFrame(() => {
+      setIsTransitionEnabled(true);
+      transitionResetFrameRef.current = null;
+    });
+  };
+
   const arrowButtonClass =
     "absolute top-1/2 z-20 inline-flex h-11 w-9 -translate-y-1/2 appearance-none items-center justify-center border-0 bg-transparent p-0 text-white drop-shadow-[0_2px_8px_rgba(15,23,42,0.85)] transition hover:scale-110 hover:text-amber-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300";
 
@@ -156,12 +244,15 @@ export default function ProductCardMediaCarousel({
       onPointerCancel={handlePointerCancel}
     >
       <div
-        className="flex h-full w-full transition-transform duration-300 ease-out"
-        style={{ transform: `translateX(-${safeActiveIndex * 100}%)` }}
+        className={`flex h-full w-full ${
+          isTransitionEnabled ? "transition-transform duration-300 ease-out" : ""
+        }`}
+        style={{ transform: `translateX(-${visibleTrackIndex * 100}%)` }}
+        onTransitionEnd={handleTrackTransitionEnd}
       >
-        {mediaUrls.map((mediaUrl, index) => (
+        {carouselSlides.map((slide, index) => (
           <Link
-            key={`${mediaUrl}-${index}`}
+            key={slide.key}
             href={productHref}
             className="relative block h-full w-full shrink-0 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-500"
             aria-label={`Открыть ${product.Title}`}
@@ -170,12 +261,12 @@ export default function ProductCardMediaCarousel({
             onDragStart={(event) => event.preventDefault()}
           >
             <ProductMedia
-              src={mediaUrl}
+              src={slide.src}
               alt={product.Title}
               fill
               sizes={sizes}
               className={mediaClassName}
-              autoPlay={index === safeActiveIndex}
+              autoPlay={index === visibleTrackIndex}
             />
           </Link>
         ))}
@@ -203,6 +294,26 @@ export default function ProductCardMediaCarousel({
             <IoChevronForward size={arrowSize} aria-hidden="true" />
           </button>
         </>
+      )}
+
+      {canSlide && (
+        <div
+          className={`absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 transition-opacity duration-300 ${
+            dotsVisible ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+          aria-hidden="true"
+        >
+          {mediaUrls.map((mediaUrl, index) => (
+            <span
+              key={`dot-${mediaUrl}-${index}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                index === safeActiveIndex
+                  ? "w-4 bg-white shadow-[0_1px_5px_rgba(15,23,42,0.65)]"
+                  : "w-1.5 bg-white/65"
+              }`}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
