@@ -89,9 +89,6 @@ export const VIDEO_SUPPORTED_EXTENSIONS = [
 
 export const VIDEO_SUPPORTED_FORMATS_LABEL = "MP4, M4V, MOV, WEBM, OGV, OGG";
 
-const FEATURE_VIDEO_ASPECT = 16 / 9;
-const FEATURE_VIDEO_ASPECT_TOLERANCE = 0.03;
-
 function getFileExtension(file: File) {
   return file.name.toLowerCase().match(/\.[^.]+$/)?.[0] || "";
 }
@@ -183,12 +180,14 @@ export const validateImageFile = (file: File): string | null => {
 
 export async function validateProductMediaFile(
   file: File,
-  target: "feature" | "gallery",
+  _target: "feature" | "gallery",
 ): Promise<{
   error: string | null;
   mediaKind: ProductMediaKind | null;
   durationSeconds?: number;
 }> {
+  void _target;
+
   const mediaKind = getProductMediaKindFromFile(file);
 
   if (!mediaKind) {
@@ -230,17 +229,6 @@ export async function validateProductMediaFile(
     };
   }
 
-  if (target === "feature") {
-    const aspect = metadata.width / metadata.height;
-    if (Math.abs(aspect - FEATURE_VIDEO_ASPECT) > FEATURE_VIDEO_ASPECT_TOLERANCE) {
-      return {
-        error: `Основное видео должно быть 16:9. Текущий размер: ${metadata.width}x${metadata.height}.`,
-        mediaKind,
-        durationSeconds: metadata.durationSeconds,
-      };
-    }
-  }
-
   return {
     error: null,
     mediaKind,
@@ -256,7 +244,30 @@ export const sanitizeImageBaseName = (value: string) =>
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "") || "product";
 
-export const getImageFileExtension = (file: File) => {
+const MIME_EXTENSION_MAP: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/avif": "avif",
+  "image/gif": "gif",
+  "image/bmp": "bmp",
+  "image/tiff": "tiff",
+  "image/svg+xml": "svg",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
+  "video/x-m4v": "m4v",
+  "video/ogg": "ogv",
+};
+
+export const getImageFileExtension = (file: File, mimeType = file.type) => {
+  const normalizedMimeType = mimeType.toLowerCase().split(";")[0];
+  const matchedByMime = MIME_EXTENSION_MAP[normalizedMimeType];
+
+  if (matchedByMime) {
+    return matchedByMime;
+  }
+
   const fileName = file.name.toLowerCase();
   const matchedByName = [
     ...IMAGE_SUPPORTED_EXTENSIONS,
@@ -267,7 +278,7 @@ export const getImageFileExtension = (file: File) => {
     return matchedByName.replace(".", "");
   }
 
-  const mimeSubtype = file.type.toLowerCase().split("/")[1] || "jpg";
+  const mimeSubtype = normalizedMimeType.split("/")[1] || "jpg";
   return mimeSubtype.split("+")[0];
 };
 
@@ -279,12 +290,13 @@ export const createUploadFileFromBlob = (
   const baseName = sanitizeImageBaseName(
     originalFile.name.replace(/\.[^.]+$/, ""),
   );
-  const ext = getImageFileExtension(originalFile);
+  const fileType = blob.type || originalFile.type || "image/jpeg";
+  const ext = getImageFileExtension(originalFile, fileType);
   const safeSuffix = sanitizeImageBaseName(suffix);
   const fileName = `${baseName}-${safeSuffix}.${ext}`;
 
   return new File([blob], fileName, {
-    type: blob.type || originalFile.type || "image/jpeg",
+    type: fileType,
     lastModified: Date.now(),
   });
 };

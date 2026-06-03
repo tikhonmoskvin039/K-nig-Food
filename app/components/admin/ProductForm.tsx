@@ -19,7 +19,7 @@ import {
   validateProductMediaFile,
 } from "../../services/admin/productForm";
 import {
-  cropImageFile,
+  cropMediaFile,
   type CropPixels,
 } from "../../services/admin/imageCropper";
 import ButtonSpinner from "../common/ButtonSpinner";
@@ -197,14 +197,20 @@ export default function ProductForm({
     try {
       const videoMetadata =
         mediaKind === "video" ? await getVideoMetadata(activeFile) : null;
-      const preparedFile =
-        mediaKind === "image"
-          ? createUploadFileFromBlob(
-              await cropImageFile(activeFile, croppedAreaPixels),
-              activeFile,
-              `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
-            )
-          : activeFile;
+      const croppedBlob = await cropMediaFile(activeFile, croppedAreaPixels);
+      const preparedFile = createUploadFileFromBlob(
+        croppedBlob,
+        activeFile,
+        `${cropQueue.target}-${cropQueue.currentIndex + 1}`,
+      );
+      const croppedVideoWidth =
+        mediaKind === "video" && croppedAreaPixels
+          ? Math.round(croppedAreaPixels.width)
+          : videoMetadata?.width;
+      const croppedVideoHeight =
+        mediaKind === "video" && croppedAreaPixels
+          ? Math.round(croppedAreaPixels.height)
+          : videoMetadata?.height;
       const uploadSlug =
         product.Slug.trim() || slugifyProductTitle(product.Title) || "product";
       const mediaUrl = await uploadMediaToAdmin({
@@ -213,8 +219,8 @@ export default function ProductForm({
         type: cropQueue.target,
         mediaKind,
         durationSeconds: videoMetadata?.durationSeconds,
-        videoWidth: videoMetadata?.width,
-        videoHeight: videoMetadata?.height,
+        videoWidth: croppedVideoWidth,
+        videoHeight: croppedVideoHeight,
       });
 
       if (cropQueue.target === "feature") {
@@ -982,7 +988,8 @@ export default function ProductForm({
         <p className="text-xs text-gray-500">
           Изображения до 5 МБ: {IMAGE_SUPPORTED_FORMATS_LABEL}. Видео до 30 МБ
           и {MAX_VIDEO_DURATION_SECONDS} секунд:{" "}
-          {VIDEO_SUPPORTED_FORMATS_LABEL}. Основное видео должно быть 16:9.
+          {VIDEO_SUPPORTED_FORMATS_LABEL}. Для главного экрана рекомендуем
+          16:9, но это не обязательно.
         </p>
         <p className="text-xs text-gray-500">
           {product.FeatureImageURL
@@ -1146,11 +1153,6 @@ export default function ProductForm({
           mediaUrl={cropQueue.previewUrl}
           mediaKind={activeCropMediaKind}
           initialPreset={activeCropMediaKind === "video" ? "landscape" : "square"}
-          lockedPreset={
-            cropQueue.target === "feature" && activeCropMediaKind === "video"
-              ? "landscape"
-              : undefined
-          }
           fileName={
             cropQueue.files[cropQueue.currentIndex]
               ? `${cropQueue.currentIndex + 1}/${cropQueue.files.length} - ${cropQueue.files[cropQueue.currentIndex].name}`

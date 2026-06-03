@@ -14,8 +14,6 @@ import { withProductMediaKind } from "../../../utils/productMedia";
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const MAX_VIDEO_FILE_SIZE_BYTES = 30 * 1024 * 1024;
 const MAX_VIDEO_DURATION_SECONDS = 15;
-const FEATURE_VIDEO_ASPECT = 16 / 9;
-const FEATURE_VIDEO_ASPECT_TOLERANCE = 0.03;
 const IMAGE_SUPPORTED_EXTENSIONS = new Set([
   "jpg",
   "jpeg",
@@ -207,9 +205,6 @@ export async function POST(req: NextRequest) {
 
     if (mediaKind === "video") {
       const durationSeconds = Number(formData.get("durationSeconds"));
-      const videoWidth = Number(formData.get("videoWidth"));
-      const videoHeight = Number(formData.get("videoHeight"));
-
       if (
         !Number.isFinite(durationSeconds) ||
         durationSeconds <= 0 ||
@@ -228,32 +223,6 @@ export async function POST(req: NextRequest) {
           responseBody,
         });
         return NextResponse.json(responseBody, { status: statusCode });
-      }
-
-      if (sanitizeFilePart(typeValue) === "feature") {
-        const aspect = videoWidth / videoHeight;
-
-        if (
-          !Number.isFinite(videoWidth) ||
-          !Number.isFinite(videoHeight) ||
-          videoWidth <= 0 ||
-          videoHeight <= 0 ||
-          Math.abs(aspect - FEATURE_VIDEO_ASPECT) > FEATURE_VIDEO_ASPECT_TOLERANCE
-        ) {
-          const responseBody = {
-            error: "Upload failed",
-            message: "Основное видео должно быть в формате 16:9",
-          };
-          const statusCode = 400;
-          await storeIdempotentResponse({
-            key: idempotency.key,
-            endpoint,
-            requestHash,
-            statusCode,
-            responseBody,
-          });
-          return NextResponse.json(responseBody, { status: statusCode });
-        }
       }
     }
 

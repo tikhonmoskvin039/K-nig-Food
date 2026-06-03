@@ -30,7 +30,6 @@ type Props = {
   fileName: string;
   isSubmitting?: boolean;
   initialPreset?: CropAspectPreset;
-  lockedPreset?: CropAspectPreset;
   onCancel: () => void;
   onConfirm: (result: {
     croppedAreaPixels: CropPixels | null;
@@ -81,7 +80,7 @@ function createDefaultFreeCrop(mediaWidth: number, mediaHeight: number): Crop {
 }
 
 function toCropPixels(
-  crop: PixelCrop | null,
+  crop: PixelCrop | Crop | null | undefined,
   imageSize: {
     naturalWidth: number;
     naturalHeight: number;
@@ -92,6 +91,28 @@ function toCropPixels(
   if (!crop) return null;
   if (crop.width <= 0 || crop.height <= 0) return null;
   if (!imageSize || imageSize.width <= 0 || imageSize.height <= 0) return null;
+
+  if (crop.unit === "%") {
+    const x = Math.max(0, Math.round((crop.x / 100) * imageSize.naturalWidth));
+    const y = Math.max(0, Math.round((crop.y / 100) * imageSize.naturalHeight));
+    const width = Math.max(
+      1,
+      Math.round((crop.width / 100) * imageSize.naturalWidth),
+    );
+    const height = Math.max(
+      1,
+      Math.round((crop.height / 100) * imageSize.naturalHeight),
+    );
+    const clampedX = Math.min(x, Math.max(imageSize.naturalWidth - 1, 0));
+    const clampedY = Math.min(y, Math.max(imageSize.naturalHeight - 1, 0));
+
+    return {
+      x: clampedX,
+      y: clampedY,
+      width: Math.min(width, imageSize.naturalWidth - clampedX),
+      height: Math.min(height, imageSize.naturalHeight - clampedY),
+    };
+  }
 
   const scaleX = imageSize.naturalWidth / imageSize.width;
   const scaleY = imageSize.naturalHeight / imageSize.height;
@@ -117,13 +138,10 @@ export default function ImageCropperModal({
   fileName,
   isSubmitting = false,
   initialPreset = "square",
-  lockedPreset,
   onCancel,
   onConfirm,
 }: Props) {
-  const [preset, setPreset] = useState<CropAspectPreset>(
-    lockedPreset || initialPreset,
-  );
+  const [preset, setPreset] = useState<CropAspectPreset>(initialPreset);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [imageSize, setImageSize] = useState<{
@@ -204,11 +222,10 @@ export default function ImageCropperModal({
                 key={option.id}
                 type="button"
                 onClick={() => {
-                  if (lockedPreset) return;
                   setPreset(option.id);
                   applyCropForPreset(option.id, imageSize);
                 }}
-                disabled={isSubmitting || Boolean(lockedPreset)}
+                disabled={isSubmitting}
                 className={
                   preset === option.id
                     ? "btn-primary px-3 py-2"
@@ -222,7 +239,7 @@ export default function ImageCropperModal({
 
           <p className="text-xs text-slate-600">
             {mediaKind === "video"
-              ? "Видео проходит через предпросмотр с рамкой кадрирования. Для основного видео доступно только 16:9."
+              ? "Для главного экрана рекомендуем 16:9, но можно выбрать другой пресет или произвольную рамку."
               : preset === "free"
               ? "Свободный режим: тяните стороны/углы рамки для изменения пропорций."
               : "Рамка фиксирует выбранные пропорции. Можно двигать и масштабировать её углами."}
@@ -298,7 +315,7 @@ export default function ImageCropperModal({
             type="button"
             onClick={() =>
               onConfirm({
-                croppedAreaPixels: toCropPixels(completedCrop, imageSize),
+                croppedAreaPixels: toCropPixels(completedCrop ?? crop, imageSize),
                 preset,
               })
             }
